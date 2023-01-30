@@ -7,14 +7,15 @@ using System.Runtime.InteropServices;
 
 using SharpGL.SceneGraph;
 using SharpGL;
+using SharpGL.SceneGraph.Core;
 
 namespace CadEditor
 {
-    public class Cube
+    public class CustomCube: SceneElement
     {
         private List<Vertex> vertices;
 
-        public Cube(List<Vertex> _vertices)
+        public CustomCube(List<Vertex> _vertices)
         {
             vertices = _vertices;
         }

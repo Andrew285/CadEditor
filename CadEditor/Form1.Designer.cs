@@ -30,6 +30,8 @@
         {
             this.openGLControl1 = new SharpGL.OpenGLControl();
             this.sceneControl1 = new SharpGL.SceneControl();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sceneControl1)).BeginInit();
             this.SuspendLayout();
@@ -62,17 +64,41 @@
             this.sceneControl1.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
             this.sceneControl1.Size = new System.Drawing.Size(632, 321);
             this.sceneControl1.TabIndex = 1;
+            this.sceneControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseDown);
+            this.sceneControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseMove);
+            this.sceneControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseUp);
+            // 
+            // treeView1
+            // 
+            this.treeView1.Location = new System.Drawing.Point(695, 472);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(225, 202);
+            this.treeView1.TabIndex = 2;
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Location = new System.Drawing.Point(695, 680);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(225, 183);
+            this.propertyGrid1.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(751, 875);
+            this.ClientSize = new System.Drawing.Size(932, 875);
+            this.Controls.Add(this.propertyGrid1);
+            this.Controls.Add(this.treeView1);
             this.Controls.Add(this.sceneControl1);
             this.Controls.Add(this.openGLControl1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sceneControl1)).EndInit();
             this.ResumeLayout(false);
@@ -83,6 +109,8 @@
 
         private SharpGL.OpenGLControl openGLControl1;
         private SharpGL.SceneControl sceneControl1;
+        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.PropertyGrid propertyGrid1;
     }
 }
 
