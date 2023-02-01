@@ -49,10 +49,6 @@
             this.openGLControl1.OpenGLInitialized += new System.EventHandler(this.openGLControl1_OpenGLInitialized_1);
             this.openGLControl1.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl1_OpenGLDraw_1);
             this.openGLControl1.Resized += new System.EventHandler(this.openGLControl1_Resized_1);
-            this.openGLControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.openGLControl1_KeyDown);
-            this.openGLControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.openglControl1_MouseDown);
-            this.openGLControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.openglControl1_MouseMove);
-            this.openGLControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.openglControl1_MouseUp);
             // 
             // sceneControl1
             // 
@@ -64,9 +60,7 @@
             this.sceneControl1.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
             this.sceneControl1.Size = new System.Drawing.Size(632, 321);
             this.sceneControl1.TabIndex = 1;
-            this.sceneControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseDown);
-            this.sceneControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseMove);
-            this.sceneControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseUp);
+            //this.sceneControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseUp);
             // 
             // treeView1
             // 
@@ -95,10 +89,8 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
+            //this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sceneControl1)).EndInit();
             this.ResumeLayout(false);
