@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CustomSceneGraph.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="SceneGrid.cs" />
     <EmbeddedResource Include="Form1.resx">

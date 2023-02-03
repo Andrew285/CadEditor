@@ -49,6 +49,7 @@
             this.openGLControl1.OpenGLInitialized += new System.EventHandler(this.openGLControl1_OpenGLInitialized_1);
             this.openGLControl1.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl1_OpenGLDraw_1);
             this.openGLControl1.Resized += new System.EventHandler(this.openGLControl1_Resized_1);
+            this.openGLControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseDown);
             // 
             // sceneControl1
             // 
@@ -60,7 +61,6 @@
             this.sceneControl1.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
             this.sceneControl1.Size = new System.Drawing.Size(632, 321);
             this.sceneControl1.TabIndex = 1;
-            //this.sceneControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.sceneControl1_MouseUp);
             // 
             // treeView1
             // 
@@ -89,8 +89,6 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
-            //this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
-            //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sceneControl1)).EndInit();
             this.ResumeLayout(false);

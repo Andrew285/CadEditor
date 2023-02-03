@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using SharpGL.SceneGraph;
+using SharpGL.SceneGraph.Cameras;
 using SharpGL.SceneGraph.Core;
 using SharpGL.SceneGraph.Effects;
 using SharpGL.SceneGraph.Lighting;
@@ -19,71 +20,75 @@ namespace CadEditor
     {
         private CustomCube cube1;
         private Cube cube;
-        private Camera camera;
-        private Scene scene;
+        private CustomSceneGraph sceneGraph;
         private OpenGL gl;
+        private Scene scene;
 
         public Form1()
         {
             InitializeComponent();
             KeyPreview = true;
-           
+            openGLControl1.MouseDown += new MouseEventHandler(this.openGLControl1_MouseDown);
         }
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
             //  Возьмём OpenGL объект
             gl = openGLControl1.OpenGL;
-            camera = new Camera(gl);
-            scene = new Scene(sceneControl1, treeView1, propertyGrid1);
+            Camera camera = new Camera(gl);
+            scene = new Scene(gl, camera);
+            sceneGraph = new CustomSceneGraph(sceneControl1, treeView1, propertyGrid1);
+
+            scene.InitObjects();
+
 
             //  Устанавливаем цвет заливки по умолчанию (в данном случае цвет голубой)
             gl.ClearColor(0.0f, 0.0f, 0.0f, 0);
 
-            List<Vertex>cubeVertices1 = new List<Vertex>
-            {
-                //front side
+            //List<Vertex>cubeVertices1 = new List<Vertex>
+            //{
+            //    //front side
 
-                new Vertex(2, 0, 2),
-                new Vertex(2, 0, 0),
-                new Vertex(2, 2, 0),
-                new Vertex(2, 2, 2),
+            //    new Vertex(2, 0, 2),
+            //    new Vertex(2, 0, 0),
+            //    new Vertex(2, 2, 0),
+            //    new Vertex(2, 2, 2),
 
-                //right side
-                new Vertex(0, 2, 0),
-                new Vertex(2, 2, 0),
-                new Vertex(2, 2, 2),
-                new Vertex(0, 2, 2),
+            //    //right side
+            //    new Vertex(0, 2, 0),
+            //    new Vertex(2, 2, 0),
+            //    new Vertex(2, 2, 2),
+            //    new Vertex(0, 2, 2),
 
-                //left side
-                new Vertex(2, 0, 2),
-                new Vertex(2, 0, 0),
-                new Vertex(0, 0, 0),
-                new Vertex(0, 0, 2),
+            //    //left side
+            //    new Vertex(2, 0, 2),
+            //    new Vertex(2, 0, 0),
+            //    new Vertex(0, 0, 0),
+            //    new Vertex(0, 0, 2),
 
-                //back side
-                new Vertex(0, 0, 0),
-                new Vertex(0, 0, 2),
-                new Vertex(0, 2, 0),
-                new Vertex(0, 2, 2),
+            //    //back side
+            //    new Vertex(0, 0, 0),
+            //    new Vertex(0, 0, 2),
+            //    new Vertex(0, 2, 0),
+            //    new Vertex(0, 2, 2),
 
-                //bottom side
-                new Vertex(0, 0, 0),
-                new Vertex(0, 2, 0),
-                new Vertex(2, 2, 0),
-                new Vertex(2, 0, 0),
+            //    //bottom side
+            //    new Vertex(0, 0, 0),
+            //    new Vertex(0, 2, 0),
+            //    new Vertex(2, 2, 0),
+            //    new Vertex(2, 0, 0),
 
-                //top side
-                new Vertex(0, 0, 2),
-                new Vertex(0, 2, 2),
-                new Vertex(2, 2, 2),
-                new Vertex(2, 0, 2)
-            };
+            //    //top side
+            //    new Vertex(0, 0, 2),
+            //    new Vertex(0, 2, 2),
+            //    new Vertex(2, 2, 2),
+            //    new Vertex(2, 0, 2)
+            //};
 
-            cube1 = new CustomCube(cubeVertices1);
+            //cube1 = new CustomCube(cubeVertices1);
             //gl.Ortho(200.0, 200.0, 1.0, 1, -1.0, 1.0);
             cube = new Cube();
-            scene.AddElement(cube);
+            sceneGraph.AddElement(cube);
         }
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
@@ -120,7 +125,6 @@ namespace CadEditor
             //);
 
 
-
             // Очистка экрана и буфера глубин
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
@@ -130,44 +134,10 @@ namespace CadEditor
             // Сдвигаем перо влево от центра и вглубь экрана
             gl.Translate(0.0f, 0.0f, 0.0f);
 
-            camera.RotateAxisY();
-            camera.RotateAxisX();
+            scene.RotateCameraX();
+            scene.RotateCameraY();
 
-            // Рисуем треугольники - грани пирамиды
-            gl.Begin(OpenGL.GL_TRIANGLES);
-
-            // Front
-            gl.Color(1.0f, 0.0f, 0.0f);
-            gl.Vertex(0.0f, 1.0f, 0.0f);
-            gl.Color(0.0f, 1.0f, 0.0f);
-            gl.Vertex(-1.0f, -1.0f, 1.0f);
-            gl.Color(0.0f, 0.0f, 1.0f);
-            gl.Vertex(1.0f, -1.0f, 1.0f);
-            // Right
-            gl.Color(1.0f, 0.0f, 0.0f);
-            gl.Vertex(0.0f, 1.0f, 0.0f);
-            gl.Color(0.0f, 1.0f, 0.0f);
-            gl.Vertex(1.0f, -1.0f, -1.0f);
-            gl.Color(0.0f, 0.0f, 1.0f);
-            gl.Vertex(1.0f, -1.0f, 1.0f);
-            // Back
-            gl.Color(1.0f, 0.0f, 0.0f);
-            gl.Vertex(0.0f, 1.0f, 0.0f);
-            gl.Color(0.0f, 1.0f, 0.0f);
-            gl.Vertex(1.0f, -1.0f, -1.0f);
-            gl.Color(0.0f, 0.0f, 1.0f);
-            gl.Vertex(-1.0f, -1.0f, -1.0f);
-            // Left
-            gl.Color(1.0f, 0.0f, 0.0f);
-            gl.Vertex(0.0f, 1.0f, 0.0f);
-            gl.Color(0.0f, 1.0f, 0.0f);
-            gl.Vertex(-1.0f, -1.0f, 1.0f);
-            gl.Color(0.0f, 0.0f, 1.0f);
-            gl.Vertex(-1.0f, -1.0f, -1.0f);
-
-            gl.End();
-            // Контроль полной отрисовки следующего изображения
-            gl.Flush();
+            scene.DrawScene();
 
             SceneGrid.Init(gl);
         }
@@ -199,22 +169,42 @@ namespace CadEditor
         {
             if (e.KeyCode == Keys.A)
             {
-                // Меняем угол поворота 
-                camera.rtri -= 3.0f;
+                scene.ChangeAxisY(-3.0f);
             }
             else if (e.KeyCode == Keys.D)
             {
-                camera.rtri += 3.0f;
+                scene.ChangeAxisY(3.0f);
+
             }
             else if (e.KeyCode == Keys.W)
             {
-                camera.utri -= 3.0f;
+                scene.ChangeAxisX(-3.0f);
+
             }
             else if (e.KeyCode == Keys.S)
             {
-                camera.utri += 3.0f;
+                scene.ChangeAxisX(3.0f);
             }
+
+            
         }
 
+        private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
+        {
+            //Vertex? vertex = scene.SelectObject(gl, MousePosition.X, MousePosition.Y);
+            //float axisLength = 20;
+            //float lineWidth = 3.0f;
+
+
+            //gl.LineWidth(lineWidth);
+            //gl.Begin(OpenGL.GL_LINES);
+            //gl.Color(1f, 1, 0, 0);
+            //gl.Vertex(-axisLength, 2, 0);
+            //gl.Vertex(axisLength, 2, 0);
+            //gl.End();
+
+            CustomCube cube = new CustomCube(gl, 5);
+            scene.AddObject(cube);
+        }
     }
 }
