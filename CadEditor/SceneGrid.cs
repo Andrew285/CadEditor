@@ -16,18 +16,18 @@ namespace CadEditor
             gl.Begin(OpenGL.GL_LINES);
             for (int i = 0; i < N; i++)
             {
-                gl.Vertex(N, -2, 1*i);
-                gl.Vertex(-N, -2, 1*i);
+                gl.Vertex(N, 0, 1*i);
+                gl.Vertex(-N, 0, 1*i);
 
-                gl.Vertex(N, -2, -1 * i);
-                gl.Vertex(-N, -2, -1 * i);
+                gl.Vertex(N, 0, -1 * i);
+                gl.Vertex(-N, 0, -1 * i);
 
 
-                gl.Vertex(1 * i, -2, N);
-                gl.Vertex(1 * i, -2, -N);
+                gl.Vertex(1 * i, 0, N);
+                gl.Vertex(1 * i, 0, -N);
 
-                gl.Vertex(-1 * i, -2, N);
-                gl.Vertex(-1 * i, -2, -N);
+                gl.Vertex(-1 * i, 0, N);
+                gl.Vertex(-1 * i, 0, -N);
             }
 
             gl.End();

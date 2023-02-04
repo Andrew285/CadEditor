@@ -15,13 +15,20 @@ namespace CadEditor
     {
         private Camera camera;
         private OpenGL gl;
-        private List<CustomCube> cubes; 
+        private List<CustomCube> cubes;
+        public float[,] line;
 
         public Scene(OpenGL _gl, Camera _camera)
         {
             camera = _camera;
             gl = _gl;
             cubes = new List<CustomCube>();
+
+            line = new float[2, 3]
+            {
+                {2, 2, 6 },
+                {0, 0, 0 }
+            };
         }
 
         public void RotateCameraX()
@@ -78,6 +85,10 @@ namespace CadEditor
             double py = point1[1] + dist * direction[1];
             double pz = point1[2] + dist * direction[2];
 
+            line[1, 0] = (float)direction[0];
+            line[1, 1] = (float)direction[1];
+            line[1, 2] = (float)direction[2];
+
             return new Vertex((float)px, (float)py, (float)pz);
         }
 
@@ -92,6 +103,11 @@ namespace CadEditor
 
             DrawCordinateAxes(3.0f, 20);
             DrawObjects();
+
+            if (line[1, 0] != 0)
+            {
+                DrawLine();
+            }
         }
 
         public void DrawCordinateAxes(float lineWidth, float axisLength)
@@ -169,6 +185,17 @@ namespace CadEditor
         public void AddObject(CustomCube c)
         {
             cubes.Add(c);
+        }
+
+        public void DrawLine()
+        {
+            gl.Begin(OpenGL.GL_LINES);
+
+            for (int i = 0; i < line.GetLength(0); i++)
+            {
+                gl.Vertex(line[i, 0], line[i, 1], line[i, 2]);
+            }
+            gl.End();
         }
     }
 }

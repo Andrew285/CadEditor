@@ -25,6 +25,7 @@ namespace CadEditor
         private Scene scene;
 
         private int mouseX;
+        private int mouseY;
         private bool isLeftButtonPressed;
 
         public Form1()
@@ -44,52 +45,6 @@ namespace CadEditor
 
             scene.InitObjects();
 
-
-            //  Устанавливаем цвет заливки по умолчанию (в данном случае цвет голубой)
-            gl.ClearColor(0.0f, 0.0f, 0.0f, 0);
-
-            //List<Vertex>cubeVertices1 = new List<Vertex>
-            //{
-            //    //front side
-
-            //    new Vertex(2, 0, 2),
-            //    new Vertex(2, 0, 0),
-            //    new Vertex(2, 2, 0),
-            //    new Vertex(2, 2, 2),
-
-            //    //right side
-            //    new Vertex(0, 2, 0),
-            //    new Vertex(2, 2, 0),
-            //    new Vertex(2, 2, 2),
-            //    new Vertex(0, 2, 2),
-
-            //    //left side
-            //    new Vertex(2, 0, 2),
-            //    new Vertex(2, 0, 0),
-            //    new Vertex(0, 0, 0),
-            //    new Vertex(0, 0, 2),
-
-            //    //back side
-            //    new Vertex(0, 0, 0),
-            //    new Vertex(0, 0, 2),
-            //    new Vertex(0, 2, 0),
-            //    new Vertex(0, 2, 2),
-
-            //    //bottom side
-            //    new Vertex(0, 0, 0),
-            //    new Vertex(0, 2, 0),
-            //    new Vertex(2, 2, 0),
-            //    new Vertex(2, 0, 0),
-
-            //    //top side
-            //    new Vertex(0, 0, 2),
-            //    new Vertex(0, 2, 2),
-            //    new Vertex(2, 2, 2),
-            //    new Vertex(2, 0, 2)
-            //};
-
-            //cube1 = new CustomCube(cubeVertices1);
-            //gl.Ortho(200.0, 200.0, 1.0, 1, -1.0, 1.0);
             cube = new Cube();
             sceneGraph.AddElement(cube);
         }
@@ -115,9 +70,9 @@ namespace CadEditor
             gl.Perspective(60.0f, (double)Width / (double)Height, 0.01, 100.0);
 
             ////  Данная функция позволяет установить камеру и её положение
-            gl.LookAt(0, 0, -6,    // позиция самой камеры (x, y, z)
+            gl.LookAt(2, 2, -6,    // позиция самой камеры (x, y, z)
                         0, 0, 0,     // направление, куда мы смотрим
-                        0, 2, 0);    // верх камеры
+                        0, 1, 0);    // верх камеры
 
             //  Зададим модель отображения
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
@@ -149,16 +104,18 @@ namespace CadEditor
 
         private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
-            //Vertex? vertex = scene.SelectObject(gl, MousePosition.X, MousePosition.Y);
 
-            if(e.Button == MouseButtons.Left)
+
+            if (e.Button == MouseButtons.Left)
             {
+                Vertex? vertex = scene.SelectObject(gl, MousePosition.X, MousePosition.Y);
                 CustomCube cube = new CustomCube(gl, 5);
                 scene.AddObject(cube);
             }
             else if (e.Button == MouseButtons.Right)
             {
                 mouseX = e.X;
+                mouseY = e.Y;
                 isLeftButtonPressed = true;
             }
 
@@ -170,7 +127,9 @@ namespace CadEditor
             if (isLeftButtonPressed)
             {
                 scene.ChangeAxisY((e.X - mouseX) * sensitivity);
+                scene.ChangeAxisX((e.Y - mouseY) * -sensitivity);
                 mouseX = e.X;
+                mouseY = e.Y;
             }
         }
 
