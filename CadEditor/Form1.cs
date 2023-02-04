@@ -24,6 +24,9 @@ namespace CadEditor
         private OpenGL gl;
         private Scene scene;
 
+        private int mouseX;
+        private bool isLeftButtonPressed;
+
         public Form1()
         {
             InitializeComponent();
@@ -93,52 +96,7 @@ namespace CadEditor
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
-            ////  Возьмём OpenGL объект
-            //OpenGL gl = openGLControl1.OpenGL;
-
-            //gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
-
-            ////gl.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
-
-            ////ModelMatrix
-            //cube1.Draw(gl);
-
-            //////  Данная функция позволяет установить камеру и её положение
-
-
-            //gl.LookAt();
-
-
-            //viewMatrix
-            //gl.Translate(0.0f, 0.0f, 1.0f);
-
-            //ProjectionMatrix
-            //double FoV = 60;
-            //gl.Perspective(
-            //    FoV,         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens".
-            //                 //Usually between 90° (extra wide) and 30° (quite zoomed in)
-            //    4.0f / 3.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 ==
-            //                 //1280 / 960, sounds familiar ?
-            //    0.1f, // Near clipping plane. Keep as big as possible, or you'll get precision issues.
-            //    100.0f // Far clipping plane. Keep as little as possible.
-            //);
-
-
-            // Очистка экрана и буфера глубин
-            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
-            // Пирамида /////////////////////////////
-            // Сбрасываем модельно-видовую матрицу
-            gl.LoadIdentity();
-            // Сдвигаем перо влево от центра и вглубь экрана
-            gl.Translate(0.0f, 0.0f, 0.0f);
-
-            scene.RotateCameraX();
-            scene.RotateCameraY();
-
             scene.DrawScene();
-
             SceneGrid.Init(gl);
         }
 
@@ -192,19 +150,33 @@ namespace CadEditor
         private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
             //Vertex? vertex = scene.SelectObject(gl, MousePosition.X, MousePosition.Y);
-            //float axisLength = 20;
-            //float lineWidth = 3.0f;
 
+            if(e.Button == MouseButtons.Left)
+            {
+                CustomCube cube = new CustomCube(gl, 5);
+                scene.AddObject(cube);
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                mouseX = e.X;
+                isLeftButtonPressed = true;
+            }
 
-            //gl.LineWidth(lineWidth);
-            //gl.Begin(OpenGL.GL_LINES);
-            //gl.Color(1f, 1, 0, 0);
-            //gl.Vertex(-axisLength, 2, 0);
-            //gl.Vertex(axisLength, 2, 0);
-            //gl.End();
+        }
 
-            CustomCube cube = new CustomCube(gl, 5);
-            scene.AddObject(cube);
+        private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
+        {
+            float sensitivity = 0.5f;
+            if (isLeftButtonPressed)
+            {
+                scene.ChangeAxisY((e.X - mouseX) * sensitivity);
+                mouseX = e.X;
+            }
+        }
+
+        private void openGLControl1_MouseUp(object sender, MouseEventArgs e)
+        {
+            isLeftButtonPressed = false;
         }
     }
 }

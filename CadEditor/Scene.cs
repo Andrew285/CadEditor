@@ -83,6 +83,13 @@ namespace CadEditor
 
         public void DrawScene()
         {
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, 0.0f);
+
+            RotateCameraX();
+            RotateCameraY();
+
             DrawCordinateAxes(3.0f, 20);
             DrawObjects();
         }
