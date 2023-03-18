@@ -34,29 +34,58 @@ namespace CadEditor
 			return Size;
 		}
 
-		public double this[int index]
+
+		#region --- Overriding operators ---
+		public static double operator *(Vector a, Vector b)
 		{
-			get
+			return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+		}
+
+		public static double operator /(Vector a, Vector b)
+		{
+			return a[0] / b[0] + a[1] / b[1] + a[2] / b[2];
+		}
+
+		public static Vector operator *(double a, Vector v)
+		{
+			double[] result = new double[v.Size];
+			for (int i = 0; i < v.Size; i++)
 			{
-				if (index < Size && index >= 0)
-				{
-					return values[index];
-				}
-				else
-				{
-					throw new ArgumentException("Wrong index!");
-				}
+				result[i] = v[i] * a;
 			}
-			set 
+			return new Vector(result);
+		}
+
+		public static Vector operator *(Vector v, double a)
+		{
+			double[] result = new double[v.Size];
+			for (int i = 0; i < v.Size; i++)
 			{
-				if(index < Size && index >= 0)
+				result[i] = v[i] * a;
+			}
+			return new Vector(result);
+		}
+
+		public static Vector operator +(Vector a, Vector b)
+		{
+			int sizeA = a.Size;
+			int sizeB = b.Size;
+
+			if (sizeA == sizeB)
+			{
+				double[] result = new double[sizeA];
+
+				for (int i = 0; i < sizeA; i++)
 				{
-					values[index] = value;
+
+					result[i] = a[i] + b[i];
 				}
-				else
-				{
-					throw new ArgumentException("Wrong index!");
-				}
+
+				return new Vector(result);
+			}
+			else
+			{
+				throw new ArgumentException("The vectors have different dimensions");
 			}
 		}
 
@@ -83,59 +112,6 @@ namespace CadEditor
 			}
 		}
 
-		public static Vector Cross(Vector v1, Vector v2)
-		{
-			double x = v1[1] * v2[2] - v1[2] * v2[1];
-			double y = v1[2] * v2[0] - v1[0] * v2[2];
-			double z = v1[0] * v2[1] - v1[1] * v2[0];
-
-			return new Vector(new double[] {x, y, z});
-		}
-
-		public static double operator *(Vector a, Vector b)
-		{
-			return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-		}
-
-		public static double operator /(Vector a, Vector b)
-		{
-			return a[0] / b[0] + a[1] / b[1] + a[2] / b[2];
-		}
-
-		public static Vector operator *(double a, Vector v)
-		{
-			double[] result = new double[v.Size];
-			for (int i = 0; i < v.Size; i++)
-			{
-				result[i] = v[i] * a;
-			}
-			return new Vector(result);
-		}
-
-
-		public static Vector operator +(Vector a, Vector b)
-		{
-			int sizeA = a.Size;
-			int sizeB = b.Size;
-
-			if (sizeA == sizeB)
-			{
-				double[] result = new double[sizeA];
-
-				for (int i = 0; i < sizeA; i++)
-				{
-
-					result[i] = a[i] + b[i];
-				}
-
-				return new Vector(result);
-			}
-			else
-			{
-				throw new ArgumentException("The vectors have different dimensions");
-			}
-		}
-
 		public static bool operator ==(Vector a, Vector b)
 		{
 			return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
@@ -146,14 +122,67 @@ namespace CadEditor
 			return a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
 		}
 
-		public override string ToString()
+		public double this[int index]
 		{
-			return String.Format("({0}, {1}, {2})", values[0], values[1], values[2]);
+			get
+			{
+				if (index < Size && index >= 0)
+				{
+					return values[index];
+				}
+				else
+				{
+					throw new ArgumentException("Wrong index!");
+				}
+			}
+			set
+			{
+				if (index < Size && index >= 0)
+				{
+					values[index] = value;
+				}
+				else
+				{
+					throw new ArgumentException("Wrong index!");
+				}
+			}
 		}
 
-		public static Vector Normalize(Vector v)
+		#endregion
+
+
+		public override string ToString()
 		{
-			double[] values = v.values;
+			StringBuilder result = new StringBuilder();
+			result.Append("(");
+			for(int i = 0; i < Size; i++)
+			{
+				result.Append(String.Format("{0}", values[i]));
+
+				if (i == Size - 1)
+				{
+					result.Append(")");
+				}
+				else
+				{
+					result.Append(", ");
+				}
+			}
+			return result.ToString();
+		}
+
+		public Vector Cross(Vector v2)
+		{
+			double x = this[1] * v2[2] - this[2] * v2[1];
+			double y = this[2] * v2[0] - this[0] * v2[2];
+			double z = this[0] * v2[1] - this[1] * v2[0];
+
+			return new Vector(new double[] { x, y, z });
+		}
+
+		public Vector Normalize()
+		{
+			double[] values = this.values;
 			double length = Math.Sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
 			values[0] /= length;
 			values[1] /= length;
@@ -161,5 +190,6 @@ namespace CadEditor
 
 			return new Vector(values);
 		}
+
 	}
 }

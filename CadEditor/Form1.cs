@@ -23,28 +23,30 @@ namespace CadEditor
 
         private int mouseX;
         private int mouseY;
-        private bool isLeftButtonPressed;
+		private bool isLeftButtonPressed;
+		private float sensitivity = 0.5f;
 
-        public Form1()
+		public Form1()
         {
             InitializeComponent();
 			KeyPreview = true;
-            openGLControl1.MouseDown += new MouseEventHandler(this.openGLControl1_MouseDown);
         }
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
-            //  Возьмём OpenGL объект
             gl = openGLControl1.OpenGL;
+
+            //Initializing fundemental objects of scene
             Camera camera = new Camera(gl, new Vector(new double[]{ 0, 0, 0}));
             scene = new Scene(gl, camera);
 
+            //Initializing objects by default
             scene.InitializeObjects();
         }
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
-            scene.DrawCube(openGLControl1.Width, openGLControl1.Height);
+            scene.DrawScene(openGLControl1.Width, openGLControl1.Height);
             SceneGrid.Init(gl);
         }
 
@@ -75,81 +77,31 @@ namespace CadEditor
         {
             if (e.KeyCode == Keys.A)
             {
-                scene.ChangeAxisY(-3.0f);
+                scene.Camera.UpdateAxisY(-3.0f);
             }
             else if (e.KeyCode == Keys.D)
             {
-                scene.ChangeAxisY(3.0f);
+                scene.Camera.UpdateAxisY(3.0f);
 
             }
             else if (e.KeyCode == Keys.W)
             {
-                scene.ChangeAxisX(-3.0f);
+                scene.Camera.UpdateAxisX(-3.0f);
 
             }
             else if (e.KeyCode == Keys.S)
             {
-                scene.ChangeAxisX(3.0f);
+                scene.Camera.UpdateAxisX(3.0f);
             }
 
             
         }
 
-		private SceneElement selectedSceneElement = null;
-
-		/// <summary>
-		/// Gets or sets the selected scene element.
-		/// </summary>
-		/// <value>
-		/// The selected scene element.
-		/// </value>
-		public SceneElement SelectedSceneElement
-		{
-			get { return selectedSceneElement; }
-			set
-			{
-				selectedSceneElement = value;
-			}
-		}
-
 		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
-
-
             if (e.Button == MouseButtons.Left)
             {
-                //Vertex? vertex = scene.SelectObject(gl, MousePosition.X, MousePosition.Y);
-                //CustomCube cube = new CustomCube(gl, 5);
-                //scene.AddObject(cube);
-                //scene.CreateRay(MousePosition.X, MousePosition.Y, camera);
-                //CustomCube selectedCube = scene.SelectObject(MousePosition.X, MousePosition.Y, camera, openGLControl1);
-                //scene.DrawRayToMouse(MousePosition.X, MousePosition.Y);
-                //if (selectedCube != null)
-                //{
-                //    Console.WriteLine("User selected a cube");
-                //}
-                //else
-                //{
-                //    Console.WriteLine("User didn't select a cube");
-                //}
-
-                //SelectedSceneElement = null;
-                //            int mouseX = MousePosition.X;
-                //            int mouseY = MousePosition.Y;
-                //var items = scene.DoHitTest(mouseX, mouseY);
-                //            foreach(var item in items)
-                //            {
-                //                Console.WriteLine("The item is clicked");
-                //            }
-
-
-                //bool isSelected = scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
                 scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
-                //bool isSelected = scene.SelectElement(MousePosition.X, MousePosition.Y, gl);
-                //if (isSelected)
-                //{
-                //    Console.WriteLine("True");
-                //}
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -162,24 +114,18 @@ namespace CadEditor
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
         {
-            float sensitivity = 0.5f;
-
 
 			if (isLeftButtonPressed)
             {
 				double horizontalAngle = (e.X - mouseX) * sensitivity;
 				double verticalAngle = (e.Y - mouseY) * sensitivity;
 
-				scene.ChangeAxisY(horizontalAngle);
-                scene.ChangeAxisX(verticalAngle);
+				scene.Camera.UpdateAxisY(horizontalAngle);
+                scene.Camera.UpdateAxisX(verticalAngle);
                 mouseX = e.X;
                 mouseY = e.Y;
 
-				//camera.UpdateCameraPosition(horizontalAngle, verticalAngle);
-				scene.Camera.UpdateOpenGLCameraPosition(gl, horizontalAngle, verticalAngle);
 			}
-
-			//camera.UpdatePosition();
 		}
 
         private void openGLControl1_MouseUp(object sender, MouseEventArgs e)

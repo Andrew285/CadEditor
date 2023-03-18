@@ -34,7 +34,7 @@ namespace CadEditor
 	}
 
 
-	public struct Vertex
+	public class Vertex
 	{
 		public float X { get; set; }
 		public float Y { get; set; }
@@ -81,15 +81,51 @@ namespace CadEditor
 		}
 	}
 
-	public struct Facet
+	public class Facet
 	{
 		public Vertex[] Vertices { get; set; }
 		public bool IsSelected { get; set; }
+		public Color SelectedColor { get; set; } = Color.Brown;
+		public Color NonSelectedColor { get; set; } = Color.Yellow;
 
 		public Facet(Vertex[] _vertices)
 		{
 			Vertices = _vertices;
 			IsSelected = false;
+		}
+
+		public bool Contains(Vertex point)
+		{
+			Vertex fp1 = this[0];
+			Vertex fp2 = this[2];
+			if (point.X >= fp1.X && point.Y >= fp1.Y && point.Z >= fp1.Z &&
+				point.X <= fp2.X && point.Y <= fp2.Y && point.Z <= fp2.Z)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		public Vector CalculateNormal()
+		{
+			// Calculate two vectors lying on the plane
+			Vector p1 = new Vector(Vertices[0]);
+			Vector p2 = new Vector(Vertices[1]);
+			Vector p3 = new Vector(Vertices[2]);
+
+			Vector v1 = p2 - p1;
+			Vector v2 = p3 - p1;
+
+			// Calculate the cross product of the two vectors
+			Vector normal = v1.Cross(v2);
+
+			// Normalize the normal vector
+			normal = normal.Normalize();
+
+			return normal;
 		}
 
 		public override string ToString()
@@ -129,7 +165,7 @@ namespace CadEditor
 		}
 	}
 
-	public struct Edge
+	public class Edge
 	{
 		public Vertex V1 { get; set; }
 		public Vertex V2 { get; set; }

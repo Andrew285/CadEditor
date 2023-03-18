@@ -2281,7 +2281,7 @@ namespace CadEditor
 			double s = Math.Sin(angle);
 
 
-			vec = Vector.Normalize(vec);
+			vec = vec.Normalize();
 
 
 			double x = vec[0];
