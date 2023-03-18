@@ -23,6 +23,7 @@ namespace CadEditor
         private OpenGL gl;
         private Scene scene;
 
+        private CustomCube selectedCube;
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
@@ -104,19 +105,21 @@ namespace CadEditor
         {
             if (e.Button == MouseButtons.Left)
             {
-                scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
+				openGLControl1.ContextMenu = null;
+				scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
             }
             else if (e.Button == MouseButtons.Right)
             {
-				//button_one.ContextMenu = new ContextMenu();
-				//button_one.ContextMenu.MenuItems.Add("Copy", menu_item_copy_click);
+				openGLControl1.ContextMenu = null;
+				selectedCube = scene.GetSelectedCube(e.X, openGLControl1.Height - e.Y, gl);
+                if(selectedCube != null)
+                {
+                    openGLControl1.ContextMenu = new ContextMenu();
+                    openGLControl1.ContextMenu.MenuItems.Add("Select Object", Select_Object_click);
+                    openGLControl1.ContextMenu.MenuItems.Add("Delete", Delete_Object_click);
 
-				//button_one.ContextMenu.Show(button_one, new Point(e.X, e.Y));
-
-				//if (colorDialog1.ShowDialog() == DialogResult.OK)
-				//{
-				//	button1.BackColor = colorDialog1.Color;
-				//}
+                    openGLControl1.ContextMenu.Show(openGLControl1, new Point(e.X, e.Y));
+                }
 			}
             else if(e.Button == MouseButtons.Middle)
             {
@@ -139,7 +142,6 @@ namespace CadEditor
                 scene.Camera.UpdateAxisX(verticalAngle);
                 mouseX = e.X;
                 mouseY = e.Y;
-
 			}
 		}
 
@@ -147,5 +149,21 @@ namespace CadEditor
         {
             isMiddleButtonPressed = false;
         }
-    }
+
+
+		private void Select_Object_click(object sender, EventArgs e)
+		{
+            selectedCube.SelectCompletely();
+		}
+
+		private void Delete_Object_click(object sender, EventArgs e)
+		{
+		    scene.DeleteCompletely(selectedCube);
+		}
+
+		private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+            scene.AddCube();
+		}
+	}
 }

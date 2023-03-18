@@ -17,11 +17,38 @@ namespace CadEditor
 			sceneCollection = treeView;
 			TreeNode mainNode = new TreeNode(collectionName);
 			sceneCollection.Nodes.Add(mainNode);
+			sceneCollection.ExpandAll();
 		}
 
 		public void Add(CustomCube cube)
 		{
-			sceneCollection.Nodes[0].Nodes.Add(new TreeNode(cube.Name));
+			sceneCollection.Nodes[0].Nodes.Add(new TreeNode(cube.CubeName));
+			sceneCollection.Update();
+		}
+
+		public void Remove(CustomCube cube)
+		{
+			for(int i = 0; i < sceneCollection.Nodes.Count; i++)
+			{
+				if (sceneCollection.Nodes[i].Nodes.Count > 0)
+				{
+					for(int j = 0; j < sceneCollection.Nodes[i].Nodes.Count; j++)
+					{
+						if (sceneCollection.Nodes[i].Nodes[j].Text == cube.CubeName)
+						{
+							sceneCollection.Nodes[i].Nodes.RemoveAt(j);
+						}
+					}
+				}
+				else
+				{
+					if (sceneCollection.Nodes[i].Text == cube.CubeName)
+					{
+						sceneCollection.Nodes.RemoveAt(i);
+					}
+				}
+			}
+			sceneCollection.Update();
 		}
 	}
 }

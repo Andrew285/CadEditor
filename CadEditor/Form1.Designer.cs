@@ -166,14 +166,15 @@
 			this.addToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cubeToolStripMenuItem});
 			this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-			this.addToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+			this.addToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.addToolStripMenuItem.Text = "Add";
 			// 
 			// cubeToolStripMenuItem
 			// 
 			this.cubeToolStripMenuItem.Name = "cubeToolStripMenuItem";
-			this.cubeToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+			this.cubeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.cubeToolStripMenuItem.Text = "Cube";
+			this.cubeToolStripMenuItem.Click += new System.EventHandler(this.cubeToolStripMenuItem_Click);
 			// 
 			// selectAllToolStripMenuItem
 			// 

@@ -140,9 +140,6 @@ namespace CadEditor
 			selectingRay.Origin = near;
 
 			// Iterate over each object in the scene
-
-			Console.WriteLine("------------------------------");
-
 			foreach (CustomCube cube in cubes)
 			{
 				UpdateObject(cube);
@@ -185,12 +182,28 @@ namespace CadEditor
 			return selectedFacet;
 		}
 
-		public void SelectElementCompletely(CustomCube cube)
+		public CustomCube GetSelectedCube(int x, int y, OpenGL gl)
 		{
-			foreach(Facet facet in cube.Mesh.Facets)
+			// Convert the mouse coordinates to world coordinates
+			Vector near = new Vector(gl.UnProject(x, y, 0));
+			Vector far = new Vector(gl.UnProject(x, y, 1));
+			Vector direction = (far - near).Normalize();
+
+			ray = new Ray(near, direction, gl);
+			selectingRay = new Ray(gl);
+			selectingRay.Origin = near;
+
+			// Iterate over each object in the scene
+			foreach (CustomCube cube in cubes)
 			{
-				facet.IsSelected = true;
-			}	
+				Facet selectedFacet = CheckSelectedFacet(cube, ray);
+				if (selectedFacet != null)
+				{
+					return cube;
+				}
+			}
+
+			return null;
 		}
 
 		//Not implemented yet
@@ -205,5 +218,18 @@ namespace CadEditor
 		}
 
 		#endregion
+
+		public void DeleteCompletely(CustomCube cube)
+		{
+			cubes.Remove(cube);
+			sceneCollection.Remove(cube);
+		}
+
+		public void AddCube()
+		{
+			CustomCube cube = new CustomCube(gl, "Cube2");
+			cubes.Add(cube);
+			sceneCollection.Add(cube);
+		}
 	}
 }

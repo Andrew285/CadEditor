@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using SharpGL.SceneGraph;
 using SharpGL;
 using SharpGL.SceneGraph.Core;
+using System.Linq.Expressions;
 
 namespace CadEditor
 {
@@ -15,8 +16,9 @@ namespace CadEditor
         private OpenGL gl;
 		private Mesh mesh;
 		private string cubeName;
-		private const int facetsAmount = 6;
-		private const int verticesAmount = 8;
+		private const int FACETS_AMOUNT = 6;
+		private const int EDGES_AMOUNT = 12;
+		private const int VERTICES_AMOUNT = 8;
 
 		public Mesh Mesh
 		{
@@ -33,7 +35,7 @@ namespace CadEditor
 			gl = _gl;
 			mesh = new Mesh();
 			cubeName = _cubeName;
-			mesh.Facets = new Facet[facetsAmount]
+			mesh.Facets = new Facet[FACETS_AMOUNT]
 			{
 				new Facet(new Vertex[]
 				{
@@ -78,10 +80,33 @@ namespace CadEditor
 					new Vertex(-1.0f, 1.0f, -1.0f)
 				})
 			};
+
+			List<Edge> edges = new List<Edge>();
+			for(int i = 0; i < mesh.Facets.Length; i++)
+			{
+				Facet currentFacet = mesh.Facets[i];
+				for(int j = 0; j < 4; j++)
+				{
+					Edge newEdge = new Edge(currentFacet.Vertices[j], currentFacet[(j+1)%4]);
+					if(edges.Count != 0)
+					{
+						if (!edges.Contains(newEdge))
+						{
+							edges.Add(newEdge);
+						}
+					}
+					else
+					{
+						edges.Add(newEdge);
+					}
+				}
+			}
+			mesh.Edges = edges.ToArray();
 		}
 
 		public void Draw()
 		{
+			//Draw Facets
 			gl.Begin(OpenGL.GL_QUADS);
 			for (int i = 0; i < mesh.Facets.Length; i++)
 			{
@@ -102,6 +127,37 @@ namespace CadEditor
 			}
 			gl.End();
 			gl.Flush();
+
+			//Draw Edges
+			gl.Begin(OpenGL.GL_LINES);
+			for (int i = 0; i < mesh.Edges.Length; i++)
+			{
+				Edge currectEdge = mesh.Edges[i];
+				if (currectEdge.IsSelected)
+				{
+					gl.Color(currectEdge.SelectedColor);
+				}
+				else
+				{
+					gl.Color(currectEdge.NonSelectedColor);
+				}
+
+				gl.Vertex(currectEdge.V1.X, currectEdge.V1.Y, currectEdge.V1.Z);
+				gl.Vertex(currectEdge.V2.X, currectEdge.V2.Y, currectEdge.V2.Z);
+			}
+			gl.End();
+			gl.Flush();
+
+			//Draw Vertexes
+
 		}
-    }
+
+		public void SelectCompletely()
+		{
+			foreach(Facet facet in Mesh.Facets)
+			{
+				facet.IsSelected = true;
+			}
+		}
+	}
 }

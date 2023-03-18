@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace CadEditor
 {
@@ -63,6 +64,42 @@ namespace CadEditor
 			Y = _y;
 			Z = _z;
 			IsSelected = false;
+		}
+
+		public static bool operator ==(Vertex a, Vertex b)
+		{
+			if (object.ReferenceEquals(a, b))
+			{
+				return true;
+			}
+			if (object.ReferenceEquals(a, null) ||
+			object.ReferenceEquals(b, null))
+			{
+				return false;
+			}
+
+			return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
+		}
+
+		public static bool operator !=(Vertex a, Vertex b)
+		{
+			return !a.Equals(b);
+		}
+
+
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as Vertex);
+		}
+
+		public bool Equals(Vertex other)
+		{
+			return this == other;
+		}
+
+		public override int GetHashCode()
+		{
+			return (int)X + (int)Y + (int)Z;
 		}
 
 		public Vertex GetWorldCoordinates(OpenGL gl) 
@@ -165,10 +202,65 @@ namespace CadEditor
 		}
 	}
 
-	public class Edge
+	public class Edge: IEquatable<Edge>
 	{
 		public Vertex V1 { get; set; }
 		public Vertex V2 { get; set; }
 		public bool IsSelected { get; set; }
+		public Color SelectedColor { get; set; } = Color.Red;
+		public Color NonSelectedColor { get; set; } = Color.Black;
+
+		public Edge(Vertex _v1, Vertex _v2)
+		{
+			V1 = _v1;
+			V2 = _v2;
+		}
+
+		public static bool operator ==(Edge a, Edge b)
+		{
+			if (object.ReferenceEquals(a, b))
+			{
+				return true;
+			}
+			if(object.ReferenceEquals(a, null) ||
+			object.ReferenceEquals(b, null))
+			{
+				return false;
+			}
+
+			return a.V1 == b.V1 && a.V2 == b.V2;
+		}
+
+		public static bool operator !=(Edge a, Edge b)
+		{
+			return !a.Equals(b);
+		}
+
+		public bool Exists(List<Edge> edges)
+		{
+			foreach(Edge edge in edges)
+			{
+				if(this == edge)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as Edge);
+		}
+
+		public bool Equals(Edge other)
+		{
+			return this == other;
+		}
+
+		public override int GetHashCode()
+		{
+			return 1;
+		}
 	}
 }
