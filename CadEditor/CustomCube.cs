@@ -14,6 +14,7 @@ namespace CadEditor
     {
         private OpenGL gl;
 		private Mesh mesh;
+		private string cubeName;
 		private const int facetsAmount = 6;
 		private const int verticesAmount = 8;
 
@@ -22,10 +23,16 @@ namespace CadEditor
 			get { return mesh; }
 		}
 
-		public CustomCube(OpenGL _gl)
+		public string CubeName
+		{
+			get { return cubeName; }
+		}
+
+		public CustomCube(OpenGL _gl, string _cubeName)
 		{
 			gl = _gl;
 			mesh = new Mesh();
+			cubeName = _cubeName;
 			mesh.Facets = new Facet[facetsAmount]
 			{
 				new Facet(new Vertex[]

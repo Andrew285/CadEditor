@@ -8,10 +8,12 @@ using SharpGL.SceneGraph.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Drawing;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace CadEditor
 {
@@ -23,14 +25,14 @@ namespace CadEditor
 
         private int mouseX;
         private int mouseY;
-		private bool isLeftButtonPressed;
+		private bool isMiddleButtonPressed;
 		private float sensitivity = 0.5f;
 
 		public Form1()
         {
             InitializeComponent();
 			KeyPreview = true;
-        }
+		}
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
@@ -38,7 +40,8 @@ namespace CadEditor
 
             //Initializing fundemental objects of scene
             Camera camera = new Camera(gl, new Vector(new double[]{ 0, 0, 0}));
-            scene = new Scene(gl, camera);
+            SceneCollection sceneCollection = new SceneCollection(treeView1, "Collection");
+            scene = new Scene(gl, camera, sceneCollection);
 
             //Initializing objects by default
             scene.InitializeObjects();
@@ -105,17 +108,29 @@ namespace CadEditor
             }
             else if (e.Button == MouseButtons.Right)
             {
-                mouseX = e.X;
-                mouseY = e.Y;
-                isLeftButtonPressed = true;
-            }
+				//button_one.ContextMenu = new ContextMenu();
+				//button_one.ContextMenu.MenuItems.Add("Copy", menu_item_copy_click);
+
+				//button_one.ContextMenu.Show(button_one, new Point(e.X, e.Y));
+
+				//if (colorDialog1.ShowDialog() == DialogResult.OK)
+				//{
+				//	button1.BackColor = colorDialog1.Color;
+				//}
+			}
+            else if(e.Button == MouseButtons.Middle)
+            {
+				mouseX = e.X;
+				mouseY = e.Y;
+				isMiddleButtonPressed = true;
+			}
 
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
         {
 
-			if (isLeftButtonPressed)
+			if (isMiddleButtonPressed)
             {
 				double horizontalAngle = (e.X - mouseX) * sensitivity;
 				double verticalAngle = (e.Y - mouseY) * sensitivity;
@@ -130,7 +145,7 @@ namespace CadEditor
 
         private void openGLControl1_MouseUp(object sender, MouseEventArgs e)
         {
-            isLeftButtonPressed = false;
+            isMiddleButtonPressed = false;
         }
     }
 }

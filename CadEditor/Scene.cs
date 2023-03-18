@@ -21,22 +21,25 @@ namespace CadEditor
     public class Scene
     {
         private Camera camera;
+        private SceneCollection sceneCollection;
         private OpenGL gl;
         private List<CustomCube> cubes;
         public Ray ray;
 		public Ray selectingRay;
+
+		public Scene(OpenGL _gl, Camera _camera, SceneCollection _sceneCollection)
+        {
+			gl = _gl;
+			camera = _camera;
+			sceneCollection = _sceneCollection;
+			cubes = new List<CustomCube>();
+        }
 
 		public Camera Camera
 		{
 			get { return camera; }
 		}
 
-		public Scene(OpenGL _gl, Camera _camera)
-        {
-			gl = _gl;
-			camera = _camera;
-            cubes = new List<CustomCube>();
-        }
 
 		#region --- Drawing ---
 
@@ -108,8 +111,9 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			CustomCube cube = new CustomCube(gl);
+			CustomCube cube = new CustomCube(gl, "Cube_1");
 			cubes.Add(cube);
+			sceneCollection.Add(cube);
 		}
 
 		public void UpdateObject(CustomCube cube)
@@ -181,6 +185,13 @@ namespace CadEditor
 			return selectedFacet;
 		}
 
+		public void SelectElementCompletely(CustomCube cube)
+		{
+			foreach(Facet facet in cube.Mesh.Facets)
+			{
+				facet.IsSelected = true;
+			}	
+		}
 
 		//Not implemented yet
 		public void CheckSelectedEdge(CustomCube cube, Ray ray)

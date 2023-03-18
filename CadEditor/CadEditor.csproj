@@ -74,6 +74,7 @@
     <Compile Include="CustomSceneGraph.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="Scene.cs" />
+    <Compile Include="SceneCollection.cs" />
     <Compile Include="SceneGrid.cs" />
     <Compile Include="Vector.cs" />
     <EmbeddedResource Include="Form1.resx">
