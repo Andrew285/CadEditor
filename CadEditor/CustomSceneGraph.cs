@@ -35,7 +35,7 @@ namespace CadEditor
             Light light = new Light()
             {
                 On = true,
-                Position = new Vertex(3, 10, 3),
+                //Position = new Vertex(3, 10, 3),
                 GLCode = OpenGL.GL_LIGHT0
             };
 
