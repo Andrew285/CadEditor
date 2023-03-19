@@ -116,14 +116,6 @@ namespace CadEditor
 			sceneCollection.Add(cube);
 		}
 
-		public void UpdateObject(CustomCube cube)
-		{
-			for(int i = 0; i < cube.Mesh.Facets.Length; i++)
-			{
-				cube.Mesh.Facets[i].IsSelected = false;
-			}
-		}
-
 		#endregion
 
 		#region --- Object Selection ---
@@ -142,14 +134,32 @@ namespace CadEditor
 			// Iterate over each object in the scene
 			foreach (CustomCube cube in cubes)
 			{
-				UpdateObject(cube);
+				//deselect all facets, edges and vertices before another selecting
+				cube.DeselectAll();
 
-				
+				//check if any vertex is selected
+				Vertex selectedVertex = CheckSelectedVertex(cube, ray);
+				if (selectedVertex != null)
+				{
+					selectedVertex.IsSelected = true;
+					return;
+				}
+
+				//check if any edge is selected
+				Edge selectedEdge = CheckSelectedEdge(cube, ray);
+				if (selectedEdge != null)
+				{
+					selectedEdge.IsSelected = true;
+					return;
+				}
+
+				//check if any facet is selected
 				Facet selectedFacet = CheckSelectedFacet(cube, ray);
-				if(selectedFacet != null)
+				if (selectedFacet != null)
 				{
 					selectedFacet.IsSelected = true;
 					//selectedFacet.SelectedColor = Color.Pink;
+					return;
 				}
 				
 			}
@@ -162,25 +172,93 @@ namespace CadEditor
 
 			for(int i = 0; i < cube.Mesh.Facets.Length; i++)
 			{
-				double? currentDistance = ray.RayIntersectsPlane(cube.Mesh.Facets[i], selectingRay);
+				double? currentDistance = ray.RayIntersectsFacet(cube.Mesh.Facets[i], selectingRay);
 				if (minDistance != null)
 				{
 					if(currentDistance < minDistance)
 					{
-						UpdateObject(cube);
 						selectedFacet = cube.Mesh.Facets[i];
 						minDistance = currentDistance;
 					}
 				}
 				else if(currentDistance != null)
 				{
-					UpdateObject(cube);
 					selectedFacet = cube.Mesh.Facets[i];
 					minDistance = currentDistance;
 				}
 			}
 			return selectedFacet;
 		}
+
+		public Edge CheckSelectedEdge(CustomCube cube, Ray ray)
+		{
+			double? minDistance = null; //minimal distance between edge and ray origin
+			Edge selectedEdge = null; //edge that is selected
+			Vertex intersectionPoint = null;
+
+			for (int i = 0; i < cube.Mesh.Edges.Length; i++)
+			{
+				double? currentDistance = ray.RayIntersectsEdge(cube.Mesh.Edges[i], out intersectionPoint);
+				if (minDistance != null)
+				{
+					if (currentDistance < minDistance)
+					{
+						selectedEdge = cube.Mesh.Edges[i];
+						minDistance = currentDistance;
+					}
+				}
+				else if (currentDistance != null)
+				{
+					selectedEdge = cube.Mesh.Edges[i];
+					minDistance = currentDistance;
+				}
+			}
+
+			if(intersectionPoint != null)
+			{
+				selectingRay.Direction = new Vector(intersectionPoint);
+			}
+			else
+			{
+				selectingRay.Direction = selectingRay.Origin;
+			}
+			return selectedEdge;
+		}
+
+		public Vertex CheckSelectedVertex(CustomCube cube, Ray ray)
+		{
+			double? minDistance = null; //minimal distance between vertex and ray origin
+			Vertex selectedVertex = null; //vertex that is selected
+
+			for (int i = 0; i < cube.Mesh.Vertices.Length; i++)
+			{
+				double? currentDistance = ray.RayIntersectsVertex(cube.Mesh.Vertices[i]);
+				if (minDistance != null)
+				{
+					if (currentDistance < minDistance)
+					{
+						selectedVertex = cube.Mesh.Vertices[i];
+						minDistance = currentDistance;
+					}
+				}
+				else if (currentDistance != null)
+				{
+					selectedVertex = cube.Mesh.Vertices[i];
+					minDistance = currentDistance;
+				}
+			}
+
+			if (selectedVertex != null)
+			{
+				selectingRay.Direction = new Vector(selectedVertex);
+			}
+			else
+			{
+				selectingRay.Direction = selectingRay.Origin;
+			}
+			return selectedVertex;
+		}
+
 
 		public CustomCube GetSelectedCube(int x, int y, OpenGL gl)
 		{
@@ -206,18 +284,8 @@ namespace CadEditor
 			return null;
 		}
 
-		//Not implemented yet
-		public void CheckSelectedEdge(CustomCube cube, Ray ray)
-		{
-
-		}
-
-		public void CheckSelectedVertex(CustomCube cube, Ray ray)
-		{
-
-		}
-
 		#endregion
+
 
 		public void DeleteCompletely(CustomCube cube)
 		{

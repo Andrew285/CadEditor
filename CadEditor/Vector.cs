@@ -23,6 +23,12 @@ namespace CadEditor
 			Size = values.Length;
 		}
 
+		public Vector(double X, double Y, double Z)
+		{
+			Size = 3;
+			values = new double[] { X, Y, Z };
+		}
+
 		public Vector(Vertex vertex)
 		{
 			Size = 3;

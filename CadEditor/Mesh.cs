@@ -41,6 +41,8 @@ namespace CadEditor
 		public float Y { get; set; }
 		public float Z { get; set; }
 		public bool IsSelected { get; set; }
+		public Color SelectedColor { get; set; } = Color.Pink;
+		public Color NonSelectedColor { get; set; } = Color.Green;
 
 		public Vertex(double[] values)
 		{
@@ -83,9 +85,8 @@ namespace CadEditor
 
 		public static bool operator !=(Vertex a, Vertex b)
 		{
-			return !a.Equals(b);
+			return !(a == b);
 		}
-
 
 		public override bool Equals(object obj)
 		{
@@ -222,32 +223,20 @@ namespace CadEditor
 			{
 				return true;
 			}
-			if(object.ReferenceEquals(a, null) ||
+			if (object.ReferenceEquals(a, null) ||
 			object.ReferenceEquals(b, null))
 			{
 				return false;
 			}
-
-			return a.V1 == b.V1 && a.V2 == b.V2;
+			return (a.V1 == b.V1 && a.V2 == b.V2) || (a.V1 == b.V2 && a.V2 == b.V1);
 		}
 
 		public static bool operator !=(Edge a, Edge b)
 		{
-			return !a.Equals(b);
+			return !(a == b);
 		}
 
-		public bool Exists(List<Edge> edges)
-		{
-			foreach(Edge edge in edges)
-			{
-				if(this == edge)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
+		//Overriding Equals() methods
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as Edge);
@@ -262,5 +251,35 @@ namespace CadEditor
 		{
 			return 1;
 		}
+
+		//Check if edge exist in list of edges
+		public bool Exists(List<Edge> edges)
+		{
+			foreach(Edge edge in edges)
+			{
+				if(this == edge)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		//Check if point contains edge
+		public bool Contains(Vertex point)
+		{
+			double accuracy = 0.05;
+			if ((Math.Abs(point.X - V1.X) <= accuracy && Math.Abs(point.Y - V1.Y) <= accuracy && Math.Abs(point.Z - V1.Z) <= accuracy) ||
+				(Math.Abs(point.X - V2.X) <= accuracy && Math.Abs(point.Y - V2.Y) <= accuracy && Math.Abs(point.Z - V2.Z) <= accuracy))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+
 	}
 }

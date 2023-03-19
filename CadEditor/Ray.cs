@@ -1,11 +1,13 @@
 ﻿using SharpGL;
 using SharpGL.SceneGraph.Core;
+using SharpGL.SceneGraph.Raytracing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -31,7 +33,7 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public double? RayIntersectsPlane(Facet facet, Ray lineRay)
+		public double? RayIntersectsFacet(Facet facet, Ray lineRay)
 		{
 
 			Vector intersectionPoint;
@@ -77,7 +79,7 @@ namespace CadEditor
 			lineRay.Direction = intersectionPoint;
 
 			//Check if the intersection point is in the current facet
-			if(!facet.Contains(new Vertex(intersectionPoint)))
+			if (!facet.Contains(new Vertex(intersectionPoint)))
 			{
 				return null;
 			}
@@ -86,5 +88,62 @@ namespace CadEditor
 			return distance;
 		}
 
+		public double? RayIntersectsEdge(Edge edge, out Vertex intersectionPoint)
+		{
+			intersectionPoint = null;
+			// Calculate the direction vector of the line
+			Vector lineDirection = new Vector(edge.V1) - new Vector(edge.V2);
+
+			// Calculate the normal of the plane that contains the line and the ray
+			Vector planeNormal = lineDirection.Cross(Direction);
+
+			// Calculate the distance between the line and the ray
+			double denominator = planeNormal * planeNormal;
+			double numerator = planeNormal * (Origin - new Vector(edge.V1));
+			double distance = -numerator / denominator;
+
+			// Check if the intersection point lies on the line segment
+			float epsilon = 0.0001f;
+			if (distance < -epsilon || distance > 1 + epsilon)
+			{
+				return null;
+			}
+
+			// Calculate the intersection point
+			intersectionPoint = new Vertex(new Vector(edge.V1) + lineDirection * distance);
+
+			if (!edge.Contains(intersectionPoint))
+			{
+				return null;
+			}
+
+			return distance;
+		}
+
+		public double? RayIntersectsVertex(Vertex vertex)
+		{
+			// Calculate the components of the direction vector.
+			double dx = Direction[0];
+			double dy = Direction[1];
+			double dz = Direction[2];
+
+			// Calculate the parameter values for each component.
+			double tx = (vertex.X - Origin[0]) / dx;
+			double ty = (vertex.Y - Origin[1]) / dy;
+			double tz = (vertex.Z - Origin[2]) / dz;
+
+			// Check if all the parameter values are equal (within some tolerance).
+			double accuracy = 0.1;
+			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
+			{
+				// The point lies on the ray.
+				return Math.Sqrt(Math.Pow((vertex.X - Origin[0]), 2) + Math.Pow((vertex.X - Origin[1]), 2) + Math.Pow((vertex.X - Origin[2]), 2));
+			}
+			else
+			{
+				// The point does not lie on the ray.
+				return null;
+			}
+		}
 	}
 }

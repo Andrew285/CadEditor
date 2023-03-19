@@ -35,6 +35,8 @@ namespace CadEditor
 			gl = _gl;
 			mesh = new Mesh();
 			cubeName = _cubeName;
+
+			//Initializing Facets
 			mesh.Facets = new Facet[FACETS_AMOUNT]
 			{
 				new Facet(new Vertex[]
@@ -81,16 +83,17 @@ namespace CadEditor
 				})
 			};
 
+			//Initializing Edges
 			List<Edge> edges = new List<Edge>();
 			for(int i = 0; i < mesh.Facets.Length; i++)
 			{
 				Facet currentFacet = mesh.Facets[i];
 				for(int j = 0; j < 4; j++)
 				{
-					Edge newEdge = new Edge(currentFacet.Vertices[j], currentFacet[(j+1)%4]);
+					Edge newEdge = new Edge(currentFacet.Vertices[j], currentFacet.Vertices[(j+1)%4]);
 					if(edges.Count != 0)
 					{
-						if (!edges.Contains(newEdge))
+						if (!newEdge.Exists(edges))
 						{
 							edges.Add(newEdge);
 						}
@@ -102,6 +105,20 @@ namespace CadEditor
 				}
 			}
 			mesh.Edges = edges.ToArray();
+
+
+			//Initializing Vertices
+			mesh.Vertices = new Vertex[]
+			{
+				new Vertex(-1.0f, -1.0f, -1.0f),
+				new Vertex(-1.0f, -1.0f, 1.0f),
+				new Vertex(-1.0f, 1.0f, -1.0f),
+				new Vertex(1.0f, -1.0f, -1.0f),
+				new Vertex(-1.0f, 1.0f, 1.0f),
+				new Vertex(1.0f, -1.0f, 1.0f),
+				new Vertex(1.0f, 1.0f, -1.0f),
+				new Vertex(1.0f, 1.0f, 1.0f)
+			};
 		}
 
 		public void Draw()
@@ -149,14 +166,59 @@ namespace CadEditor
 			gl.Flush();
 
 			//Draw Vertexes
+			gl.PointSize(10.0f);
+			gl.Begin(OpenGL.GL_POINTS);
+			for (int i = 0; i < mesh.Vertices.Length; i++)
+			{
+				Vertex currectVertex = mesh.Vertices[i];
+				if (currectVertex.IsSelected)
+				{
+					gl.Color(currectVertex.SelectedColor);
+				}
+				else
+				{
+					gl.Color(currectVertex.NonSelectedColor);
+				}
 
+				gl.Vertex(currectVertex.X, currectVertex.Y, currectVertex.Z);
+			}
+			gl.End();
+			gl.Flush();
 		}
 
-		public void SelectCompletely()
+		public void SelectAll()
 		{
 			foreach(Facet facet in Mesh.Facets)
 			{
 				facet.IsSelected = true;
+			}
+
+			foreach (Edge edge in Mesh.Edges)
+			{
+				edge.IsSelected = true;
+			}
+
+			foreach (Vertex vertex in Mesh.Vertices)
+			{
+				vertex.IsSelected = true;
+			}
+		}
+
+		public void DeselectAll()
+		{
+			foreach (Facet facet in Mesh.Facets)
+			{
+				facet.IsSelected = false;
+			}
+
+			foreach (Edge edge in Mesh.Edges)
+			{
+				edge.IsSelected = false;
+			}
+
+			foreach (Vertex vertex in Mesh.Vertices)
+			{
+				vertex.IsSelected = false;
 			}
 		}
 	}

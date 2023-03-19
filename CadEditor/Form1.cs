@@ -116,6 +116,7 @@ namespace CadEditor
                 {
                     openGLControl1.ContextMenu = new ContextMenu();
                     openGLControl1.ContextMenu.MenuItems.Add("Select Object", Select_Object_click);
+                    openGLControl1.ContextMenu.MenuItems.Add("Deselect Object", Deselect_Object_click);
                     openGLControl1.ContextMenu.MenuItems.Add("Delete", Delete_Object_click);
 
                     openGLControl1.ContextMenu.Show(openGLControl1, new Point(e.X, e.Y));
@@ -153,7 +154,12 @@ namespace CadEditor
 
 		private void Select_Object_click(object sender, EventArgs e)
 		{
-            selectedCube.SelectCompletely();
+            selectedCube.SelectAll();
+		}
+
+		private void Deselect_Object_click(object sender, EventArgs e)
+		{
+			selectedCube.DeselectAll();
 		}
 
 		private void Delete_Object_click(object sender, EventArgs e)
