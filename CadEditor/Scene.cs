@@ -55,7 +55,7 @@ namespace CadEditor
 			// Set up the view matrix
 			gl.MatrixMode(OpenGL.GL_MODELVIEW);
 			gl.LoadIdentity();
-			gl.LookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
+			gl.LookAt(0, 0, camera.CameraDistance, 0, 0, 0, 0, 1, 0);
 
 			//Rotate Camera
 			camera.RotateAxisX();

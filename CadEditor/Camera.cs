@@ -12,12 +12,13 @@ namespace CadEditor
 {
     public class Camera: SceneElement
     {
-        private Vector cameraPosition;
+		private OpenGL gl;
+		private Vector cameraPosition;
         private Vector rotationPoint;
 
+		public double CameraDistance { get; set; } = 5.0f;
         public double rtri { get; set; }
         public double utri { get; set; }
-        private OpenGL gl;
 
 
 		private Vertex position = new Vertex(-1f, -1f, 0.5f);

@@ -84,7 +84,7 @@ namespace CadEditor
 				return null;
 			}
 
-			//Console.WriteLine("\nIntersection Point: {0}\nFacet: {1}\nDistance: {2}", intersectionPoint, facet, distance);
+			Console.WriteLine("\n\n-----------------\nIntersection Point: {0}\nFacet: {1}\nNormal: {2}", intersectionPoint, facet, planeNormal);
 			return distance;
 		}
 

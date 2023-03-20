@@ -33,6 +33,7 @@ namespace CadEditor
         {
             InitializeComponent();
 			KeyPreview = true;
+            openGLControl1.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
 		}
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
@@ -69,7 +70,7 @@ namespace CadEditor
             gl.Perspective(60.0f, (double)Width / (double)Height, 0.01, 100.0);
 
             ////  Данная функция позволяет установить камеру и её положение
-            gl.LookAt(2, 2, -6,    // позиция самой камеры (x, y, z)
+            gl.LookAt(2, 2, scene.Camera.CameraDistance,    // позиция самой камеры (x, y, z)
                         0, 0, 0,     // направление, куда мы смотрим
                         0, 1, 0);    // верх камеры
 
@@ -128,7 +129,6 @@ namespace CadEditor
 				mouseY = e.Y;
 				isMiddleButtonPressed = true;
 			}
-
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
@@ -151,6 +151,18 @@ namespace CadEditor
             isMiddleButtonPressed = false;
         }
 
+		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
+		{
+			// Calculate the new camera distance based on the mouse wheel delta
+			scene.Camera.CameraDistance += e.Delta * -0.01f;
+
+			// Limit the camera distance to a reasonable range
+			scene.Camera.CameraDistance = Math.Max(scene.Camera.CameraDistance, 1.0f);
+			scene.Camera.CameraDistance = Math.Min(scene.Camera.CameraDistance, 20.0f);
+
+			// Redraw the viewport
+			openGLControl1.Invalidate();
+		}
 
 		private void Select_Object_click(object sender, EventArgs e)
 		{
