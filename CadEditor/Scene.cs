@@ -24,9 +24,16 @@ namespace CadEditor
         private SceneCollection sceneCollection;
         private OpenGL gl;
         public List<CustomCube> cubes;
+
         public Ray ray;
 		public Ray selectingRay;
+
 		public bool Selected { get; set; }
+		private ISelectable selectedObj { get; set; }
+
+		public float selectedObjAxisLength { get; set; }
+		private Edge[] selectingCoordinateAxes;
+
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
 
@@ -65,7 +72,32 @@ namespace CadEditor
 			camera.RotateAxisY();
 
 			//Draw Scene Grid
-			DrawCordinateAxes(3.0f, 20);
+			DrawCordinateAxes(new Vertex(gl, 0, 0, 0), 3.0, 20);
+
+			//Draw Coordinate Axes if selected Vertex
+			if(selectedObj != null)
+			{
+				//check the type of selected object
+				Vertex centerPoint = null;
+				if(selectedObj is Vertex)
+				{
+					centerPoint = (Vertex)selectedObj;
+				}
+				else if(selectedObj is Edge)
+				{
+
+				}
+				else if(selectedObj is Facet)
+				{
+
+				}
+
+				//draw the coordinate axes
+				if(centerPoint != null && SceneMode == SceneMode.EDIT)
+				{
+					DrawSelectingCoordAxes(centerPoint, 2.8f, 1.0f);
+				}
+			}
 
 			//DrawLine();
 			if (selectingRay != null)
@@ -79,25 +111,48 @@ namespace CadEditor
 			}
 		}
 
-        public void DrawCordinateAxes(float lineWidth, float axisLength)
+        public void DrawCordinateAxes(Vertex v, double lineWidth, double axisLength)
         {
-            gl.LineWidth(lineWidth);
+            gl.LineWidth((float)lineWidth);
             gl.Begin(OpenGL.GL_LINES);
-            gl.Color(1f, 0, 0, 0);
-            gl.Vertex(-axisLength, 0, 0);
-            gl.Vertex(axisLength, 0, 0);
 
-            gl.Color(0, 1f, 0, 0);
-            gl.Vertex(0, -axisLength, 0);
-            gl.Vertex(0, axisLength, 0);
+			gl.Color(1f, 0, 0, 0);
+			gl.Vertex(-axisLength + v.X, v.Y, v.Z);
+			gl.Vertex(axisLength + v.X, v.Y, v.Z);
 
-            gl.Color(0, 0, 1f, 0);
-            gl.Vertex(0, 0, -axisLength);
-            gl.Vertex(0, 0, axisLength);
+
+			gl.Color(0, 1f, 0, 0);
+			gl.Vertex(v.X, -axisLength + v.Y, v.Z);
+            gl.Vertex(v.X, axisLength + v.Y, v.Z);
+
+			gl.Color(0, 0, 1f, 0);
+			gl.Vertex(v.X, v.Y, -axisLength + v.Z);
+            gl.Vertex(v.X, v.Y, axisLength + v.Z);
 
             gl.End();
             gl.Flush();
         }
+
+		public void DrawSelectingCoordAxes(Vertex v, float lineWidth, double axisLength)
+		{
+			gl.Begin(OpenGL.GL_LINES);
+
+			double axisXLength = axisLength * v.X / Math.Abs(v.X);
+			double axisYLength = axisLength * v.Y / Math.Abs(v.Y);
+			double axisZLength = axisLength * v.Z / Math.Abs(v.Z);
+
+			Edge axisX = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, axisXLength + v.X, v.Y, v.Z));
+			Edge axisY = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, axisYLength + v.Y, v.Z));
+			Edge axisZ = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, v.Y, axisZLength + v.Z));
+			selectingCoordinateAxes = new Edge[] { axisX, axisY, axisZ };
+
+			axisX.Draw(new double[] {1, 0, 0}, lineWidth);
+			axisY.Draw(new double[] { 0, 1, 0 }, lineWidth);
+			axisZ.Draw(new double[] { 0, 0, 1 }, lineWidth);
+
+			gl.End();
+			gl.Flush();
+		}
 
 		public void DrawLine(Vector v1, Vector v2)
         {
@@ -123,7 +178,7 @@ namespace CadEditor
 
 		#region --- Object Selection ---
 
-		public ISelectable SelectElement(int x, int y, OpenGL gl)
+		public ISelectable CheckSelectedElement(int x, int y, OpenGL gl)
 		{
 			// Convert the mouse coordinates to world coordinates
 			Vector near = new Vector(gl.UnProject(x, y, 0));
@@ -169,8 +224,7 @@ namespace CadEditor
 					}
 				}
 
-
-				//check if any object is selected
+				//Check SceneMode
 				if(selectedObject != null)
 				{
 					if(SceneMode == SceneMode.VIEW)
@@ -188,6 +242,7 @@ namespace CadEditor
 
 			}
 
+			selectedObj = selectedObject;
 			return selectedObject;
 		}
 
@@ -286,6 +341,24 @@ namespace CadEditor
 		}
 
 
+		public void CheckSelectedCoordinateAxes()
+		{
+			if(selectingCoordinateAxes != null)
+			{
+				foreach (Edge line in selectingCoordinateAxes)
+				{
+					Vertex intersectionPoint;
+					double? currentDistance = ray.RayIntersectsEdge(line, out intersectionPoint);
+
+					if (intersectionPoint != null)
+					{
+						line.IsSelected = true;
+						return;
+					}
+				}
+			}
+		}
+
 		public CustomCube GetSelectedCube(int x, int y, OpenGL gl)
 		{
 			// Convert the mouse coordinates to world coordinates
@@ -309,6 +382,7 @@ namespace CadEditor
 
 			return null;
 		}
+
 
 		#endregion
 

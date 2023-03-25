@@ -114,7 +114,8 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-				ISelectable selectedObject =  scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
+                scene.CheckSelectedCoordinateAxes();
+				ISelectable selectedObject =  scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
                 //if (selectedObject is Facet && scene.SceneMode == SceneMode.VIEW)
                 //{
@@ -166,14 +167,8 @@ namespace CadEditor
                 SelectedVertexEditMode.Y -= (float)(verticalAngle * 0.01);
                 Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.X, (float)horizontalAngle));
                 Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.Y, (float)verticalAngle));
-				//SelectedVertexEditMode.X += 0.1f;
-				//SelectedVertexEditMode.Y += 0.1f;
-
-				var cubes = scene.cubes;
-
-				//Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.X, 1));
-				//Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.Y, 1));
-			}
+			    
+            }
 
 			mouseX = e.X;
 			mouseY = e.Y;

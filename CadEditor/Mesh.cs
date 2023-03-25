@@ -1,10 +1,12 @@
 ﻿using SharpGL;
+using SharpGL.SceneGraph;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace CadEditor
@@ -37,9 +39,10 @@ namespace CadEditor
 
 	public class Vertex: ISelectable
 	{
-		public float X { get; set; }
-		public float Y { get; set; }
-		public float Z { get; set; }
+		private OpenGL gl;
+		public double X { get; set; }
+		public double Y { get; set; }
+		public double Z { get; set; }
 
 		public List<Edge> EdgeParents { get; set; }
 		public List<Facet> FacetParents { get; set; }
@@ -64,11 +67,12 @@ namespace CadEditor
 			IsSelected = false;
 		}
 
-		public Vertex(float _x, float _y, float _z)
+		public Vertex(OpenGL _gl, double _x, double _y, double _z)
 		{
 			X = _x;
 			Y = _y;
 			Z = _z;
+			gl = _gl;
 			IsSelected = false;
 			EdgeParents = new List<Edge>();
 			FacetParents = new List<Facet>();
@@ -123,19 +127,42 @@ namespace CadEditor
 		{
 			return String.Format("({0}, {1}, {2})", X, Y, Z);
 		}
+
+		public void Draw(double[] color = null)
+		{
+			if (color != null && color.Length == 3)
+			{
+				gl.Color(color[0], color[1], color[2]);
+			}
+			else
+			{
+				if (IsSelected)
+				{
+					gl.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+				}
+				else
+				{
+					gl.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+				}
+			}
+
+			gl.Vertex(X, Y, Z);
+		}
 	}
 
 	public class Facet: ISelectable
 	{
+		private OpenGL gl;
 		public Vertex[] Vertices { get; set; }
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Brown;
 		public Color NonSelectedColor { get; set; } = Color.Yellow;
 
-		public Facet(Vertex[] _vertices)
+		public Facet(OpenGL _gl, Vertex[] _vertices)
 		{
 			Vertices = _vertices;
 			IsSelected = false;
+			gl = _gl;
 		}
 
 		public bool Contains(Vertex point)
@@ -207,23 +234,52 @@ namespace CadEditor
 				}
 			}
 		}
+
+		public void Draw(double[] color = null)
+		{
+			if (color != null && color.Length == 3)
+			{
+				gl.Color(color[0], color[1], color[2]);
+			}
+			else
+			{
+				if (IsSelected)
+				{
+					gl.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+				}
+				else
+				{
+					gl.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+				}
+			}
+
+
+			foreach (Vertex v in Vertices)
+			{
+				gl.Vertex(v.X, v.Y, v.Z);
+			}
+		}
 	}
 
 	public class Edge: IEquatable<Edge>, ISelectable
 	{
+		private OpenGL gl;
+
 		public Vertex V1 { get; set; }
 		public Vertex V2 { get; set; }
 
 		public List<Facet> FacetParents { get; set; }
 
+		public float LineWidth { get; set; } = 3.0f;
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-		public Edge(Vertex _v1, Vertex _v2)
+		public Edge(OpenGL _gl, Vertex _v1, Vertex _v2)
 		{
 			V1 = _v1;
 			V2 = _v2;
+			gl = _gl;
 			FacetParents = new List<Facet>();
 		}
 
@@ -290,6 +346,30 @@ namespace CadEditor
 			}
 		}
 
+		public void Draw(double[] color = null, float lineWidth = 3.0f)
+		{
+			if(color != null && color.Length == 3)
+			{
+				gl.Color(color[0], color[1], color[2]);
+			}
+			else
+			{
+				if (IsSelected)
+				{
+					gl.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+				}
+				else
+				{
+					gl.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+				}
+			}
+
+			LineWidth = (float)lineWidth;
+
+			gl.LineWidth((float)LineWidth);
+			gl.Vertex(V1.X, V1.Y, V1.Z);
+			gl.Vertex(V2.X, V2.Y, V2.Z);
+		}
 	}
 
 	public interface ISelectable

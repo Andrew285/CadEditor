@@ -39,55 +39,55 @@ namespace CadEditor
 			//Initializing Vertices
 			mesh.Vertices = new Vertex[]
 			{
-				new Vertex(-1.0f, -1.0f, -1.0f),
-				new Vertex(-1.0f, -1.0f, 1.0f),
-				new Vertex(-1.0f, 1.0f, -1.0f),
-				new Vertex(-1.0f, 1.0f, 1.0f),
-				new Vertex(1.0f, -1.0f, -1.0f),
-				new Vertex(1.0f, -1.0f, 1.0f),
-				new Vertex(1.0f, 1.0f, -1.0f),
-				new Vertex(1.0f, 1.0f, 1.0f)
+				new Vertex(gl, -1.0f, -1.0f, -1.0f),
+				new Vertex(gl, -1.0f, -1.0f, 1.0f),
+				new Vertex(gl, -1.0f, 1.0f, -1.0f),
+				new Vertex(gl, -1.0f, 1.0f, 1.0f),
+				new Vertex(gl, 1.0f, -1.0f, -1.0f),
+				new Vertex(gl, 1.0f, -1.0f, 1.0f),
+				new Vertex(gl, 1.0f, 1.0f, -1.0f),
+				new Vertex(gl, 1.0f, 1.0f, 1.0f)
 			};
 
 			//Initializing Facets
 			mesh.Facets = new Facet[FACETS_AMOUNT]
 			{
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[1],
 					mesh.Vertices[5],
 					mesh.Vertices[7],
 					mesh.Vertices[3]
 				}),
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[2],
 					mesh.Vertices[6],
 					mesh.Vertices[4]
 				}),
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[2],
 					mesh.Vertices[3],
 					mesh.Vertices[7],
 					mesh.Vertices[6]
 				}),
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[4],
 					mesh.Vertices[5],
 					mesh.Vertices[1]
 				}),
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[4],
 					mesh.Vertices[6],
 					mesh.Vertices[7],
 					mesh.Vertices[5]
 				}),
-				new Facet(new Vertex[]
+				new Facet(gl, new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[1],
@@ -114,7 +114,7 @@ namespace CadEditor
 				Facet currentFacet = mesh.Facets[i];
 				for(int j = 0; j < 4; j++)
 				{
-					Edge newEdge = new Edge(currentFacet.Vertices[j], currentFacet.Vertices[(j+1)%4]);
+					Edge newEdge = new Edge(gl, currentFacet.Vertices[j], currentFacet.Vertices[(j+1)%4]);
 					if(edges.Count != 0)
 					{
 						if (!newEdge.Exists(edges))
@@ -143,24 +143,13 @@ namespace CadEditor
 
 		public void Draw()
 		{
-			//Draw Facets
-			gl.Begin(OpenGL.GL_QUADS);
-			for (int i = 0; i < mesh.Facets.Length; i++)
-			{
-				Facet currectFacet = mesh.Facets[i];
-				if (currectFacet.IsSelected)
-				{
-					gl.Color(currectFacet.SelectedColor);
-				}
-				else
-				{
-					gl.Color(currectFacet.NonSelectedColor);
-				}
 
-				gl.Vertex(currectFacet.Vertices[0].X, currectFacet.Vertices[0].Y, currectFacet.Vertices[0].Z);
-				gl.Vertex(currectFacet.Vertices[1].X, currectFacet.Vertices[1].Y, currectFacet.Vertices[1].Z);
-				gl.Vertex(currectFacet.Vertices[2].X, currectFacet.Vertices[2].Y, currectFacet.Vertices[2].Z);
-				gl.Vertex(currectFacet.Vertices[3].X, currectFacet.Vertices[3].Y, currectFacet.Vertices[3].Z);
+			//Draw Vertexes
+			gl.PointSize(10.0f);
+			gl.Begin(OpenGL.GL_POINTS);
+			for (int i = 0; i < mesh.Vertices.Length; i++)
+			{
+				mesh.Vertices[i].Draw();
 			}
 			gl.End();
 			gl.Flush();
@@ -169,38 +158,23 @@ namespace CadEditor
 			gl.Begin(OpenGL.GL_LINES);
 			for (int i = 0; i < mesh.Edges.Length; i++)
 			{
-				Edge currectEdge = mesh.Edges[i];
-				if (currectEdge.IsSelected)
-				{
-					gl.Color(currectEdge.SelectedColor);
-				}
-				else
-				{
-					gl.Color(currectEdge.NonSelectedColor);
-				}
-
-				gl.Vertex(currectEdge.V1.X, currectEdge.V1.Y, currectEdge.V1.Z);
-				gl.Vertex(currectEdge.V2.X, currectEdge.V2.Y, currectEdge.V2.Z);
+				mesh.Edges[i].Draw();
 			}
 			gl.End();
 			gl.Flush();
 
-			//Draw Vertexes
-			gl.PointSize(10.0f);
-			gl.Begin(OpenGL.GL_POINTS);
-			for (int i = 0; i < mesh.Vertices.Length; i++)
-			{
-				Vertex currectVertex = mesh.Vertices[i];
-				if (currectVertex.IsSelected)
-				{
-					gl.Color(currectVertex.SelectedColor);
-				}
-				else
-				{
-					gl.Color(currectVertex.NonSelectedColor);
-				}
+			
 
-				gl.Vertex(currectVertex.X, currectVertex.Y, currectVertex.Z);
+
+			//Draw Facets
+			gl.Begin(OpenGL.GL_QUADS);
+			for (int i = 0; i < mesh.Facets.Length; i++)
+			{
+				mesh.Facets[i].Draw();
+				//gl.Vertex(currectFacet.Vertices[0].X, currectFacet.Vertices[0].Y, currectFacet.Vertices[0].Z);
+				//gl.Vertex(currectFacet.Vertices[1].X, currectFacet.Vertices[1].Y, currectFacet.Vertices[1].Z);
+				//gl.Vertex(currectFacet.Vertices[2].X, currectFacet.Vertices[2].Y, currectFacet.Vertices[2].Z);
+				//gl.Vertex(currectFacet.Vertices[3].X, currectFacet.Vertices[3].Y, currectFacet.Vertices[3].Z);
 			}
 			gl.End();
 			gl.Flush();

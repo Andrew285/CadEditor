@@ -21,7 +21,7 @@ namespace CadEditor
         public double utri { get; set; }
 
 
-		private Vertex position = new Vertex(-1f, -1f, 0.5f);
+		private Vertex position;
 		private Matrix projectionMatrix = new Matrix(4, 4);
 		private double aspectRatio = 1.0f;
 		private double fieldOfView = 60.0f;
@@ -62,7 +62,8 @@ namespace CadEditor
         {
             gl = _gl;
             rotationPoint = _rotationPoint;
-            cameraPosition = new Vector(new double[] {0, 0, 5});
+			position = new Vertex(gl, -1f, -1f, 0.5f);
+			cameraPosition = new Vector(new double[] {0, 0, 5});
         }
 
         public void RotateAxisX()
