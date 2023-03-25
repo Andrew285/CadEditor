@@ -35,11 +35,15 @@ namespace CadEditor
 	}
 
 
-	public class Vertex
+	public class Vertex: ISelectable
 	{
 		public float X { get; set; }
 		public float Y { get; set; }
 		public float Z { get; set; }
+
+		public List<Edge> EdgeParents { get; set; }
+		public List<Facet> FacetParents { get; set; }
+
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Pink;
 		public Color NonSelectedColor { get; set; } = Color.Green;
@@ -66,6 +70,8 @@ namespace CadEditor
 			Y = _y;
 			Z = _z;
 			IsSelected = false;
+			EdgeParents = new List<Edge>();
+			FacetParents = new List<Facet>();
 		}
 
 		public static bool operator ==(Vertex a, Vertex b)
@@ -119,7 +125,7 @@ namespace CadEditor
 		}
 	}
 
-	public class Facet
+	public class Facet: ISelectable
 	{
 		public Vertex[] Vertices { get; set; }
 		public bool IsSelected { get; set; }
@@ -203,10 +209,13 @@ namespace CadEditor
 		}
 	}
 
-	public class Edge: IEquatable<Edge>
+	public class Edge: IEquatable<Edge>, ISelectable
 	{
 		public Vertex V1 { get; set; }
 		public Vertex V2 { get; set; }
+
+		public List<Facet> FacetParents { get; set; }
+
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
@@ -215,6 +224,7 @@ namespace CadEditor
 		{
 			V1 = _v1;
 			V2 = _v2;
+			FacetParents = new List<Facet>();
 		}
 
 		public static bool operator ==(Edge a, Edge b)
@@ -280,6 +290,12 @@ namespace CadEditor
 			}
 		}
 
+	}
 
+	public interface ISelectable
+	{
+		bool IsSelected { get; set; }
+		Color SelectedColor { get; set; }
+		Color NonSelectedColor { get; set; }
 	}
 }

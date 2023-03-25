@@ -27,13 +27,20 @@ namespace CadEditor
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
+        private ISelectable SelectedFacetViewMode;
+        private Vertex SelectedVertexEditMode;
 		private float sensitivity = 0.5f;
 
 		public Form1()
         {
             InitializeComponent();
 			KeyPreview = true;
-            openGLControl1.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
+
+            mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
+            mode_comboBox.SelectedItem = mode_comboBox.Items[0];
+
+
+			openGLControl1.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
 		}
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
@@ -107,7 +114,17 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-				scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
+				ISelectable selectedObject =  scene.SelectElement(e.X, openGLControl1.Height - e.Y, gl);
+
+                //if (selectedObject is Facet && scene.SceneMode == SceneMode.VIEW)
+                //{
+                //    SelectedFacetViewMode = selectedObject;
+                //}
+
+                if(selectedObject is Vertex && scene.SceneMode == SceneMode.EDIT)
+                {
+                    SelectedVertexEditMode = (Vertex)selectedObject;
+                }
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -133,22 +150,51 @@ namespace CadEditor
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
         {
+			double horizontalAngle = (e.X - mouseX) * sensitivity;
+			double verticalAngle = (e.Y - mouseY) * sensitivity;
+
 
 			if (isMiddleButtonPressed)
             {
-				double horizontalAngle = (e.X - mouseX) * sensitivity;
-				double verticalAngle = (e.Y - mouseY) * sensitivity;
-
 				scene.Camera.UpdateAxisY(horizontalAngle);
                 scene.Camera.UpdateAxisX(verticalAngle);
-                mouseX = e.X;
-                mouseY = e.Y;
+
 			}
+            else if(SelectedVertexEditMode != null)
+            {
+                SelectedVertexEditMode.X += (float)(horizontalAngle * 0.01);
+                SelectedVertexEditMode.Y -= (float)(verticalAngle * 0.01);
+                Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.X, (float)horizontalAngle));
+                Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.Y, (float)verticalAngle));
+				//SelectedVertexEditMode.X += 0.1f;
+				//SelectedVertexEditMode.Y += 0.1f;
+
+				var cubes = scene.cubes;
+
+				//Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.X, 1));
+				//Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.Y, 1));
+			}
+
+			mouseX = e.X;
+			mouseY = e.Y;
+
+			//else if (SelectedFacetViewMode != null && scene.SceneMode == SceneMode.VIEW)
+			//{
+			//    Facet facet = (Facet)SelectedFacetViewMode;
+			//    Vector facetNormal = facet.CalculateNormal();
+
+			//    if (Math.Abs(facetNormal[0]) == 1)
+			//    {
+
+			//    }
+			//}
 		}
 
         private void openGLControl1_MouseUp(object sender, MouseEventArgs e)
         {
             isMiddleButtonPressed = false;
+            SelectedVertexEditMode = null;
+            //SelectedFacetViewMode = null;
         }
 
 		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
@@ -182,6 +228,18 @@ namespace CadEditor
 		private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
             scene.AddCube();
+		}
+
+		private void mode_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+		{
+            if(mode_comboBox.SelectedIndex == 0)
+            {
+                scene.SceneMode = SceneMode.VIEW;
+            }
+            else if (mode_comboBox.SelectedIndex == 1)
+            {
+                scene.SceneMode = SceneMode.EDIT;
+            }
 		}
 	}
 }

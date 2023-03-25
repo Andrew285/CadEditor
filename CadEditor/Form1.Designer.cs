@@ -49,6 +49,7 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.colorDialog1 = new System.Windows.Forms.ColorDialog();
 			this.button1 = new System.Windows.Forms.Button();
+			this.mode_comboBox = new System.Windows.Forms.ComboBox();
 			((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
 			this.contextMenuStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
@@ -57,12 +58,12 @@
 			// openGLControl1
 			// 
 			this.openGLControl1.DrawFPS = true;
-			this.openGLControl1.Location = new System.Drawing.Point(18, 49);
+			this.openGLControl1.Location = new System.Drawing.Point(18, 73);
 			this.openGLControl1.Name = "openGLControl1";
 			this.openGLControl1.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
 			this.openGLControl1.RenderContextType = SharpGL.RenderContextType.DIBSection;
 			this.openGLControl1.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
-			this.openGLControl1.Size = new System.Drawing.Size(1015, 827);
+			this.openGLControl1.Size = new System.Drawing.Size(1015, 803);
 			this.openGLControl1.TabIndex = 0;
 			this.openGLControl1.OpenGLInitialized += new System.EventHandler(this.openGLControl1_OpenGLInitialized_1);
 			this.openGLControl1.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl1_OpenGLDraw_1);
@@ -166,13 +167,13 @@
 			this.addToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cubeToolStripMenuItem});
 			this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-			this.addToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.addToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.addToolStripMenuItem.Text = "Add";
 			// 
 			// cubeToolStripMenuItem
 			// 
 			this.cubeToolStripMenuItem.Name = "cubeToolStripMenuItem";
-			this.cubeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.cubeToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
 			this.cubeToolStripMenuItem.Text = "Cube";
 			this.cubeToolStripMenuItem.Click += new System.EventHandler(this.cubeToolStripMenuItem_Click);
 			// 
@@ -191,9 +192,9 @@
 			// groupBox1
 			// 
 			this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.groupBox1.Location = new System.Drawing.Point(12, 27);
+			this.groupBox1.Location = new System.Drawing.Point(12, 54);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(1029, 861);
+			this.groupBox1.Size = new System.Drawing.Size(1029, 834);
 			this.groupBox1.TabIndex = 5;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Scene";
@@ -207,11 +208,22 @@
 			this.button1.Text = "button1";
 			this.button1.UseVisualStyleBackColor = true;
 			// 
+			// mode_comboBox
+			// 
+			this.mode_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.mode_comboBox.FormattingEnabled = true;
+			this.mode_comboBox.Location = new System.Drawing.Point(12, 27);
+			this.mode_comboBox.Name = "mode_comboBox";
+			this.mode_comboBox.Size = new System.Drawing.Size(121, 21);
+			this.mode_comboBox.TabIndex = 7;
+			this.mode_comboBox.SelectedIndexChanged += new System.EventHandler(this.mode_comboBox_SelectedIndexChanged);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1284, 900);
+			this.Controls.Add(this.mode_comboBox);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.propertyGrid1);
 			this.Controls.Add(this.treeView1);
@@ -254,6 +266,7 @@
 		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem selectObjectToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+		private System.Windows.Forms.ComboBox mode_comboBox;
 	}
 }
 

@@ -23,9 +23,12 @@ namespace CadEditor
         private Camera camera;
         private SceneCollection sceneCollection;
         private OpenGL gl;
-        private List<CustomCube> cubes;
+        public List<CustomCube> cubes;
         public Ray ray;
 		public Ray selectingRay;
+		public bool Selected { get; set; }
+		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
+
 
 		public Scene(OpenGL _gl, Camera _camera, SceneCollection _sceneCollection)
         {
@@ -120,7 +123,7 @@ namespace CadEditor
 
 		#region --- Object Selection ---
 
-		public void SelectElement(int x, int y, OpenGL gl)
+		public ISelectable SelectElement(int x, int y, OpenGL gl)
 		{
 			// Convert the mouse coordinates to world coordinates
 			Vector near = new Vector(gl.UnProject(x, y, 0));
@@ -131,38 +134,61 @@ namespace CadEditor
 			selectingRay = new Ray(gl);
 			selectingRay.Origin = near;
 
+			ISelectable selectedObject = null;
+
 			// Iterate over each object in the scene
 			foreach (CustomCube cube in cubes)
 			{
+
 				//deselect all facets, edges and vertices before another selecting
 				cube.DeselectAll();
+
 
 				//check if any vertex is selected
 				Vertex selectedVertex = CheckSelectedVertex(cube, ray);
 				if (selectedVertex != null)
 				{
-					selectedVertex.IsSelected = true;
-					return;
+					selectedObject = selectedVertex;
+				}
+				else
+				{
+					//check if any edge is selected
+					Edge selectedEdge = CheckSelectedEdge(cube, ray);
+					if (selectedEdge != null)
+					{
+						selectedObject = selectedEdge;
+					}
+					else
+					{
+						//check if any facet is selected
+						Facet selectedFacet = CheckSelectedFacet(cube, ray);
+						if (selectedFacet != null)
+						{
+							selectedObject = selectedFacet;
+						}
+					}
 				}
 
-				//check if any edge is selected
-				Edge selectedEdge = CheckSelectedEdge(cube, ray);
-				if (selectedEdge != null)
+
+				//check if any object is selected
+				if(selectedObject != null)
 				{
-					selectedEdge.IsSelected = true;
-					return;
+					if(SceneMode == SceneMode.VIEW)
+					{
+						foreach(Edge edge in cube.Mesh.Edges)
+						{
+							edge.IsSelected = true;
+						}
+					}
+					else if(SceneMode == SceneMode.EDIT)
+					{
+						selectedObject.IsSelected = true;
+					}
 				}
 
-				//check if any facet is selected
-				Facet selectedFacet = CheckSelectedFacet(cube, ray);
-				if (selectedFacet != null)
-				{
-					selectedFacet.IsSelected = true;
-					//selectedFacet.SelectedColor = Color.Pink;
-					return;
-				}
-				
 			}
+
+			return selectedObject;
 		}
 
 		public Facet CheckSelectedFacet(CustomCube cube, Ray ray)
@@ -300,4 +326,6 @@ namespace CadEditor
 			sceneCollection.Add(cube);
 		}
 	}
+
+	public enum SceneMode { VIEW, EDIT};
 }

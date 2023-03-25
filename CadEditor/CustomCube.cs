@@ -36,52 +36,76 @@ namespace CadEditor
 			mesh = new Mesh();
 			cubeName = _cubeName;
 
+			//Initializing Vertices
+			mesh.Vertices = new Vertex[]
+			{
+				new Vertex(-1.0f, -1.0f, -1.0f),
+				new Vertex(-1.0f, -1.0f, 1.0f),
+				new Vertex(-1.0f, 1.0f, -1.0f),
+				new Vertex(-1.0f, 1.0f, 1.0f),
+				new Vertex(1.0f, -1.0f, -1.0f),
+				new Vertex(1.0f, -1.0f, 1.0f),
+				new Vertex(1.0f, 1.0f, -1.0f),
+				new Vertex(1.0f, 1.0f, 1.0f)
+			};
+
 			//Initializing Facets
 			mesh.Facets = new Facet[FACETS_AMOUNT]
 			{
 				new Facet(new Vertex[]
 				{
-					new Vertex(-1.0f, -1.0f, 1.0f),
-					new Vertex(1.0f, -1.0f, 1.0f),
-					new Vertex(1.0f, 1.0f, 1.0f),
-					new Vertex(-1.0f, 1.0f, 1.0f)
+					mesh.Vertices[1],
+					mesh.Vertices[5],
+					mesh.Vertices[7],
+					mesh.Vertices[3]
 				}),
 				new Facet(new Vertex[]
 				{
-					new Vertex(-1.0f, -1.0f, -1.0f),
-					new Vertex(-1.0f, 1.0f, -1.0f),
-					new Vertex(1.0f, 1.0f, -1.0f),
-					new Vertex(1.0f, -1.0f, -1.0f)
+					mesh.Vertices[0],
+					mesh.Vertices[2],
+					mesh.Vertices[6],
+					mesh.Vertices[4]
 				}),
 				new Facet(new Vertex[]
 				{
-					new Vertex(-1.0f, 1.0f, -1.0f),
-					new Vertex(-1.0f, 1.0f, 1.0f),
-					new Vertex(1.0f, 1.0f, 1.0f),
-					new Vertex(1.0f, 1.0f, -1.0f)
+					mesh.Vertices[2],
+					mesh.Vertices[3],
+					mesh.Vertices[7],
+					mesh.Vertices[6]
 				}),
 				new Facet(new Vertex[]
 				{
-					new Vertex(-1.0f, -1.0f, -1.0f),
-					new Vertex(1.0f, -1.0f, -1.0f),
-					new Vertex(1.0f, -1.0f, 1.0f),
-					new Vertex(-1.0f, -1.0f, 1.0f)
+					mesh.Vertices[0],
+					mesh.Vertices[4],
+					mesh.Vertices[5],
+					mesh.Vertices[1]
 				}),
 				new Facet(new Vertex[]
 				{
-					new Vertex(1.0f, -1.0f, -1.0f),
-					new Vertex(1.0f, 1.0f, -1.0f),
-					new Vertex(1.0f, 1.0f, 1.0f),
-					new Vertex(1.0f, -1.0f, 1.0f)
+					mesh.Vertices[4],
+					mesh.Vertices[6],
+					mesh.Vertices[7],
+					mesh.Vertices[5]
 				}),
 				new Facet(new Vertex[]
 				{
-					new Vertex(-1.0f, -1.0f, -1.0f),
-					new Vertex(-1.0f, -1.0f, 1.0f),
-					new Vertex(-1.0f, 1.0f, 1.0f),
-					new Vertex(-1.0f, 1.0f, -1.0f)
+					mesh.Vertices[0],
+					mesh.Vertices[1],
+					mesh.Vertices[3],
+					mesh.Vertices[2]
 				})
 			};
+
+			//Defining facet - vertex relationships
+			mesh.Vertices[0].FacetParents = new List<Facet>(){ mesh.Facets[1], mesh.Facets[3], mesh.Facets[5]};
+			mesh.Vertices[1].FacetParents = new List<Facet>(){ mesh.Facets[0], mesh.Facets[3], mesh.Facets[5]};
+			mesh.Vertices[2].FacetParents = new List<Facet>(){ mesh.Facets[1], mesh.Facets[2], mesh.Facets[5]};
+			mesh.Vertices[3].FacetParents = new List<Facet>(){ mesh.Facets[0], mesh.Facets[2], mesh.Facets[5]};
+			mesh.Vertices[4].FacetParents = new List<Facet>(){ mesh.Facets[1], mesh.Facets[3], mesh.Facets[4]};
+			mesh.Vertices[5].FacetParents = new List<Facet>(){ mesh.Facets[0], mesh.Facets[3], mesh.Facets[4]};
+			mesh.Vertices[6].FacetParents = new List<Facet>(){ mesh.Facets[1], mesh.Facets[2], mesh.Facets[4]};
+			mesh.Vertices[7].FacetParents = new List<Facet>(){ mesh.Facets[0], mesh.Facets[2], mesh.Facets[4]};
+
 
 			//Initializing Edges
 			List<Edge> edges = new List<Edge>();
@@ -96,29 +120,25 @@ namespace CadEditor
 						if (!newEdge.Exists(edges))
 						{
 							edges.Add(newEdge);
+
+							//Defining Edge - Vertex relationship
+							mesh.Vertices[j].EdgeParents.Add(newEdge);
+							mesh.Vertices[(j + 1) % 4].EdgeParents.Add(newEdge);
 						}
 					}
 					else
 					{
 						edges.Add(newEdge);
+
+						//Defining Edge - Vertex relationship
+						mesh.Vertices[j].EdgeParents.Add(newEdge);
+						mesh.Vertices[(j + 1) % 4].EdgeParents.Add(newEdge);
 					}
 				}
 			}
 			mesh.Edges = edges.ToArray();
 
 
-			//Initializing Vertices
-			mesh.Vertices = new Vertex[]
-			{
-				new Vertex(-1.0f, -1.0f, -1.0f),
-				new Vertex(-1.0f, -1.0f, 1.0f),
-				new Vertex(-1.0f, 1.0f, -1.0f),
-				new Vertex(1.0f, -1.0f, -1.0f),
-				new Vertex(-1.0f, 1.0f, 1.0f),
-				new Vertex(1.0f, -1.0f, 1.0f),
-				new Vertex(1.0f, 1.0f, -1.0f),
-				new Vertex(1.0f, 1.0f, 1.0f)
-			};
 		}
 
 		public void Draw()
