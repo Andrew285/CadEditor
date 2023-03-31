@@ -277,6 +277,14 @@ namespace CadEditor
 				gl.Vertex(v.X, v.Y, v.Z);
 			}
 		}
+
+		public void Move(double x, double y, double z)
+		{
+			foreach(Vertex v in Vertices)
+			{
+				v.Move(x, y, z);
+			}
+		}
 	}
 
 	public class Edge: IEquatable<Edge>, ISelectable
@@ -399,6 +407,15 @@ namespace CadEditor
 			V1.Move(x, y, z);
 			V2.Move(x, y, z);
 		}
+
+		public Vertex GetCenterPoint()
+		{
+			double x = (V1.X + V2.X) / 2;
+			double y = (V1.Y + V2.Y) / 2;
+			double z = (V1.Z + V2.Z) / 2;
+
+			return new Vertex(gl, x, y, z); 
+		}
 	}
 
 	public class Axis: Edge
@@ -416,6 +433,8 @@ namespace CadEditor
 		bool IsSelected { get; set; }
 		Color SelectedColor { get; set; }
 		Color NonSelectedColor { get; set; }
+
+		void Move(double x, double y, double z);
 	}
 
 }

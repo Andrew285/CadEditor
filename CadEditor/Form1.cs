@@ -27,8 +27,8 @@ namespace CadEditor
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
-        private Vertex SelectedVertexEditMode;
         private AxisCube SelectedAxisCubeEditMode;
+        private ISelectable SelectedCubeElement;
 		private float sensitivity = 0.5f;
 
 		public Form1()
@@ -43,7 +43,9 @@ namespace CadEditor
 			openGLControl1.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
 		}
 
-        private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
+		#region ---- OpenGLControl Events ----
+
+		private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
             gl = openGLControl1.OpenGL;
 
@@ -74,7 +76,11 @@ namespace CadEditor
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+		#endregion
+
+		#region ---- Key Events ----
+
+		private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.A)
             {
@@ -99,18 +105,9 @@ namespace CadEditor
 
 		private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
-			if (e.KeyCode == Keys.Tab)
-			{
-				if (mode_comboBox.SelectedIndex == 0)
-				{
-					scene.SceneMode = SceneMode.VIEW;
-				}
-				else if (mode_comboBox.SelectedIndex == 1)
-				{
-					scene.SceneMode = SceneMode.EDIT;
-				}
-			}
+
 		}
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool baseResult = base.ProcessCmdKey(ref msg, keyData);
@@ -138,7 +135,11 @@ namespace CadEditor
             return baseResult;
         }
 
-			private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
+		#endregion
+
+		#region ---- Mouse Events ----
+
+		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -148,20 +149,23 @@ namespace CadEditor
 				selectedObject = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
                 //check type of selected object
-				if (selectedObject is Vertex && scene.SceneMode == SceneMode.EDIT)
-				{
-					SelectedVertexEditMode = (Vertex)selectedObject;
-                    SelectedAxisCubeEditMode = null;
-                    scene.InitSelectingCoordAxes(SelectedVertexEditMode, 2.8f, 1.0);
-				}
-                else if(selectedObject is AxisCube)
+                if(selectedObject != null)
                 {
-					SelectedAxisCubeEditMode = (AxisCube)selectedObject;
+                    if(selectedObject is AxisCube)
+                    {
+						SelectedAxisCubeEditMode = (AxisCube)selectedObject;
+					}
+                    else if(!(selectedObject is AxisCube))
+                    {
+						SelectedCubeElement = selectedObject;
+						SelectedAxisCubeEditMode = null;
+						scene.InitSelectingCoordAxes(SelectedCubeElement, 2.8f, 1.0);
+					}
+                    else
+                    {
+						scene.DeleteSelectingCoordAxes();
+					}
 				}
-                else
-                {
-                    scene.DeleteSelectingCoordAxes();
-                }
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -207,19 +211,20 @@ namespace CadEditor
 				if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
                     value = horizontalAngle * sensitivityLevel;
-					SelectedVertexEditMode.X += value;
+					//SelectedVertexEditMode.X += value;
+                    SelectedCubeElement.Move(value, 0, 0);
                     scene.MoveCoordinateAxes(value, 0, 0);
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
 					value = verticalAngle * sensitivityLevel;
-					SelectedVertexEditMode.Y -= value;
+					SelectedCubeElement.Move(0, -value, 0);
 					scene.MoveCoordinateAxes(0, -value, 0);
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
 					value = horizontalAngle * sensitivityLevel;
-					SelectedVertexEditMode.Z -= value;
+					SelectedCubeElement.Move(0, 0, -value);
 					scene.MoveCoordinateAxes(0, 0, -value);
 				}
 			}
@@ -253,6 +258,10 @@ namespace CadEditor
 			openGLControl1.Invalidate();
 		}
 
+		#endregion
+
+		#region ---- RightClick ----
+
 		private void Select_Object_click(object sender, EventArgs e)
 		{
             selectedCube.SelectAll();
@@ -267,6 +276,8 @@ namespace CadEditor
 		{
 		    scene.DeleteCompletely(selectedCube);
 		}
+
+		#endregion
 
 		private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{

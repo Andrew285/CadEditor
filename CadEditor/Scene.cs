@@ -61,8 +61,22 @@ namespace CadEditor
 			sceneCollection.Add(cube);
 		}
 
-		public void InitSelectingCoordAxes(Vertex v, float lineWidth, double axisLength)
+		public void InitSelectingCoordAxes(ISelectable obj, float lineWidth, double axisLength)
 		{
+			Vertex v = null;
+			if (obj is Vertex)
+			{
+				v = (Vertex)obj;
+			}
+			else if (obj is Edge)
+			{
+				v = ((Edge)obj).GetCenterPoint();
+			}
+			else if (obj is Facet)
+			{
+				v = ((Facet)obj).GetCenterPoint();
+			}
+
 			//Create Axes
 			double axisXLength = axisLength * v.X / Math.Abs(v.X);
 			double axisYLength = axisLength * v.Y / Math.Abs(v.Y);
