@@ -94,9 +94,51 @@ namespace CadEditor
             {
                 scene.Camera.UpdateAxisX(3.0f);
             }
+            
         }
 
-		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
+		private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			if (e.KeyCode == Keys.Tab)
+			{
+				if (mode_comboBox.SelectedIndex == 0)
+				{
+					scene.SceneMode = SceneMode.VIEW;
+				}
+				else if (mode_comboBox.SelectedIndex == 1)
+				{
+					scene.SceneMode = SceneMode.EDIT;
+				}
+			}
+		}
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            bool baseResult = base.ProcessCmdKey(ref msg, keyData);
+
+            if (keyData == Keys.Tab)
+            {
+				if (mode_comboBox.SelectedIndex == 1)
+				{
+					scene.SceneMode = SceneMode.VIEW;
+                    mode_comboBox.SelectedItem = mode_comboBox.Items[0];
+				}
+				else if (mode_comboBox.SelectedIndex == 0)
+				{
+					scene.SceneMode = SceneMode.EDIT;
+					mode_comboBox.SelectedItem = mode_comboBox.Items[1];
+				}
+				return true;
+            }
+
+    //        if (keyData == (Keys.Tab | Keys.Shift))
+    //        {
+				//return true;
+    //        }
+
+            return baseResult;
+        }
+
+			private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -157,20 +199,26 @@ namespace CadEditor
             //move selected objects towards the selected axis
             if(SelectedAxisCubeEditMode != null)
             {
-                double value = horizontalAngle * 0.01;
+                //double value1 = Math.Pow(horizontalAngle, 2) + Math.Pow(verticalAngle, 2);
+                //double value = Math.Sqrt(value1);
+                double value;
+                double sensitivityLevel = 0.01;
 
 				if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
-                    SelectedVertexEditMode.X += value;
+                    value = horizontalAngle * sensitivityLevel;
+					SelectedVertexEditMode.X += value;
                     scene.MoveCoordinateAxes(value, 0, 0);
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
-					SelectedVertexEditMode.Y += value;
-					scene.MoveCoordinateAxes(0, value, 0);
+					value = verticalAngle * sensitivityLevel;
+					SelectedVertexEditMode.Y -= value;
+					scene.MoveCoordinateAxes(0, -value, 0);
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
+					value = horizontalAngle * sensitivityLevel;
 					SelectedVertexEditMode.Z -= value;
 					scene.MoveCoordinateAxes(0, 0, -value);
 				}
@@ -236,5 +284,7 @@ namespace CadEditor
                 scene.SceneMode = SceneMode.EDIT;
             }
 		}
+
+
 	}
 }

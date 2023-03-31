@@ -82,6 +82,10 @@ namespace CadEditor
 			AxisCube cubeY = new AxisCube(gl, new Vertex(gl, v.X, axisYLength + v.Y, v.Z), CoordinateAxis.Y, 0.1f, "cubeAxisY");
 			AxisCube cubeZ = new AxisCube(gl, new Vertex(gl, v.X, v.Y, axisZLength + v.Z), CoordinateAxis.Z, 0.1f, "cubeAxisZ");
 
+			cubeX.NonSelectedColor = Color.Red;
+			cubeY.NonSelectedColor = Color.Green;
+			cubeZ.NonSelectedColor = Color.Blue;
+
 			//Set colors
 			selectingCoordinateCubes = new AxisCube[] { cubeX, cubeY, cubeZ };
 

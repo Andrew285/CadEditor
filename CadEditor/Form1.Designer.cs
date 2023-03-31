@@ -235,6 +235,7 @@
 			this.Name = "Form1";
 			this.Text = "Form1";
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+			this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Form1_PreviewKeyDown);
 			((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
 			this.contextMenuStrip1.ResumeLayout(false);
 			this.menuStrip1.ResumeLayout(false);

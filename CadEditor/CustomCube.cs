@@ -262,22 +262,11 @@ namespace CadEditor
 		{
 			if (IsSelected)
 			{
-				if(Axis == CoordinateAxis.X)
-				{
-					base.Draw(null, null, new double[] { 1, 0, 0 });
-				}
-				else if(Axis == CoordinateAxis.Y)
-				{
-					base.Draw(null, null, new double[] { 0, 1, 0 });
-				}
-				else if(Axis == CoordinateAxis.Z)
-				{
-					base.Draw(null, null, new double[] { 0, 0, 1 });
-				}
+				base.Draw(null, new double[] { SelectedColor.R, SelectedColor.G, SelectedColor.B }, null);
 			}
 			else
 			{
-				base.Draw();
+				base.Draw(null, null, new double[] { NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B });
 			}
 		}
 
