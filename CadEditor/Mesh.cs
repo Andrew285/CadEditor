@@ -61,9 +61,9 @@ namespace CadEditor
 
 		public Vertex(Vector v)
 		{
-			X = (float)v[0];
-			Y = (float)v[1];
-			Z = (float)v[2];
+			X = v[0];
+			Y = v[1];
+			Z = v[2];
 			IsSelected = false;
 		}
 
@@ -148,6 +148,13 @@ namespace CadEditor
 
 			gl.Vertex(X, Y, Z);
 		}
+
+		public void Move(double x, double y, double z)
+		{
+			X += x;
+			Y += y;
+			Z += z;
+		}
 	}
 
 	public class Facet: ISelectable
@@ -197,6 +204,17 @@ namespace CadEditor
 			normal = normal.Normalize();
 
 			return normal;
+		}
+
+		public Vertex GetCenterPoint()
+		{
+			Vertex fp1 = this[0];
+			Vertex fp2 = this[2];
+
+			double x = (fp1.X + fp2.X) / 2;
+			double y = (fp1.Y + fp2.Y) / 2;
+			double z = (fp1.Z + fp2.Z) / 2;
+			return new Vertex(gl, x, y, z);
 		}
 
 		public override string ToString()
@@ -269,6 +287,7 @@ namespace CadEditor
 		public Vertex V2 { get; set; }
 
 		public List<Facet> FacetParents { get; set; }
+
 
 		public float LineWidth { get; set; } = 3.0f;
 		public bool IsSelected { get; set; }
@@ -365,10 +384,30 @@ namespace CadEditor
 			}
 
 			LineWidth = (float)lineWidth;
+			if (IsSelected)
+			{
+				LineWidth += 1.0f;
+			}
 
 			gl.LineWidth((float)LineWidth);
 			gl.Vertex(V1.X, V1.Y, V1.Z);
 			gl.Vertex(V2.X, V2.Y, V2.Z);
+		}
+
+		public void Move(double x, double y, double z)
+		{
+			V1.Move(x, y, z);
+			V2.Move(x, y, z);
+		}
+	}
+
+	public class Axis: Edge
+	{
+		public CoordinateAxis CoordinateAxis { get; set; }
+
+		public Axis(OpenGL openGL, Vertex v1, Vertex v2, CoordinateAxis axis): base(openGL, v1, v2)
+		{
+			CoordinateAxis = axis;
 		}
 	}
 
@@ -378,4 +417,5 @@ namespace CadEditor
 		Color SelectedColor { get; set; }
 		Color NonSelectedColor { get; set; }
 	}
+
 }

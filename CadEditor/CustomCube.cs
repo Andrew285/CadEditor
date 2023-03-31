@@ -13,12 +13,14 @@ namespace CadEditor
 {
     public class CustomCube: SceneElement
     {
-        private OpenGL gl;
-		private Mesh mesh;
+        protected OpenGL gl;
+		protected Mesh mesh;
 		private string cubeName;
 		private const int FACETS_AMOUNT = 6;
 		private const int EDGES_AMOUNT = 12;
 		private const int VERTICES_AMOUNT = 8;
+		private float size = 1.0f;
+		private Vertex centerPoint;
 
 		public Mesh Mesh
 		{
@@ -30,23 +32,47 @@ namespace CadEditor
 			get { return cubeName; }
 		}
 
-		public CustomCube(OpenGL _gl, string _cubeName)
+		public CustomCube(OpenGL _gl, Vertex _centerPoint, float? _size = null, string _cubeName = null)
 		{
 			gl = _gl;
 			mesh = new Mesh();
 			cubeName = _cubeName;
+			centerPoint = _centerPoint;
+
+			if(_size != null)
+			{
+				size = (float)_size;
+			}
+			
+			if(_cubeName != null)
+			{
+				cubeName = _cubeName;
+			}
+
+			////Initializing Vertices
+			//mesh.Vertices = new Vertex[]
+			//{
+			//	new Vertex(gl, -1.0f, -1.0f, -1.0f),
+			//	new Vertex(gl, -1.0f, -1.0f, 1.0f),
+			//	new Vertex(gl, -1.0f, 1.0f, -1.0f),
+			//	new Vertex(gl, -1.0f, 1.0f, 1.0f),
+			//	new Vertex(gl, 1.0f, -1.0f, -1.0f),
+			//	new Vertex(gl, 1.0f, -1.0f, 1.0f),
+			//	new Vertex(gl, 1.0f, 1.0f, -1.0f),
+			//	new Vertex(gl, 1.0f, 1.0f, 1.0f)
+			//};
 
 			//Initializing Vertices
 			mesh.Vertices = new Vertex[]
 			{
-				new Vertex(gl, -1.0f, -1.0f, -1.0f),
-				new Vertex(gl, -1.0f, -1.0f, 1.0f),
-				new Vertex(gl, -1.0f, 1.0f, -1.0f),
-				new Vertex(gl, -1.0f, 1.0f, 1.0f),
-				new Vertex(gl, 1.0f, -1.0f, -1.0f),
-				new Vertex(gl, 1.0f, -1.0f, 1.0f),
-				new Vertex(gl, 1.0f, 1.0f, -1.0f),
-				new Vertex(gl, 1.0f, 1.0f, 1.0f)
+				new Vertex(gl, -size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z),
+				new Vertex(gl, -size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z),
+				new Vertex(gl, -size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z),
+				new Vertex(gl, -size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z),
+				new Vertex(gl, size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z),
+				new Vertex(gl, size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z),
+				new Vertex(gl, size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z),
+				new Vertex(gl, size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z)
 			};
 
 			//Initializing Facets
@@ -141,15 +167,14 @@ namespace CadEditor
 
 		}
 
-		public void Draw()
+		public void Draw(double[] vertexColor = null, double[] edgeColor = null, double[] facetColor = null)
 		{
-
 			//Draw Vertexes
 			gl.PointSize(10.0f);
 			gl.Begin(OpenGL.GL_POINTS);
 			for (int i = 0; i < mesh.Vertices.Length; i++)
 			{
-				mesh.Vertices[i].Draw();
+				mesh.Vertices[i].Draw(vertexColor);
 			}
 			gl.End();
 			gl.Flush();
@@ -158,23 +183,17 @@ namespace CadEditor
 			gl.Begin(OpenGL.GL_LINES);
 			for (int i = 0; i < mesh.Edges.Length; i++)
 			{
-				mesh.Edges[i].Draw();
+				mesh.Edges[i].Draw(edgeColor);
 			}
 			gl.End();
 			gl.Flush();
-
-			
 
 
 			//Draw Facets
 			gl.Begin(OpenGL.GL_QUADS);
 			for (int i = 0; i < mesh.Facets.Length; i++)
 			{
-				mesh.Facets[i].Draw();
-				//gl.Vertex(currectFacet.Vertices[0].X, currectFacet.Vertices[0].Y, currectFacet.Vertices[0].Z);
-				//gl.Vertex(currectFacet.Vertices[1].X, currectFacet.Vertices[1].Y, currectFacet.Vertices[1].Z);
-				//gl.Vertex(currectFacet.Vertices[2].X, currectFacet.Vertices[2].Y, currectFacet.Vertices[2].Z);
-				//gl.Vertex(currectFacet.Vertices[3].X, currectFacet.Vertices[3].Y, currectFacet.Vertices[3].Z);
+				mesh.Facets[i].Draw(facetColor);
 			}
 			gl.End();
 			gl.Flush();
@@ -198,7 +217,7 @@ namespace CadEditor
 			}
 		}
 
-		public void DeselectAll()
+		public virtual void DeselectAll()
 		{
 			foreach (Facet facet in Mesh.Facets)
 			{
@@ -214,6 +233,57 @@ namespace CadEditor
 			{
 				vertex.IsSelected = false;
 			}
+		}
+
+		public void Move(double x, double y, double z)
+		{
+			for (int i = 0; i < mesh.Vertices.Length; i++)
+			{
+				mesh.Vertices[i].Move(x, y, z);
+			}
+		}
+
+	}
+
+
+	public class AxisCube : CustomCube, ISelectable
+	{
+		public CoordinateAxis Axis { get; set; }
+		public bool IsSelected { get; set; }
+		public Color SelectedColor { get; set; }
+		public Color NonSelectedColor { get; set; }
+
+		public AxisCube(OpenGL _gl, Vertex _centerPoint, CoordinateAxis _axis, float? _size = null, string _cubeName = null) : base(_gl, _centerPoint, _size, _cubeName)
+		{
+			Axis = _axis;
+		}
+
+		public void Draw()
+		{
+			if (IsSelected)
+			{
+				if(Axis == CoordinateAxis.X)
+				{
+					base.Draw(null, null, new double[] { 1, 0, 0 });
+				}
+				else if(Axis == CoordinateAxis.Y)
+				{
+					base.Draw(null, null, new double[] { 0, 1, 0 });
+				}
+				else if(Axis == CoordinateAxis.Z)
+				{
+					base.Draw(null, null, new double[] { 0, 0, 1 });
+				}
+			}
+			else
+			{
+				base.Draw();
+			}
+		}
+
+		public override void DeselectAll()
+		{
+			IsSelected = false;
 		}
 	}
 }

@@ -40,6 +40,25 @@ namespace CadEditor
 			return Size;
 		}
 
+		public override string ToString()
+		{
+			StringBuilder result = new StringBuilder();
+			result.Append("(");
+			for (int i = 0; i < Size; i++)
+			{
+				result.Append(String.Format("{0}", values[i]));
+
+				if (i == Size - 1)
+				{
+					result.Append(")");
+				}
+				else
+				{
+					result.Append(", ");
+				}
+			}
+			return result.ToString();
+		}
 
 		#region --- Overriding operators ---
 		public static double operator *(Vector a, Vector b)
@@ -120,12 +139,21 @@ namespace CadEditor
 
 		public static bool operator ==(Vector a, Vector b)
 		{
+			if (object.ReferenceEquals(a, b))
+			{
+				return true;
+			}
+			if (object.ReferenceEquals(a, null) ||
+			object.ReferenceEquals(b, null))
+			{
+				return false;
+			}
 			return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
 		}
 
 		public static bool operator !=(Vector a, Vector b)
 		{
-			return a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
+			return !(a == b);
 		}
 
 		public double this[int index]
@@ -155,27 +183,6 @@ namespace CadEditor
 		}
 
 		#endregion
-
-
-		public override string ToString()
-		{
-			StringBuilder result = new StringBuilder();
-			result.Append("(");
-			for(int i = 0; i < Size; i++)
-			{
-				result.Append(String.Format("{0}", values[i]));
-
-				if (i == Size - 1)
-				{
-					result.Append(")");
-				}
-				else
-				{
-					result.Append(", ");
-				}
-			}
-			return result.ToString();
-		}
 
 		public Vector Cross(Vector v2)
 		{

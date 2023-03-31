@@ -27,8 +27,8 @@ namespace CadEditor
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
-        private ISelectable SelectedFacetViewMode;
         private Vertex SelectedVertexEditMode;
+        private AxisCube SelectedAxisCubeEditMode;
 		private float sensitivity = 0.5f;
 
 		public Form1()
@@ -64,24 +64,13 @@ namespace CadEditor
 
         private void openGLControl1_Resized_1(object sender, EventArgs e)
         {
-            //  Возьмём OpenGL объект
             OpenGL gl = openGLControl1.OpenGL;
-
-            //  Зададим матрицу проекции
             gl.MatrixMode(OpenGL.GL_PROJECTION);
-
-            //  Единичная матрица для последующих преобразований
             gl.LoadIdentity();
-
-            //  Преобразование
             gl.Perspective(60.0f, (double)Width / (double)Height, 0.01, 100.0);
-
-            ////  Данная функция позволяет установить камеру и её положение
-            gl.LookAt(2, 2, scene.Camera.CameraDistance,    // позиция самой камеры (x, y, z)
-                        0, 0, 0,     // направление, куда мы смотрим
-                        0, 1, 0);    // верх камеры
-
-            //  Зададим модель отображения
+            gl.LookAt(2, 2, scene.Camera.CameraDistance,
+                      0, 0, 0,
+                      0, 1, 0);
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
         }
 
@@ -105,8 +94,6 @@ namespace CadEditor
             {
                 scene.Camera.UpdateAxisX(3.0f);
             }
-
-            
         }
 
 		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
@@ -114,17 +101,24 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-                scene.CheckSelectedCoordinateAxes();
-				ISelectable selectedObject =  scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
-                //if (selectedObject is Facet && scene.SceneMode == SceneMode.VIEW)
-                //{
-                //    SelectedFacetViewMode = selectedObject;
-                //}
+                ISelectable selectedObject = null;
+				selectedObject = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
-                if(selectedObject is Vertex && scene.SceneMode == SceneMode.EDIT)
+                //check type of selected object
+				if (selectedObject is Vertex && scene.SceneMode == SceneMode.EDIT)
+				{
+					SelectedVertexEditMode = (Vertex)selectedObject;
+                    SelectedAxisCubeEditMode = null;
+                    scene.InitSelectingCoordAxes(SelectedVertexEditMode, 2.8f, 1.0);
+				}
+                else if(selectedObject is AxisCube)
                 {
-                    SelectedVertexEditMode = (Vertex)selectedObject;
+					SelectedAxisCubeEditMode = (AxisCube)selectedObject;
+				}
+                else
+                {
+                    scene.DeleteSelectingCoordAxes();
                 }
             }
             else if (e.Button == MouseButtons.Right)
@@ -154,43 +148,49 @@ namespace CadEditor
 			double horizontalAngle = (e.X - mouseX) * sensitivity;
 			double verticalAngle = (e.Y - mouseY) * sensitivity;
 
-
 			if (isMiddleButtonPressed)
             {
 				scene.Camera.UpdateAxisY(horizontalAngle);
                 scene.Camera.UpdateAxisX(verticalAngle);
-
 			}
-            else if(SelectedVertexEditMode != null)
+
+            //move selected objects towards the selected axis
+            if(SelectedAxisCubeEditMode != null)
             {
-                SelectedVertexEditMode.X += (float)(horizontalAngle * 0.01);
-                SelectedVertexEditMode.Y -= (float)(verticalAngle * 0.01);
-                Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.X, (float)horizontalAngle));
-                Console.WriteLine(String.Format("{0} += {1}", SelectedVertexEditMode.Y, (float)verticalAngle));
-			    
-            }
+                double value = horizontalAngle * 0.01;
+
+				if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
+                {
+                    SelectedVertexEditMode.X += value;
+                    scene.MoveCoordinateAxes(value, 0, 0);
+                }
+                else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
+                {
+					SelectedVertexEditMode.Y += value;
+					scene.MoveCoordinateAxes(0, value, 0);
+				}
+				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
+                {
+					SelectedVertexEditMode.Z -= value;
+					scene.MoveCoordinateAxes(0, 0, -value);
+				}
+			}
 
 			mouseX = e.X;
 			mouseY = e.Y;
-
-			//else if (SelectedFacetViewMode != null && scene.SceneMode == SceneMode.VIEW)
-			//{
-			//    Facet facet = (Facet)SelectedFacetViewMode;
-			//    Vector facetNormal = facet.CalculateNormal();
-
-			//    if (Math.Abs(facetNormal[0]) == 1)
-			//    {
-
-			//    }
-			//}
 		}
 
         private void openGLControl1_MouseUp(object sender, MouseEventArgs e)
         {
             isMiddleButtonPressed = false;
-            SelectedVertexEditMode = null;
-            //SelectedFacetViewMode = null;
-        }
+
+            if (SelectedAxisCubeEditMode != null)
+            {
+				SelectedAxisCubeEditMode.DeselectAll();
+                SelectedAxisCubeEditMode = null;
+			}
+			//SelectedFacetViewMode = null;
+		}
 
 		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
 		{

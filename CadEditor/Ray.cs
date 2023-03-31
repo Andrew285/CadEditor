@@ -37,6 +37,8 @@ namespace CadEditor
 		{
 
 			Vector intersectionPoint;
+			Vector intersectionPoint2;
+			Vertex facetCenterPoint = facet.GetCenterPoint();
 
 			//Calculate planeNormal
 			Vector planeNormal = facet.CalculateNormal();
@@ -51,7 +53,8 @@ namespace CadEditor
 			}
 
 			// Calculate the distance from the ray origin to the plane
-			double distance = ((planeNormal - origin) * planeNormal) / dotProduct;
+			double distance2 = ((planeNormal - origin) * planeNormal) / dotProduct;
+			double distance = ((new Vector(facetCenterPoint) - origin) * planeNormal) / dotProduct;
 			//double distance2 = (planeNormal - origin) / direction;
 
 
@@ -59,6 +62,10 @@ namespace CadEditor
 			if (distance != 0.0)
 			{
 				if (distance < nearDistance)
+				{
+					nearDistance = distance;
+				}
+				else
 				{
 					nearDistance = distance;
 				}
@@ -76,6 +83,7 @@ namespace CadEditor
 
 			// Calculate the intersection point
 			intersectionPoint = origin + distance * direction;
+			intersectionPoint2 = origin + distance2 * direction;
 			lineRay.Direction = intersectionPoint;
 
 			//Check if the intersection point is in the current facet
@@ -92,7 +100,7 @@ namespace CadEditor
 		{
 			intersectionPoint = null;
 			// Calculate the direction vector of the line
-			Vector lineDirection = new Vector(edge.V1) - new Vector(edge.V2);
+			Vector lineDirection = new Vector(edge.V2) - new Vector(edge.V1);
 
 			// Calculate the normal of the plane that contains the line and the ray
 			Vector planeNormal = lineDirection.Cross(Direction);

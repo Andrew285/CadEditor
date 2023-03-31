@@ -28,11 +28,13 @@ namespace CadEditor
         public Ray ray;
 		public Ray selectingRay;
 
+		public Vertex centerPoint;
 		public bool Selected { get; set; }
-		private ISelectable selectedObj { get; set; }
+		private ISelectable selectedAxis { get; set; }
 
 		public float selectedObjAxisLength { get; set; }
-		private Edge[] selectingCoordinateAxes;
+		private Axis[] selectingCoordinateAxes;
+		private AxisCube[] selectingCoordinateCubes;
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
@@ -50,6 +52,42 @@ namespace CadEditor
 			get { return camera; }
 		}
 
+		#region --- Initializing ---
+
+		public void InitializeObjects()
+		{
+			CustomCube cube = new CustomCube(gl, new Vertex(gl, 0, 0, 0), 1f, "Cube_1");
+			cubes.Add(cube);
+			sceneCollection.Add(cube);
+		}
+
+		public void InitSelectingCoordAxes(Vertex v, float lineWidth, double axisLength)
+		{
+			//Create Axes
+			double axisXLength = axisLength * v.X / Math.Abs(v.X);
+			double axisYLength = axisLength * v.Y / Math.Abs(v.Y);
+			double axisZLength = axisLength * v.Z / Math.Abs(v.Z);
+
+			Axis axisX = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, axisXLength + v.X, v.Y, v.Z), CoordinateAxis.X);
+			Axis axisY = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, axisYLength + v.Y, v.Z), CoordinateAxis.Y);
+			Axis axisZ = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, v.Y, axisZLength + v.Z), CoordinateAxis.Z);
+
+			axisX.LineWidth = lineWidth;
+			axisY.LineWidth = lineWidth;
+			axisZ.LineWidth = lineWidth;
+			selectingCoordinateAxes = new Axis[] { axisX, axisY, axisZ };
+
+			//Create Cubes
+			AxisCube cubeX = new AxisCube(gl, new Vertex(gl, axisXLength + v.X, v.Y, v.Z), CoordinateAxis.X, 0.1f, "cubeAxisX");
+			AxisCube cubeY = new AxisCube(gl, new Vertex(gl, v.X, axisYLength + v.Y, v.Z), CoordinateAxis.Y, 0.1f, "cubeAxisY");
+			AxisCube cubeZ = new AxisCube(gl, new Vertex(gl, v.X, v.Y, axisZLength + v.Z), CoordinateAxis.Z, 0.1f, "cubeAxisZ");
+
+			//Set colors
+			selectingCoordinateCubes = new AxisCube[] { cubeX, cubeY, cubeZ };
+
+		}
+
+		#endregion
 
 		#region --- Drawing ---
 
@@ -75,36 +113,18 @@ namespace CadEditor
 			DrawCordinateAxes(new Vertex(gl, 0, 0, 0), 3.0, 20);
 
 			//Draw Coordinate Axes if selected Vertex
-			if(selectedObj != null)
+			if(selectingCoordinateAxes != null && SceneMode == SceneMode.EDIT)
 			{
-				//check the type of selected object
-				Vertex centerPoint = null;
-				if(selectedObj is Vertex)
-				{
-					centerPoint = (Vertex)selectedObj;
-				}
-				else if(selectedObj is Edge)
-				{
-
-				}
-				else if(selectedObj is Facet)
-				{
-
-				}
-
-				//draw the coordinate axes
-				if(centerPoint != null && SceneMode == SceneMode.EDIT)
-				{
-					DrawSelectingCoordAxes(centerPoint, 2.8f, 1.0f);
-				}
+				DrawSelectingCoordAxes();
 			}
 
-			//DrawLine();
-			if (selectingRay != null)
+			//Draw ray when user clicks with left button
+			if (selectingRay != null && selectingRay.Direction != null)
 			{
 				DrawLine(selectingRay.Origin, selectingRay.Direction);
 			}
 
+			//Draw all objects
 			foreach (var cube in cubes)
 			{
 				cube.Draw();
@@ -133,22 +153,17 @@ namespace CadEditor
             gl.Flush();
         }
 
-		public void DrawSelectingCoordAxes(Vertex v, float lineWidth, double axisLength)
+		public void DrawSelectingCoordAxes()
 		{
 			gl.Begin(OpenGL.GL_LINES);
 
-			double axisXLength = axisLength * v.X / Math.Abs(v.X);
-			double axisYLength = axisLength * v.Y / Math.Abs(v.Y);
-			double axisZLength = axisLength * v.Z / Math.Abs(v.Z);
+			selectingCoordinateAxes[0].Draw(new double[] {1, 0, 0});
+			selectingCoordinateAxes[1].Draw(new double[] { 0, 1, 0 });
+			selectingCoordinateAxes[2].Draw(new double[] { 0, 0, 1 });
 
-			Edge axisX = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, axisXLength + v.X, v.Y, v.Z));
-			Edge axisY = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, axisYLength + v.Y, v.Z));
-			Edge axisZ = new Edge(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, v.Y, axisZLength + v.Z));
-			selectingCoordinateAxes = new Edge[] { axisX, axisY, axisZ };
-
-			axisX.Draw(new double[] {1, 0, 0}, lineWidth);
-			axisY.Draw(new double[] { 0, 1, 0 }, lineWidth);
-			axisZ.Draw(new double[] { 0, 0, 1 }, lineWidth);
+			selectingCoordinateCubes[0].Draw();
+			selectingCoordinateCubes[1].Draw();
+			selectingCoordinateCubes[2].Draw();
 
 			gl.End();
 			gl.Flush();
@@ -167,16 +182,15 @@ namespace CadEditor
 			gl.End();
 		}
 
-		public void InitializeObjects()
-		{
-			CustomCube cube = new CustomCube(gl, "Cube_1");
-			cubes.Add(cube);
-			sceneCollection.Add(cube);
-		}
 
+
+		public void DeleteSelectingCoordAxes()
+		{
+			selectingCoordinateAxes = null;
+		}
 		#endregion
 
-		#region --- Object Selection ---
+		#region --- Selection ---
 
 		public ISelectable CheckSelectedElement(int x, int y, OpenGL gl)
 		{
@@ -185,64 +199,88 @@ namespace CadEditor
 			Vector far = new Vector(gl.UnProject(x, y, 1));
 			Vector direction = (far - near).Normalize();
 
+			//initialize a ray
 			ray = new Ray(near, direction, gl);
 			selectingRay = new Ray(gl);
 			selectingRay.Origin = near;
 
 			ISelectable selectedObject = null;
+			selectedAxis = null;
 
-			// Iterate over each object in the scene
-			foreach (CustomCube cube in cubes)
+			//Check if any coordinate axis is selected
+			if (selectingCoordinateCubes != null)
 			{
-
-				//deselect all facets, edges and vertices before another selecting
-				cube.DeselectAll();
-
-
-				//check if any vertex is selected
-				Vertex selectedVertex = CheckSelectedVertex(cube, ray);
-				if (selectedVertex != null)
+				foreach (CustomCube cube in selectingCoordinateCubes)
 				{
-					selectedObject = selectedVertex;
+					cube.DeselectAll();
 				}
-				else
+
+				for(int i = 0; i < selectingCoordinateCubes.Length; i++)
 				{
-					//check if any edge is selected
-					Edge selectedEdge = CheckSelectedEdge(cube, ray);
-					if (selectedEdge != null)
+
+					Facet selectedFacet = CheckSelectedFacet(selectingCoordinateCubes[i], ray);
+					if (selectedFacet != null)
 					{
-						selectedObject = selectedEdge;
+						selectingCoordinateCubes[i].IsSelected = true;
+						return selectingCoordinateCubes[i];
+					}
+				}
+			}
+
+			if(selectedAxis == null)
+			{
+				// Iterate over each object in the scene
+				foreach (CustomCube cube in cubes)
+				{
+
+					//deselect all facets, edges and vertices before another selecting
+					cube.DeselectAll();
+
+
+					//check if any vertex is selected
+					Vertex selectedVertex = CheckSelectedVertex(cube, ray);
+					if (selectedVertex != null)
+					{
+						selectedObject = selectedVertex;
 					}
 					else
 					{
-						//check if any facet is selected
-						Facet selectedFacet = CheckSelectedFacet(cube, ray);
-						if (selectedFacet != null)
+						//check if any edge is selected
+						Edge selectedEdge = CheckSelectedEdge(cube, ray);
+						if (selectedEdge != null)
 						{
-							selectedObject = selectedFacet;
+							selectedObject = selectedEdge;
+						}
+						else
+						{
+							//check if any facet is selected
+							Facet selectedFacet = CheckSelectedFacet(cube, ray);
+							if (selectedFacet != null)
+							{
+								selectedObject = selectedFacet;
+							}
 						}
 					}
-				}
 
-				//Check SceneMode
-				if(selectedObject != null)
-				{
-					if(SceneMode == SceneMode.VIEW)
+					//Check SceneMode
+					if (selectedObject != null)
 					{
-						foreach(Edge edge in cube.Mesh.Edges)
+						if (SceneMode == SceneMode.VIEW)
 						{
-							edge.IsSelected = true;
+							foreach (Edge edge in cube.Mesh.Edges)
+							{
+								edge.IsSelected = true;
+							}
+						}
+						else if (SceneMode == SceneMode.EDIT)
+						{
+							selectedObject.IsSelected = true;
 						}
 					}
-					else if(SceneMode == SceneMode.EDIT)
-					{
-						selectedObject.IsSelected = true;
-					}
-				}
 
+				}
 			}
 
-			selectedObj = selectedObject;
 			return selectedObject;
 		}
 
@@ -268,6 +306,7 @@ namespace CadEditor
 					minDistance = currentDistance;
 				}
 			}
+
 			return selectedFacet;
 		}
 
@@ -340,12 +379,11 @@ namespace CadEditor
 			return selectedVertex;
 		}
 
-
-		public void CheckSelectedCoordinateAxes()
+		public Axis CheckSelectedCoordinateAxes()
 		{
 			if(selectingCoordinateAxes != null)
 			{
-				foreach (Edge line in selectingCoordinateAxes)
+				foreach (Axis line in selectingCoordinateAxes)
 				{
 					Vertex intersectionPoint;
 					double? currentDistance = ray.RayIntersectsEdge(line, out intersectionPoint);
@@ -353,10 +391,12 @@ namespace CadEditor
 					if (intersectionPoint != null)
 					{
 						line.IsSelected = true;
-						return;
+						return line;
 					}
 				}
 			}
+
+			return null;
 		}
 
 		public CustomCube GetSelectedCube(int x, int y, OpenGL gl)
@@ -383,9 +423,29 @@ namespace CadEditor
 			return null;
 		}
 
+		public bool IsSelectedAxisCube(int x, int y, AxisCube cube, OpenGL gl)
+		{
+			// Convert the mouse coordinates to world coordinates
+			Vector near = new Vector(gl.UnProject(x, y, 0));
+			Vector far = new Vector(gl.UnProject(x, y, 1));
+			Vector direction = (far - near).Normalize();
+
+			ray = new Ray(near, direction, gl);
+			selectingRay = new Ray(gl);
+			selectingRay.Origin = near;
+
+			Facet selectedFacet = CheckSelectedFacet(cube, ray);
+			if (selectedFacet != null)
+			{
+				return true;
+			}
+
+			return false;
+		}
 
 		#endregion
 
+		#region --- Manipulation ---
 
 		public void DeleteCompletely(CustomCube cube)
 		{
@@ -395,11 +455,24 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			CustomCube cube = new CustomCube(gl, "Cube2");
+			CustomCube cube = new CustomCube(gl, new Vertex(gl, 0, 0, 0), null, "Cube2");
 			cubes.Add(cube);
 			sceneCollection.Add(cube);
 		}
+
+		public void MoveCoordinateAxes(double x, double y, double z)
+		{
+			for(int i = 0; i < selectingCoordinateCubes.Length; i++)
+			{
+				selectingCoordinateCubes[i].Move(x, y, z);
+				selectingCoordinateAxes[i].Move(x, y, z);
+			}
+
+		}
+
+		#endregion
 	}
 
 	public enum SceneMode { VIEW, EDIT};
+	public enum CoordinateAxis { X, Y, Z }
 }
