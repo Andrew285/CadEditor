@@ -33,7 +33,7 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public double? RayIntersectsFacet(Facet facet, Ray lineRay)
+		public Vertex RayIntersectsFacet(Facet facet)
 		{
 
 			Vector intersectionPoint;
@@ -84,7 +84,7 @@ namespace CadEditor
 			// Calculate the intersection point
 			intersectionPoint = origin + distance * direction;
 			intersectionPoint2 = origin + distance2 * direction;
-			lineRay.Direction = intersectionPoint;
+			//lineRay.Direction = intersectionPoint;
 
 			//Check if the intersection point is in the current facet
 			if (!facet.Contains(new Vertex(intersectionPoint)))
@@ -92,13 +92,12 @@ namespace CadEditor
 				return null;
 			}
 
-			Console.WriteLine("\n\n-----------------\nIntersection Point: {0}\nFacet: {1}\nNormal: {2}", intersectionPoint, facet, planeNormal);
-			return distance;
+			//Console.WriteLine("\n\n-----------------\nIntersection Point: {0}\nFacet: {1}\nNormal: {2}", intersectionPoint, facet, planeNormal);
+			return new Vertex(intersectionPoint);
 		}
 
-		public double? RayIntersectsEdge(Edge edge, out Vertex intersectionPoint)
+		public Vertex RayIntersectsEdge(Edge edge)
 		{
-			intersectionPoint = null;
 			// Calculate the direction vector of the line
 			Vector lineDirection = new Vector(edge.V2) - new Vector(edge.V1);
 
@@ -118,17 +117,17 @@ namespace CadEditor
 			}
 
 			// Calculate the intersection point
-			intersectionPoint = new Vertex(new Vector(edge.V1) + lineDirection * distance);
+			Vertex intersectionPoint = new Vertex(new Vector(edge.V1) + lineDirection * distance);
 
 			if (!edge.Contains(intersectionPoint))
 			{
 				return null;
 			}
 
-			return distance;
+			return intersectionPoint;
 		}
 
-		public double? RayIntersectsVertex(Vertex vertex)
+		public Vertex RayIntersectsVertex(Vertex vertex)
 		{
 			// Calculate the components of the direction vector.
 			double dx = Direction[0];
@@ -145,7 +144,8 @@ namespace CadEditor
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
-				return Math.Sqrt(Math.Pow((vertex.X - Origin[0]), 2) + Math.Pow((vertex.X - Origin[1]), 2) + Math.Pow((vertex.X - Origin[2]), 2));
+				//return Math.Sqrt(Math.Pow((vertex.X - Origin[0]), 2) + Math.Pow((vertex.X - Origin[1]), 2) + Math.Pow((vertex.X - Origin[2]), 2));
+				return new Vertex(gl, tx, ty, tz);
 			}
 			else
 			{

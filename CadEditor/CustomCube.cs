@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace CadEditor
 {
-    public class CustomCube: SceneElement
+    public class CustomCube: ISelectable
     {
         protected OpenGL gl;
 		protected Mesh mesh;
@@ -32,6 +32,10 @@ namespace CadEditor
 			get { return cubeName; }
 		}
 
+		public bool IsSelected { get; set; }
+		public Color SelectedColor { get; set; }
+		public Color NonSelectedColor { get; set; }
+
 		public CustomCube(OpenGL _gl, Vertex _centerPoint, float? _size = null, string _cubeName = null)
 		{
 			gl = _gl;
@@ -48,19 +52,6 @@ namespace CadEditor
 			{
 				cubeName = _cubeName;
 			}
-
-			////Initializing Vertices
-			//mesh.Vertices = new Vertex[]
-			//{
-			//	new Vertex(gl, -1.0f, -1.0f, -1.0f),
-			//	new Vertex(gl, -1.0f, -1.0f, 1.0f),
-			//	new Vertex(gl, -1.0f, 1.0f, -1.0f),
-			//	new Vertex(gl, -1.0f, 1.0f, 1.0f),
-			//	new Vertex(gl, 1.0f, -1.0f, -1.0f),
-			//	new Vertex(gl, 1.0f, -1.0f, 1.0f),
-			//	new Vertex(gl, 1.0f, 1.0f, -1.0f),
-			//	new Vertex(gl, 1.0f, 1.0f, 1.0f)
-			//};
 
 			//Initializing Vertices
 			mesh.Vertices = new Vertex[]
@@ -169,6 +160,7 @@ namespace CadEditor
 
 		public void Draw(double[] vertexColor = null, double[] edgeColor = null, double[] facetColor = null)
 		{
+
 			//Draw Vertexes
 			gl.PointSize(10.0f);
 			gl.Begin(OpenGL.GL_POINTS);
@@ -199,25 +191,15 @@ namespace CadEditor
 			gl.Flush();
 		}
 
-		public void SelectAll()
+		public void Select()
 		{
-			foreach(Facet facet in Mesh.Facets)
-			{
-				facet.IsSelected = true;
-			}
-
 			foreach (Edge edge in Mesh.Edges)
 			{
 				edge.IsSelected = true;
 			}
-
-			foreach (Vertex vertex in Mesh.Vertices)
-			{
-				vertex.IsSelected = true;
-			}
 		}
 
-		public virtual void DeselectAll()
+		public virtual void Deselect()
 		{
 			foreach (Facet facet in Mesh.Facets)
 			{
@@ -241,6 +223,12 @@ namespace CadEditor
 			{
 				mesh.Vertices[i].Move(x, y, z);
 			}
+			centerPoint.Move(x, y, z);
+		}
+
+		public Vertex GetCenterPoint()
+		{
+			return centerPoint;
 		}
 
 	}
@@ -270,7 +258,7 @@ namespace CadEditor
 			}
 		}
 
-		public override void DeselectAll()
+		public override void Deselect()
 		{
 			IsSelected = false;
 		}

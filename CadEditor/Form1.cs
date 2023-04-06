@@ -28,7 +28,7 @@ namespace CadEditor
         private int mouseY;
 		private bool isMiddleButtonPressed;
         private AxisCube SelectedAxisCubeEditMode;
-        private ISelectable SelectedCubeElement;
+        private ISelectable SelectedObject;
 		private float sensitivity = 0.5f;
 
 		public Form1()
@@ -124,6 +124,8 @@ namespace CadEditor
 					scene.SceneMode = SceneMode.EDIT;
 					mode_comboBox.SelectedItem = mode_comboBox.Items[1];
 				}
+				scene.Update();
+
 				return true;
             }
 
@@ -145,27 +147,29 @@ namespace CadEditor
             {
 				openGLControl1.ContextMenu = null;
 
-                ISelectable selectedObject = null;
-				selectedObject = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
-                //check type of selected object
-                if(selectedObject != null)
+
+				ISelectable selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
+
+                ////check type of selected object
+                if (selectedCubeElement != null)
                 {
-                    if(selectedObject is AxisCube)
+                    if (selectedCubeElement is AxisCube)
                     {
-						SelectedAxisCubeEditMode = (AxisCube)selectedObject;
-					}
-                    else if(!(selectedObject is AxisCube))
+                        SelectedAxisCubeEditMode = (AxisCube)selectedCubeElement;
+                    }
+                    else if (!(selectedCubeElement is AxisCube))
                     {
-						SelectedCubeElement = selectedObject;
-						SelectedAxisCubeEditMode = null;
-						scene.InitSelectingCoordAxes(SelectedCubeElement, 2.8f, 1.0);
-					}
+                        SelectedObject = selectedCubeElement;
+                        SelectedAxisCubeEditMode = null;
+                        scene.InitSelectingCoordAxes(SelectedObject, 2.8f, 1.0);
+                    }
                     else
                     {
-						scene.DeleteSelectingCoordAxes();
-					}
-				}
+                        scene.DeleteSelectingCoordAxes();
+                    }
+                }
+
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -212,19 +216,19 @@ namespace CadEditor
                 {
                     value = horizontalAngle * sensitivityLevel;
 					//SelectedVertexEditMode.X += value;
-                    SelectedCubeElement.Move(value, 0, 0);
+                    SelectedObject.Move(value, 0, 0);
                     scene.MoveCoordinateAxes(value, 0, 0);
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
 					value = verticalAngle * sensitivityLevel;
-					SelectedCubeElement.Move(0, -value, 0);
+					SelectedObject.Move(0, -value, 0);
 					scene.MoveCoordinateAxes(0, -value, 0);
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
 					value = horizontalAngle * sensitivityLevel;
-					SelectedCubeElement.Move(0, 0, -value);
+					SelectedObject.Move(0, 0, -value);
 					scene.MoveCoordinateAxes(0, 0, -value);
 				}
 			}
@@ -239,7 +243,7 @@ namespace CadEditor
 
             if (SelectedAxisCubeEditMode != null)
             {
-				SelectedAxisCubeEditMode.DeselectAll();
+				SelectedAxisCubeEditMode.Deselect();
                 SelectedAxisCubeEditMode = null;
 			}
 			//SelectedFacetViewMode = null;
@@ -264,12 +268,12 @@ namespace CadEditor
 
 		private void Select_Object_click(object sender, EventArgs e)
 		{
-            selectedCube.SelectAll();
+            selectedCube.Select();
 		}
 
 		private void Deselect_Object_click(object sender, EventArgs e)
 		{
-			selectedCube.DeselectAll();
+			selectedCube.Deselect();
 		}
 
 		private void Delete_Object_click(object sender, EventArgs e)
@@ -293,9 +297,9 @@ namespace CadEditor
             else if (mode_comboBox.SelectedIndex == 1)
             {
                 scene.SceneMode = SceneMode.EDIT;
-            }
+			}
+			scene.Update();
 		}
-
 
 	}
 }
