@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CadEditor", "CadEditor\CadEditor.csproj", "{6E69A687-F9EF-4B91-9F29-3DA03B2DACFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{09428D92-E461-4AA6-9969-13F12E39A37A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6E69A687-F9EF-4B91-9F29-3DA03B2DACFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E69A687-F9EF-4B91-9F29-3DA03B2DACFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E69A687-F9EF-4B91-9F29-3DA03B2DACFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09428D92-E461-4AA6-9969-13F12E39A37A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09428D92-E461-4AA6-9969-13F12E39A37A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09428D92-E461-4AA6-9969-13F12E39A37A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09428D92-E461-4AA6-9969-13F12E39A37A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

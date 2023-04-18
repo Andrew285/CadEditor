@@ -32,10 +32,15 @@ namespace CadEditor
 		public Vector(Vertex vertex)
 		{
 			Size = 3;
-			values = new double[] {vertex.X, vertex.Y, vertex.Z};
+				values = new double[] {vertex.X, vertex.Y, vertex.Z};
 		}
 
-		public int GetSize() 
+        public double Length()
+        {
+            return Math.Sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
+        }
+
+        public int GetSize() 
 		{
 			return Size;
 		}
@@ -137,7 +142,22 @@ namespace CadEditor
 			}
 		}
 
-		public static bool operator ==(Vector a, Vector b)
+        public static Vector operator -(Vector a, double b)
+        {
+			int sizeA = a.Size;
+
+            double[] result = new double[sizeA];
+
+            for (int i = 0; i < sizeA; i++)
+            {
+
+                result[i] = a[i] - b;
+            }
+
+            return new Vector(result);
+        }
+
+        public static bool operator ==(Vector a, Vector b)
 		{
 			if (object.ReferenceEquals(a, b))
 			{
@@ -204,5 +224,9 @@ namespace CadEditor
 			return new Vector(values);
 		}
 
-	}
+        public double LengthSquared()
+        {
+            return this[0] * this[0] + this[1] * this[1] + this[2] * this[2];
+        }
+    }
 }

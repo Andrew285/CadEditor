@@ -1,19 +1,8 @@
 ﻿using SharpGL;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Cameras;
-using SharpGL.SceneGraph.Core;
-using SharpGL.SceneGraph.Effects;
-using SharpGL.SceneGraph.Lighting;
-using SharpGL.SceneGraph.Primitives;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Drawing;
-using System.Numerics;
-using System.Security.Cryptography;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
+
 
 namespace CadEditor
 {
@@ -38,7 +27,6 @@ namespace CadEditor
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
-
 
 			openGLControl1.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
 		}
@@ -147,13 +135,13 @@ namespace CadEditor
             {
 				openGLControl1.ContextMenu = null;
 
-
-
 				ISelectable selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
-                ////check type of selected object
+                //check type of selected object
                 if (selectedCubeElement != null)
                 {
+                    selectedCubeElement.Select();
+
                     if (selectedCubeElement is AxisCube)
                     {
                         SelectedAxisCubeEditMode = (AxisCube)selectedCubeElement;
@@ -301,5 +289,9 @@ namespace CadEditor
 			scene.Update();
 		}
 
-	}
+        private void openGLControl1_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
 }

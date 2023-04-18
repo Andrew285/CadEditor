@@ -1,20 +1,7 @@
 ﻿using SharpGL;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Core;
-using SharpGL.SceneGraph.Primitives;
-using SharpGL.SceneGraph.Raytracing;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.Remoting;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace CadEditor
 {
@@ -28,13 +15,12 @@ namespace CadEditor
         public Ray ray;
 		public Ray selectingRay;
 
-		public Vertex centerPoint;
-		public bool Selected { get; set; }
-		private ISelectable selectedAxis { get; set; }
-
 		public float selectedObjAxisLength { get; set; }
 		private Axis[] selectingCoordinateAxes;
 		private AxisCube[] selectingCoordinateCubes;
+
+		private readonly double facetTolerance = 0.08;
+		private readonly double edgeTolerance = 0.08;
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
@@ -56,7 +42,7 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			CustomCube cube = new CustomCube(gl, new Vertex(gl, 0, 0, 0), 1f, "Cube_1");
+			CustomCube cube = new CustomCube(gl, new Vertex(0, 0, 0, gl), 1f, "Cube_1");
 			cubes.Add(cube);
 			sceneCollection.Add(cube);
 		}
@@ -108,9 +94,9 @@ namespace CadEditor
 				axisXYZLengths[i] = axisLength * multiplier;
 			}
 
-			Axis axisX = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, axisXYZLengths[0] + v.X, v.Y, v.Z), CoordinateAxis.X);
-			Axis axisY = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, axisXYZLengths[1] + v.Y, v.Z), CoordinateAxis.Y);
-			Axis axisZ = new Axis(gl, new Vertex(gl, v.X, v.Y, v.Z), new Vertex(gl, v.X, v.Y, axisXYZLengths[2] + v.Z), CoordinateAxis.Z);
+			Axis axisX = new Axis(new Vertex(v.X, v.Y, v.Z, gl), new Vertex(axisXYZLengths[0] + v.X, v.Y, v.Z, gl), CoordinateAxis.X, gl);
+			Axis axisY = new Axis(new Vertex(v.X, v.Y, v.Z, gl), new Vertex(v.X, axisXYZLengths[1] + v.Y, v.Z, gl), CoordinateAxis.Y, gl);
+			Axis axisZ = new Axis(new Vertex(v.X, v.Y, v.Z, gl), new Vertex(v.X, v.Y, axisXYZLengths[2] + v.Z, gl), CoordinateAxis.Z, gl);
 
 			axisX.LineWidth = lineWidth;
 			axisY.LineWidth = lineWidth;
@@ -118,9 +104,9 @@ namespace CadEditor
 			selectingCoordinateAxes = new Axis[] { axisX, axisY, axisZ };
 
 			//Create Axis Cubes
-			AxisCube cubeX = new AxisCube(gl, new Vertex(gl, axisXYZLengths[0] + v.X, v.Y, v.Z), CoordinateAxis.X, 0.1f, "cubeAxisX");
-			AxisCube cubeY = new AxisCube(gl, new Vertex(gl, v.X, axisXYZLengths[1] + v.Y, v.Z), CoordinateAxis.Y, 0.1f, "cubeAxisY");
-			AxisCube cubeZ = new AxisCube(gl, new Vertex(gl, v.X, v.Y, axisXYZLengths[2] + v.Z), CoordinateAxis.Z, 0.1f, "cubeAxisZ");
+			AxisCube cubeX = new AxisCube(gl, new Vertex(axisXYZLengths[0] + v.X, v.Y, v.Z, gl), CoordinateAxis.X, 0.1f, "cubeAxisX");
+			AxisCube cubeY = new AxisCube(gl, new Vertex(v.X, axisXYZLengths[1] + v.Y, v.Z, gl), CoordinateAxis.Y, 0.1f, "cubeAxisY");
+			AxisCube cubeZ = new AxisCube(gl, new Vertex(v.X, v.Y, axisXYZLengths[2] + v.Z, gl), CoordinateAxis.Z, 0.1f, "cubeAxisZ");
 
 			//Set colors
 			cubeX.NonSelectedColor = Color.Red;
@@ -153,7 +139,7 @@ namespace CadEditor
 			camera.RotateAxisY();
 
 			//Draw Scene Grid
-			DrawCordinateAxes(new Vertex(gl, 0, 0, 0), 3.0, 20);
+			DrawCordinateAxes(new Vertex(0, 0, 0, gl), 3.0, 20);
 
 			//Draw Coordinate Axes if selected Vertex
 			if(selectingCoordinateAxes != null)
@@ -246,10 +232,8 @@ namespace CadEditor
 			selectingRay = new Ray(gl);
 			selectingRay.Origin = near;
 
+			ISelectable selectedCube = null;
 			ISelectable selectedObject = null;
-			selectedAxis = null;
-
-			List<ISelectable> selectedObjects = new List<ISelectable>();
 
 			//Check if any coordinate axis is selected
 			if (selectingCoordinateCubes != null)
@@ -266,310 +250,195 @@ namespace CadEditor
 					if (selectedFacet != null)
 					{
 						selectingCoordinateCubes[i].IsSelected = true;
-						selectedObjects.Add(selectingCoordinateCubes[i]);
-						//return selectingCoordinateCubes[i];
+						return selectingCoordinateCubes[i];
 					}
 				}
 			}
 
-			if(selectedObjects.Count == 0)
-			{
-				// Iterate over each object in the scene
-				foreach (CustomCube cube in cubes)
-				{
-					//deselect all facets, edges and vertices before another selecting
-					cube.Deselect();
+            // Iterate over each object in the scene
+            foreach (CustomCube cube in cubes)
+            {
+                //deselect all facets, edges and vertices before another selecting
+                cube.Deselect();
 
+                //check if any facet is selected
+                Facet selectedFacet = CheckSelectedFacet(cube, ray);
+                if (selectedFacet != null)
+                {
+                    selectedObject = selectedFacet;
+                    selectedCube = cube;
+                    break;
+                }
+                Console.WriteLine("\nFacet: " + selectedFacet);
 
-					////check if any vertex is selected
-					//List<ISelectable> selectedObjects = new List<ISelectable>();
+                //check if any edge is selected
+                Edge selectedEdge = CheckSelectedEdge(cube, ray);
+                if (selectedEdge != null)
+                {
+                    selectedObject = selectedEdge;
+                    selectedCube = cube;
+                    break;
+                }
 
-					Console.WriteLine("\n------------------\n");
-					//check if any facet is selected
-					Facet selectedFacet = CheckSelectedFacet(cube, ray);
-					if (selectedFacet != null)
-					{
-						selectedObjects.Add(selectedFacet);
-					}
-					Console.WriteLine("\nFacet: " + selectedFacet);
+                //check if any vertex is selected
+                Vertex selectedVertex = CheckSelectedVertex(cube, ray);
+                if (selectedVertex != null)
+                {
+                    selectedObject = selectedVertex;
+                    selectedCube = cube;
+                    break;
+                }
+            }
 
-					//check if any edge is selected
-					Edge selectedEdge = CheckSelectedEdge(cube, ray);
-					if (selectedEdge != null)
-					{
-						selectedObjects.Add(selectedEdge);
+            if (selectedObject != null && SceneMode == SceneMode.VIEW)
+            {
+                selectedObject = selectedCube;
+            }
 
-					}
-
-					Vertex selectedVertex = CheckSelectedVertex(cube, ray);
-					if (selectedVertex != null)
-					{
-						selectedObjects.Add(selectedVertex);
-					}
-
-					if(selectedObjects.Count > 0)
-					{
-						if(SceneMode == SceneMode.VIEW)
-						{
-							selectedObjects = new List<ISelectable> { cube };
-						}
-					}
-
-					//if(selectedObjects.Count > 0)
-					//{
-					//	selectedObject = GetNearestObject(selectedObjects, ray);
-					//}
-					//else
-					//{
-					//	selectedObject = null;
-					//}
-
-					////Check SceneMode
-					//if (selectedObject != null)
-					//{
-					//	if (SceneMode == SceneMode.VIEW)
-					//	{
-					//		cube.Select();
-					//		return cube;
-					//	}
-					//	else if (SceneMode == SceneMode.EDIT)
-					//	{
-					//		selectedObject.IsSelected = true;
-					//		return selectedObject;
-					//	}
-					//}
-
-				}
-			}
-
-			if (selectedObjects.Count > 1)
-			{
-				selectedObject = GetNearestObject(selectedObjects, ray);
-				selectedObject.Select();
-
-			}
-			else if (selectedObjects.Count == 1)
-			{
-				selectedObject = selectedObjects[0];
-				selectedObject.Select();
-			}
-			else
-			{
-				selectedObject = null;
-			}
-
-			return selectedObject;
-		}
-
-		private ISelectable GetNearestObject(List<ISelectable> selectedObjects, Ray _ray)
-		{
-			Vertex minVertex = null;
-			int index = 0;
-			for (int i = 0; i < selectedObjects.Count; i++)
-			{
-				//Get a point where axis coordinates will be shown
-				Vertex v = null;
-				if (selectedObjects[i] is Vertex)
-				{
-					v = (Vertex)selectedObjects[i];
-				}
-				else if (selectedObjects[i] is Edge)
-				{
-					v = ((Edge)selectedObjects[i]).GetCenterPoint();
-				}
-				else if (selectedObjects[i] is Facet)
-				{
-					v = ((Facet)selectedObjects[i]).GetCenterPoint();
-				}
-
-				if (minVertex != null)
-				{
-					double dist1 = GetDistance(v, new Vertex(ray.Origin));
-					double dist2 = GetDistance(minVertex, new Vertex(ray.Origin));
-					if (Math.Abs(dist1 - dist2) > 0.001 && dist1 < dist2)
-					{
-						minVertex = v;
-						index = i;
-					}
-				}
-				else
-				{
-					minVertex = v;
-				}
-			}
-
-			return selectedObjects[index];
-		}
-
-		private double GetDistance(Vertex v1, Vertex v2)
-		{
-			return Math.Sqrt(Math.Pow((v2.X - v1.X), 2) + Math.Pow((v2.Y - v1.Y), 2) + Math.Pow((v2.Z - v1.Z), 2));
-		}
+            return selectedObject;
+        }
 
 		public Facet CheckSelectedFacet(CustomCube cube, Ray ray)
 		{
 			double? minDistance = null; //minimal distance between facet and ray origin
 			Facet selectedFacet = null; //facet that is selected
+			Vertex minIntersectionPoint = null;
 
-			Vertex minPoint = null;
 			for(int i = 0; i < cube.Mesh.Facets.Length; i++)
 			{
-				Vertex intersectionPoint = ray.RayIntersectsFacet(cube.Mesh.Facets[i]);
+				Facet currentFacet = cube.Mesh.Facets[i];
+                Vertex intersectionPoint = ray.RayIntersectsPlane(currentFacet);
 
-				if(intersectionPoint != null)
+				//check if facet contains intersection point
+				if (intersectionPoint != null && currentFacet.Contains(intersectionPoint))
 				{
-					Console.WriteLine("\nPoint: " + intersectionPoint);
-				}
-				//if (minDistance != null)
-				//{
-				//	if(currentDistance < minDistance)
-				//	{
-				//		selectedFacet = cube.Mesh.Facets[i];
-				//		minDistance = currentDistance;
-				//	}
-				//}
-				//else if(currentDistance != null)
-				//{
-				//	selectedFacet = cube.Mesh.Facets[i];
-				//	minDistance = currentDistance;
-				//}
-
-				if (intersectionPoint != null)
-				{
-					if (minPoint != null)
+					//compare distances from ray origin to intersection point
+                    double distanceToPoint = GetDistance(intersectionPoint, new Vertex(ray.Origin));
+                    
+					if (minDistance != null)
 					{
-						double dist1 = GetDistance(intersectionPoint, new Vertex(ray.Origin));
-						double dist2 = GetDistance(minPoint, new Vertex(ray.Origin));
-						if (dist1 < dist2)
+						if(distanceToPoint < minDistance)
 						{
-							minPoint = intersectionPoint;
-							selectedFacet = cube.Mesh.Facets[i];
-						}
-					}
+							minDistance = distanceToPoint;
+                            selectedFacet = currentFacet;
+							minIntersectionPoint = intersectionPoint;
+                        }
+                    }
 					else
 					{
-						minPoint = intersectionPoint;
-						selectedFacet = cube.Mesh.Facets[i];
-					}
+						minDistance = distanceToPoint;
+                        selectedFacet = currentFacet;
+                        minIntersectionPoint = intersectionPoint;
+                    }
 				}
-			}
+            }
 
-			if(minPoint != null)
+			//check if clickable area of facet contains the intersection point
+			if(selectedFacet != null && minIntersectionPoint != null)
 			{
-				selectingRay.Direction = new Vector(minPoint);
-				Console.WriteLine("\nResult Min Point: " + minPoint);
-			}
-			return selectedFacet;
+                Facet facetArea = selectedFacet.GetClickableFacet(facetTolerance);
+				if (!facetArea.Contains(minIntersectionPoint))
+				{
+					return null;
+				}
+
+				selectingRay.Direction = new Vector(minIntersectionPoint);
+            }
+
+            return selectedFacet;
 		}
 
 		public Edge CheckSelectedEdge(CustomCube cube, Ray ray)
 		{
 			double? minDistance = null; //minimal distance between edge and ray origin
 			Edge selectedEdge = null; //edge that is selected
+			Vertex minIntersectionPoint = null;
 
-			Vertex minPoint = null;
 			for (int i = 0; i < cube.Mesh.Edges.Length; i++)
 			{
-				Vertex intersectionPoint = ray.RayIntersectsEdge(cube.Mesh.Edges[i]);
-				
-				//if (minDistance != null)
-				//{
-				//	if (currentDistance < minDistance)
-				//	{
-				//		selectedEdge = cube.Mesh.Edges[i];
-				//		minDistance = currentDistance;
-				//	}
-				//}
-				//else if (currentDistance != null)
-				//{
-				//	selectedEdge = cube.Mesh.Edges[i];
-				//	minDistance = currentDistance;
-				//}
+                Edge currentEdge = cube.Mesh.Edges[i];
+                Vertex intersectionPoint = ray.RayIntersectsLine(currentEdge);
 
-				if (intersectionPoint != null)
-				{
-					if (minPoint != null)
-					{
-						double dist1 = GetDistance(intersectionPoint, new Vertex(ray.Origin));
-						double dist2 = GetDistance(minPoint, new Vertex(ray.Origin));
-						if (dist1 < dist2)
-						{
-							minPoint = intersectionPoint;
-							selectedEdge = cube.Mesh.Edges[i];
-						}
-					}
-					else
-					{
-						minPoint = intersectionPoint;
-						selectedEdge = cube.Mesh.Edges[i];
-					}
-				}
-			}
+                //check if edge contains intersection point
+                if (intersectionPoint != null && currentEdge.Contains(intersectionPoint))
+                {
+                    //compare distances from ray origin to intersection point
+                    double distanceToPoint = GetDistance(intersectionPoint, new Vertex(ray.Origin));
+                    
+					if (minDistance != null)
+                    {
+                        if (distanceToPoint < minDistance)
+                        {
+                            minDistance = distanceToPoint;
+                            selectedEdge = currentEdge;
+                            minIntersectionPoint = intersectionPoint;
+                        }
+                    }
+                    else
+                    {
+                        minDistance = distanceToPoint;
+                        selectedEdge = currentEdge;
+                        minIntersectionPoint = intersectionPoint;
+                    }
+                }
+            }
 
-			//if(intersectionPoint != null)
-			//{
-			//	selectingRay.Direction = new Vector(intersectionPoint);
-			//}
-			//else
-			//{
-			//	selectingRay.Direction = selectingRay.Origin;
-			//}
-			return selectedEdge;
+            //check if clickable area of facet contains the intersection point
+            if (selectedEdge != null && minIntersectionPoint != null)
+            {
+                Edge edgeArea = selectedEdge.GetClickableEdge(edgeTolerance);
+                if (!edgeArea.Contains(minIntersectionPoint))
+                {
+                    return null;
+                }
+
+                selectingRay.Direction = new Vector(minIntersectionPoint);
+            }
+
+            return selectedEdge;
 		}
 
 		public Vertex CheckSelectedVertex(CustomCube cube, Ray ray)
 		{
 			double? minDistance = null; //minimal distance between vertex and ray origin
 			Vertex selectedVertex = null; //vertex that is selected
+            Vertex minIntersectionPoint = null;
 
-			Vertex minPoint = null;
 			for (int i = 0; i < cube.Mesh.Vertices.Length; i++)
 			{
-				Vertex intersectionPoint = ray.RayIntersectsVertex(cube.Mesh.Vertices[i]);
+                Vertex currentVertex = cube.Mesh.Vertices[i];
+                Vertex intersectionPoint = ray.RayIntersectsVertex(currentVertex);
 
-				//if (minDistance != null)
-				//{
-				//	if (currentDistance < minDistance)
-				//	{
-				//		selectedVertex = cube.Mesh.Vertices[i];
-				//		minDistance = currentDistance;
-				//	}
-				//}
-				//else if (currentDistance != null)
-				//{
-				//	selectedVertex = cube.Mesh.Vertices[i];
-				//	minDistance = currentDistance;
-				//}
+                //check if edge contains intersection point
+                if (intersectionPoint != null)
+                {
+                    //compare distances from ray origin to intersection point
+                    double distanceToPoint = GetDistance(intersectionPoint, new Vertex(ray.Origin));
 
-				if (intersectionPoint != null)
-				{
-					if (minPoint != null)
-					{
-						double dist1 = GetDistance(intersectionPoint, new Vertex(ray.Origin));
-						double dist2 = GetDistance(minPoint, new Vertex(ray.Origin));
-						if (dist1 < dist2)
-						{
-							minPoint = intersectionPoint;
-							selectedVertex = cube.Mesh.Vertices[i];
-						}
-					}
-					else
-					{
-						minPoint = intersectionPoint;
-						selectedVertex = cube.Mesh.Vertices[i];
-					}
-				}
-			}
+                    if (minDistance != null)
+                    {
+                        if (distanceToPoint < minDistance)
+                        {
+                            minDistance = distanceToPoint;
+                            selectedVertex = currentVertex;
+                            minIntersectionPoint = intersectionPoint;
+                        }
+                    }
+                    else
+                    {
+                        minDistance = distanceToPoint;
+                        selectedVertex = currentVertex;
+                        minIntersectionPoint = intersectionPoint;
+                    }
+                }
+            }
 
-			//if (selectedVertex != null)
-			//{
-			//	selectingRay.Direction = new Vector(selectedVertex);
-			//}
-			//else
-			//{
-			//	selectingRay.Direction = selectingRay.Origin;
-			//}
-			return selectedVertex;
+			if(minIntersectionPoint != null)
+			{
+                selectingRay.Direction = new Vector(minIntersectionPoint);
+            }
+
+            return selectedVertex;
 		}
 
 		public Axis CheckSelectedCoordinateAxes()
@@ -578,7 +447,7 @@ namespace CadEditor
 			{
 				foreach (Axis line in selectingCoordinateAxes)
 				{
-					Vertex intersectionPoint = ray.RayIntersectsEdge(line);
+					Vertex intersectionPoint = ray.RayIntersectsLine(line);
 
 					if (intersectionPoint != null)
 					{
@@ -647,7 +516,7 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			CustomCube cube = new CustomCube(gl, new Vertex(gl, 0, 0, 0), null, "Cube2");
+			CustomCube cube = new CustomCube(gl, new Vertex(0, 0, 0, gl), null, "Cube2");
 			cubes.Add(cube);
 			sceneCollection.Add(cube);
 		}
@@ -675,9 +544,14 @@ namespace CadEditor
 			}
 		}
 
-		#endregion
-	}
+        private double GetDistance(Vertex v1, Vertex v2)
+        {
+            return Math.Sqrt(Math.Pow((v2.X - v1.X), 2) + Math.Pow((v2.Y - v1.Y), 2) + Math.Pow((v2.Z - v1.Z), 2));
+        }
 
-	public enum SceneMode { VIEW, EDIT};
+        #endregion
+    }
+
+    public enum SceneMode { VIEW, EDIT};
 	public enum CoordinateAxis { X, Y, Z }
 }

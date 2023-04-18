@@ -1,13 +1,5 @@
 ﻿using SharpGL;
-using SharpGL.SceneGraph.Core;
-using SharpGL.SceneGraph.Raytracing;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -16,7 +8,6 @@ namespace CadEditor
 		private Vector origin;
 		private Vector direction;
 		private OpenGL gl;
-		private double nearDistance;
 
 		public Ray(OpenGL _gl)
 		{
@@ -33,11 +24,9 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public Vertex RayIntersectsFacet(Facet facet)
+		public Vertex RayIntersectsPlane(Facet facet)
 		{
-
 			Vector intersectionPoint;
-			Vector intersectionPoint2;
 			Vertex facetCenterPoint = facet.GetCenterPoint();
 
 			//Calculate planeNormal
@@ -53,28 +42,8 @@ namespace CadEditor
 			}
 
 			// Calculate the distance from the ray origin to the plane
-			double distance2 = ((planeNormal - origin) * planeNormal) / dotProduct;
 			double distance = ((new Vector(facetCenterPoint) - origin) * planeNormal) / dotProduct;
-			//double distance2 = (planeNormal - origin) / direction;
-
-
-			//Check if distance is the minimum
-			if (distance != 0.0)
-			{
-				if (distance < nearDistance)
-				{
-					nearDistance = distance;
-				}
-				else
-				{
-					nearDistance = distance;
-				}
-			}
-			else
-			{
-				nearDistance = distance;
-			}
-
+			
 			// Check if the intersection point is behind the ray origin
 			if (distance < 0)
 			{
@@ -83,48 +52,37 @@ namespace CadEditor
 
 			// Calculate the intersection point
 			intersectionPoint = origin + distance * direction;
-			intersectionPoint2 = origin + distance2 * direction;
-			//lineRay.Direction = intersectionPoint;
 
-			//Check if the intersection point is in the current facet
-			if (!facet.Contains(new Vertex(intersectionPoint)))
-			{
-				return null;
-			}
-
-			//Console.WriteLine("\n\n-----------------\nIntersection Point: {0}\nFacet: {1}\nNormal: {2}", intersectionPoint, facet, planeNormal);
 			return new Vertex(intersectionPoint);
 		}
 
-		public Vertex RayIntersectsEdge(Edge edge)
+		public Vertex RayIntersectsLine(Edge edge)
 		{
-			// Calculate the direction vector of the line
-			Vector lineDirection = new Vector(edge.V2) - new Vector(edge.V1);
+			double coPlanerThreshold = 0.7;
 
-			// Calculate the normal of the plane that contains the line and the ray
-			Vector planeNormal = lineDirection.Cross(Direction);
+			Vector da = Direction;
+			Vector db = edge.V2 - edge.V1;
+			Vector dc = new Vector(edge.V1) - Origin;
 
-			// Calculate the distance between the line and the ray
-			double denominator = planeNormal * planeNormal;
-			double numerator = planeNormal * (Origin - new Vector(edge.V1));
-			double distance = -numerator / denominator;
+			double dd = Math.Abs(dc * da.Cross(db));
 
-			// Check if the intersection point lies on the line segment
-			float epsilon = 0.0001f;
-			if (distance < -epsilon || distance > 1 + epsilon)
+			if (dd >= coPlanerThreshold)
 			{
 				return null;
 			}
 
-			// Calculate the intersection point
-			Vertex intersectionPoint = new Vertex(new Vector(edge.V1) + lineDirection * distance);
+			double s = (dc.Cross(db) * da.Cross(db)) / da.Cross(db).LengthSquared(); // find distance
 
-			if (!edge.Contains(intersectionPoint))
+			if (s >= 0.0)   // Means we have an intersection
+			{
+				Vector intersection = Origin + s * da;
+				return new Vertex(intersection);
+			}
+			else
 			{
 				return null;
 			}
 
-			return intersectionPoint;
 		}
 
 		public Vertex RayIntersectsVertex(Vertex vertex)
@@ -140,12 +98,11 @@ namespace CadEditor
 			double tz = (vertex.Z - Origin[2]) / dz;
 
 			// Check if all the parameter values are equal (within some tolerance).
-			double accuracy = 0.1;
+			double accuracy = 0.9;
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
-				//return Math.Sqrt(Math.Pow((vertex.X - Origin[0]), 2) + Math.Pow((vertex.X - Origin[1]), 2) + Math.Pow((vertex.X - Origin[2]), 2));
-				return new Vertex(gl, tx, ty, tz);
+				return new Vertex(tx, ty, tz, gl);
 			}
 			else
 			{
@@ -153,5 +110,6 @@ namespace CadEditor
 				return null;
 			}
 		}
+
 	}
 }

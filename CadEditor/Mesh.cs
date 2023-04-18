@@ -1,17 +1,7 @@
 ﻿using SharpGL;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Raytracing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using static System.Windows.Forms.AxHost;
 
 namespace CadEditor
 {
@@ -39,7 +29,6 @@ namespace CadEditor
 			set { edges = value; }
 		}
 	}
-
 
 	public class Vertex: ISelectable
 	{
@@ -71,7 +60,7 @@ namespace CadEditor
 			IsSelected = false;
 		}
 
-		public Vertex(OpenGL _gl, double _x, double _y, double _z)
+		public Vertex(double _x, double _y, double _z, OpenGL _gl = null)
 		{
 			X = _x;
 			Y = _y;
@@ -198,6 +187,11 @@ namespace CadEditor
 		{
 			IsSelected = true;
 		}
+
+		public Vertex Clone()
+		{
+			return new Vertex(X, Y, Z);
+		}
 	}
 
 	public class Facet: ISelectable
@@ -208,212 +202,29 @@ namespace CadEditor
 		public Color SelectedColor { get; set; } = Color.Brown;
 		public Color NonSelectedColor { get; set; } = Color.Yellow;
 
-		public Facet(OpenGL _gl, Vertex[] _vertices)
+		public Facet(Vertex[] _vertices, OpenGL _gl = null)
 		{
 			Vertices = _vertices;
 			IsSelected = false;
 			gl = _gl;
-		}
+        }
 
 		public bool Contains(Vertex point)
 		{
-			//Vertex fp1 = this[0];
-			//Vertex fp2 = this[2];
-			//if (point.X >= fp1.X && point.Y >= fp1.Y && point.Z >= fp1.Z &&
-			//	point.X <= fp2.X && point.Y <= fp2.Y && point.Z <= fp2.Z)
-			//{
-			//	return true;
-			//}
-			//else
-			//{
-			//	return false;
-			//}
+			Edge centerToPointEdge = new Edge(GetCenterPoint(), point, gl);
 
-			Vertex minVertex = Vertices[0];
-			Vertex maxVertex = Vertices[2];
-
-			for (int i = 0; i < Vertices.Length; i++)
+			for (int i = 0; i < this.Vertices.Length; i++)
 			{
-				if (Vertices[i].X < minVertex.X)
-				{
-					minVertex.X = Vertices[i].X;
-				}
+				int j = i;
+				Edge cubeEdge = new Edge(Vertices[i], Vertices[(j + 1) % Vertices.Length], gl);
 
-				if (Vertices[i].Y < minVertex.Y)
+				if (centerToPointEdge.IntersectsEdge(cubeEdge))
 				{
-					minVertex.Y = Vertices[i].Y;
-				}
-
-				if (Vertices[i].Z < minVertex.Z)
-				{
-					minVertex.Z = Vertices[i].Z;
-				}
-
-				if (Vertices[i].X > maxVertex.X)
-				{
-					maxVertex.X = Vertices[i].X;
-				}
-
-				if (Vertices[i].Y > maxVertex.Y)
-				{
-					maxVertex.Y = Vertices[i].Y;
-				}
-
-				if (Vertices[i].Z > maxVertex.Z)
-				{
-					maxVertex.Z = Vertices[i].Z;
+					return false;
 				}
 			}
-			if (point.X >= minVertex.X && point.Y >= minVertex.Y && point.Z >= minVertex.Z &&
-				point.X <= maxVertex.X && point.Y <= maxVertex.Y && point.Z <= maxVertex.Z)
-			{
-				Console.WriteLine("\nThis point is in these bounderies: " + point);
-				Console.WriteLine("\nMin: " + minVertex + " / Max: " + maxVertex);
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
 
-		//public bool Contains(Vertex p)
-		//{
-		//	Vector intersection;
-		//	Vector direction1 = this.GetCenterPoint() - p;
-
-		//	for(int i = 0; i < Vertices.Length; i++)
-		//	{
-		//		Vertex v1, v2;
-
-		//		if (i == Vertices.Length - 1)
-		//		{
-		//			v1 = Vertices[i];
-		//			v2 = Vertices[0];
-		//		}
-		//		else
-		//		{
-		//			v1 = Vertices[i];
-		//			v2 = Vertices[i++];
-		//		}
-
-		//		Vector direction2 = v2 - v1;
-
-		//		Vector cross = direction1.Cross(direction2);
-		//		double crossLengthSquared = LengthSquared(cross);
-
-		//		// Lines are parallel
-		//		if (crossLengthSquared < float.Epsilon)
-		//		{
-		//			intersection = null;
-		//			return false;
-		//		}
-
-		//		Vector vectorBetweenStarts = v2 - p;
-
-		//		double u = (vectorBetweenStarts.Cross(direction2) * cross) / crossLengthSquared;
-		//		double v = (vectorBetweenStarts.Cross(direction1) * cross) / crossLengthSquared;
-
-		//		// Lines intersect
-		//		if (u >= 0f && u <= 1f && v >= 0f && v <= 1f)
-		//		{
-		//			intersection = new Vector(this.GetCenterPoint()) + direction1 * u;
-		//			return true;
-		//		}
-
-		//		// Lines do not intersect
-		//		intersection = null;
-		//		return false;
-		//	}
-
-		//	return false;
-		//}
-
-		//public bool Contains(Vertex v)
-		//{
-		//	Edge newEdge = new Edge(gl, this.GetCenterPoint(), v);
-
-		//	for (int i = 0; i < Vertices.Length; i++)
-		//	{
-		//		Edge facetEdge;
-		//		if(i == Vertices.Length - 1)
-		//		{
-		//			facetEdge = new Edge(gl, Vertices[i], Vertices[0]);
-		//		}
-		//		else
-		//		{
-		//			facetEdge = new Edge(gl, Vertices[i], Vertices[i++]);
-		//		}
-
-		//		if (newEdge.IntersectsEdge(facetEdge))
-		//		{
-		//			return true;
-		//		}
-		//	}
-
-		//	return false;
-		//}
-
-		//public bool Contains(Vertex point)
-		//{
-		//	//int intersectCount = 0;
-
-		//	//for (int i = 0; i < Vertices.Length; i++)
-		//	//{
-		//	//	int j = (i + 1) % Vertices.Length;
-
-		//	//	if (((Vertices[i].Y <= point.Y) && (Vertices[j].Y > point.Y))
-		//	//		|| ((Vertices[i].Y > point.Y) && (Vertices[j].Y <= point.Y)))
-		//	//	{
-		//	//		double vt = (point.Y - Vertices[i].Y) / (Vertices[j].Y - Vertices[i].Y);
-
-		//	//		if (point.X < Vertices[i].X + vt * (Vertices[j].X - Vertices[i].X))
-		//	//		{
-		//	//			intersectCount++;
-		//	//		}
-		//	//	}
-		//	//}
-
-		//	//return (intersectCount % 2 == 1);
-
-
-
-		//	Vector center = null;
-
-		//	foreach (Vertex vertex in Vertices)
-		//	{
-		//		center = new Vertex(center) + vertex;
-		//	}
-
-		//	center /= Vertices.Length;
-
-		//	Vector3 normal = Vector3.Cross(polygonVertices[1] - polygonVertices[0], polygonVertices[2] - polygonVertices[0]);
-		//	normal.Normalize();
-
-		//	Vector3 toPoint = point - center;
-
-		//	if (Vector3.Dot(normal, toPoint) > 0)
-		//	{
-		//		return false;
-		//	}
-
-		//	for (int i = 0; i < polygonVertices.Count; i++)
-		//	{
-		//		Vector3 edge = polygonVertices[(i + 1) % polygonVertices.Count] - polygonVertices[i];
-		//		Vector3 toEdge = point - polygonVertices[i];
-
-		//		if (Vector3.Dot(normal, Vector3.Cross(edge, toEdge)) < 0)
-		//		{
-		//			return false;
-		//		}
-		//	}
-
-		//	return true;
-		//}
-
-		public double LengthSquared(Vector vector)
-		{
-			return vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2];
+			return true;
 		}
 
 		public Vector CalculateNormal()
@@ -437,13 +248,22 @@ namespace CadEditor
 
 		public Vertex GetCenterPoint()
 		{
-			Vertex fp1 = this[0];
-			Vertex fp2 = this[2];
+			double x = 0;
+			double y = 0;
+			double z = 0;
 
-			double x = (fp1.X + fp2.X) / 2;
-			double y = (fp1.Y + fp2.Y) / 2;
-			double z = (fp1.Z + fp2.Z) / 2;
-			return new Vertex(gl, x, y, z);
+			for(int j = 0; j < Vertices.Length; j++)
+			{
+				x += Vertices[j].X;
+				y += Vertices[j].Y;
+				z += Vertices[j].Z;
+			}
+
+			x /= Vertices.Length;
+			y /= Vertices.Length;
+			z /= Vertices.Length;
+
+			return new Vertex(x, y, z, gl);
 		}
 
 		public override string ToString()
@@ -519,6 +339,33 @@ namespace CadEditor
 		{
 			IsSelected = true;
 		}
+
+		public Facet GetClickableFacet(double tolerance)
+		{
+			Facet resultFacet = this.Clone();
+
+			for(int i = 0; i < resultFacet.Vertices.Length; i++)
+			{
+				Vertex currentVertex = resultFacet.Vertices[i].Clone();
+				Vector directionToCenter = currentVertex - GetCenterPoint();
+
+				resultFacet[i] = new Vertex(new Vector(currentVertex) - directionToCenter * tolerance);
+			}
+
+			return resultFacet;
+		}
+
+		public Facet Clone()
+		{
+			Vertex[] vertices = new Vertex[4];
+
+			for(int i = 0; i < this.Vertices.Length; i++)
+			{
+				vertices[i] = this.Vertices[i].Clone();
+			}
+
+			return new Facet(vertices);
+		}
 	}
 
 	public class Edge: IEquatable<Edge>, ISelectable
@@ -530,13 +377,12 @@ namespace CadEditor
 
 		public List<Facet> FacetParents { get; set; }
 
-
 		public float LineWidth { get; set; } = 3.0f;
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-		public Edge(OpenGL _gl, Vertex _v1, Vertex _v2)
+		public Edge(Vertex _v1, Vertex _v2, OpenGL _gl = null)
 		{
 			V1 = _v1;
 			V2 = _v2;
@@ -595,17 +441,19 @@ namespace CadEditor
 		//Check if point contains edge
 		public bool Contains(Vertex point)
 		{
-			double accuracy = 0.1;
-			if ((Math.Abs(point.X - V1.X) <= accuracy && Math.Abs(point.Y - V1.Y) <= accuracy && Math.Abs(point.Z - V1.Z) <= accuracy) ||
-				(Math.Abs(point.X - V2.X) <= accuracy && Math.Abs(point.Y - V2.Y) <= accuracy && Math.Abs(point.Z - V2.Z) <= accuracy))
+            double lengthErrorThreshold = 1e-3;
+
+            // See if this lies on the segment
+            if ((new Vector(point) - new Vector(V1)).LengthSquared() + (new Vector(point) - new Vector(V2)).LengthSquared()
+			<= new Vector(new Vertex(V2 - V1)).LengthSquared() + lengthErrorThreshold)
 			{
 				return true;
-			}
+            }
 			else
 			{
 				return false;
 			}
-		}
+        }
 
 		public void Draw(double[] color = null, float lineWidth = 3.0f)
 		{
@@ -648,7 +496,7 @@ namespace CadEditor
 			double y = (V1.Y + V2.Y) / 2;
 			double z = (V1.Z + V2.Z) / 2;
 
-			return new Vertex(gl, x, y, z); 
+			return new Vertex(x, y, z, gl); 
 		}
 
 		public void Select()
@@ -658,41 +506,59 @@ namespace CadEditor
 
 		public bool IntersectsEdge(Edge edge)
 		{
-			// Calculate the direction vector of the line
-			Vector lineDirection = new Vector(edge.V2) - new Vector(edge.V1);
+            Vector line1Direction = V2 - V1;
+            Vector line2Direction = edge.V2 - edge.V1;
 
-			// Calculate the normal of the plane that contains the line and the ray
-			Vector planeNormal = lineDirection.Cross(new Vector(V1) - new Vector(V2));
+            Vector intersectionDirection = line1Direction.Cross(line2Direction);
+            double intersectionMagSqr = intersectionDirection.LengthSquared();
 
-			// Calculate the distance between the line and the ray
-			double denominator = planeNormal * planeNormal;
-			double numerator = planeNormal * (new Vector(V1) - new Vector(edge.V1));
-			double distance = -numerator / denominator;
+            if (intersectionMagSqr < 0.0001f) // lines are parallel
+            {
+                return false;
+            }
 
-			// Check if the intersection point lies on the line segment
-			float epsilon = 0.0001f;
-			if (distance < -epsilon || distance > 1 + epsilon)
-			{
-				return false;
-			}
+            Vector toLine2Start = edge.V1 - V1;
+            double t = (toLine2Start.Cross(line2Direction) * intersectionDirection) / intersectionMagSqr;
+            double u = (toLine2Start.Cross(line1Direction) * intersectionDirection) / intersectionMagSqr;
 
-			// Calculate the intersection point
-			Vertex intersectionPoint = new Vertex(new Vector(edge.V1) + lineDirection * distance);
+            if (t < 0f || t > 1f || u < 0f || u > 1f) // intersection point is outside of both line segments
+            {
+                return false;
+            }
 
-			if (!edge.Contains(intersectionPoint))
-			{
-				return false;
-			}
+            //Vector intersectionPoint = new Vector(V1) + line1Direction * t;
+            return true;
+        }
 
-			return true;
-		}
-	}
+        public Edge Clone()
+        {
+            return new Edge(V1.Clone(), V2.Clone());
+        }
+
+        public Edge GetClickableEdge(double tolerance)
+        {
+            Edge resultEdge = this.Clone();
+			Vertex[] edgeVertices = new Vertex[] { resultEdge.V1, resultEdge.V2 };
+            for (int i = 0; i < edgeVertices.Length; i++)
+            {
+                Vertex currentVertex = edgeVertices[i];
+                Vector directionToCenter = currentVertex - GetCenterPoint();
+
+				edgeVertices[i] = new Vertex(new Vector(currentVertex) - directionToCenter * tolerance);
+            }
+
+			resultEdge.V1 = edgeVertices[0];
+			resultEdge.V2 = edgeVertices[1];
+
+            return resultEdge;
+        }
+    }
 
 	public class Axis: Edge
 	{
 		public CoordinateAxis CoordinateAxis { get; set; }
 
-		public Axis(OpenGL openGL, Vertex v1, Vertex v2, CoordinateAxis axis): base(openGL, v1, v2)
+		public Axis(Vertex v1, Vertex v2, CoordinateAxis axis, OpenGL openGL = null): base(v1, v2, openGL)
 		{
 			CoordinateAxis = axis;
 		}

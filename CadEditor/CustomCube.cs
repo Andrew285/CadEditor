@@ -56,61 +56,61 @@ namespace CadEditor
 			//Initializing Vertices
 			mesh.Vertices = new Vertex[]
 			{
-				new Vertex(gl, -size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z),
-				new Vertex(gl, -size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z),
-				new Vertex(gl, -size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z),
-				new Vertex(gl, -size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z),
-				new Vertex(gl, size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z),
-				new Vertex(gl, size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z),
-				new Vertex(gl, size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z),
-				new Vertex(gl, size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z)
+				new Vertex(-size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z, gl),
+				new Vertex(-size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z, gl),
+				new Vertex(-size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z, gl),
+				new Vertex(-size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z, gl),
+				new Vertex(size + centerPoint.X, -size + centerPoint.Y, -size + centerPoint.Z, gl),
+				new Vertex(size + centerPoint.X, -size + centerPoint.Y, size + centerPoint.Z, gl),
+				new Vertex(size + centerPoint.X, size + centerPoint.Y, -size + centerPoint.Z, gl),
+				new Vertex(size + centerPoint.X, size + centerPoint.Y, size + centerPoint.Z, gl)
 			};
 
 			//Initializing Facets
 			mesh.Facets = new Facet[FACETS_AMOUNT]
 			{
-				new Facet(gl, new Vertex[]
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[1],
 					mesh.Vertices[5],
 					mesh.Vertices[7],
 					mesh.Vertices[3]
-				}),
-				new Facet(gl, new Vertex[]
+				}, gl),
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[2],
 					mesh.Vertices[6],
 					mesh.Vertices[4]
-				}),
-				new Facet(gl, new Vertex[]
+				}, gl),
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[2],
 					mesh.Vertices[3],
 					mesh.Vertices[7],
 					mesh.Vertices[6]
-				}),
-				new Facet(gl, new Vertex[]
+				}, gl),
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[4],
 					mesh.Vertices[5],
 					mesh.Vertices[1]
-				}),
-				new Facet(gl, new Vertex[]
+				}, gl),
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[4],
 					mesh.Vertices[6],
 					mesh.Vertices[7],
 					mesh.Vertices[5]
-				}),
-				new Facet(gl, new Vertex[]
+				}, gl),
+				new Facet(new Vertex[]
 				{
 					mesh.Vertices[0],
 					mesh.Vertices[1],
 					mesh.Vertices[3],
 					mesh.Vertices[2]
-				})
+				}, gl)
 			};
 
 			//Defining facet - vertex relationships
@@ -131,7 +131,7 @@ namespace CadEditor
 				Facet currentFacet = mesh.Facets[i];
 				for(int j = 0; j < 4; j++)
 				{
-					Edge newEdge = new Edge(gl, currentFacet.Vertices[j], currentFacet.Vertices[(j+1)%4]);
+					Edge newEdge = new Edge(currentFacet.Vertices[j], currentFacet.Vertices[(j+1)%4], gl);
 					if(edges.Count != 0)
 					{
 						if (!newEdge.Exists(edges))

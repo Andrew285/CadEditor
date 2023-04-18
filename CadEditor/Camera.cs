@@ -62,7 +62,7 @@ namespace CadEditor
         {
             gl = _gl;
             rotationPoint = _rotationPoint;
-			position = new Vertex(gl, -1f, -1f, 0.5f);
+			position = new Vertex(-1f, -1f, 0.5f, gl);
 			cameraPosition = new Vector(new double[] {0, 0, 5});
         }
 
