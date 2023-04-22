@@ -43,6 +43,7 @@ namespace CadEditor
 
 			// Calculate the distance from the ray origin to the plane
 			double distance = ((new Vector(facetCenterPoint) - origin) * planeNormal) / dotProduct;
+			//double distance = ((new Vector(facet.Vertices[0]) - origin) * planeNormal) / dotProduct;
 			
 			// Check if the intersection point is behind the ray origin
 			if (distance < 0)
