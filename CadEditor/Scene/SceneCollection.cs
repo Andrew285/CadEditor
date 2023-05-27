@@ -20,13 +20,13 @@ namespace CadEditor
 			sceneCollection.ExpandAll();
 		}
 
-		public void Add(CustomCube cube)
+		public void Add(ComplexCube cube)
 		{
-			sceneCollection.Nodes[0].Nodes.Add(new TreeNode(cube.CubeName));
+			sceneCollection.Nodes[0].Nodes.Add(new TreeNode(cube.Name));
 			sceneCollection.Update();
 		}
 
-		public void Remove(CustomCube cube)
+		public void Remove(ComplexCube cube)
 		{
 			for(int i = 0; i < sceneCollection.Nodes.Count; i++)
 			{
@@ -34,7 +34,7 @@ namespace CadEditor
 				{
 					for(int j = 0; j < sceneCollection.Nodes[i].Nodes.Count; j++)
 					{
-						if (sceneCollection.Nodes[i].Nodes[j].Text == cube.CubeName)
+						if (sceneCollection.Nodes[i].Nodes[j].Text == cube.Name)
 						{
 							sceneCollection.Nodes[i].Nodes.RemoveAt(j);
 						}
@@ -42,7 +42,7 @@ namespace CadEditor
 				}
 				else
 				{
-					if (sceneCollection.Nodes[i].Text == cube.CubeName)
+					if (sceneCollection.Nodes[i].Text == cube.Name)
 					{
 						sceneCollection.Nodes.RemoveAt(i);
 					}

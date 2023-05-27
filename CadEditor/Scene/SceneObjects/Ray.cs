@@ -24,10 +24,10 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public Vertex RayIntersectsPlane(Facet facet)
+		public Point RayIntersectsPlane(Plane facet)
 		{
 			Vector intersectionPoint;
-			Vertex facetCenterPoint = facet.GetCenterPoint();
+			Point facetCenterPoint = (Point)facet.GetCenterPoint();
 
 			//Calculate planeNormal
 			Vector planeNormal = facet.CalculateNormal();
@@ -54,16 +54,16 @@ namespace CadEditor
 			// Calculate the intersection point
 			intersectionPoint = origin + distance * direction;
 
-			return new Vertex(intersectionPoint);
+			return new Point(intersectionPoint);
 		}
 
-		public Vertex RayIntersectsLine(Edge edge)
+		public Point RayIntersectsLine(Line edge)
 		{
 			double coPlanerThreshold = 0.7;
 
 			Vector da = Direction;
-			Vector db = edge.V2 - edge.V1;
-			Vector dc = new Vector(edge.V1) - Origin;
+			Vector db = edge.P2 - edge.P1;
+			Vector dc = new Vector(edge.P1) - Origin;
 
 			double dd = Math.Abs(dc * da.Cross(db));
 
@@ -77,7 +77,7 @@ namespace CadEditor
 			if (s >= 0.0)   // Means we have an intersection
 			{
 				Vector intersection = Origin + s * da;
-				return new Vertex(intersection);
+				return new Point(intersection);
 			}
 			else
 			{
@@ -86,7 +86,7 @@ namespace CadEditor
 
 		}
 
-		public Vertex RayIntersectsVertex(Vertex vertex)
+		public Point RayIntersectsVertex(Point vertex)
 		{
 			// Calculate the components of the direction vector.
 			double dx = Direction[0];
@@ -103,7 +103,7 @@ namespace CadEditor
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
-				return new Vertex(tx, ty, tz, gl);
+				return new Point(tx, ty, tz, gl);
 			}
 			else
 			{
