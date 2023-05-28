@@ -99,7 +99,7 @@ namespace CadEditor
 			double tz = (vertex.Z - Origin[2]) / dz;
 
 			// Check if all the parameter values are equal (within some tolerance).
-			double accuracy = 0.9;
+			double accuracy = 0.1;
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
@@ -111,6 +111,5 @@ namespace CadEditor
 				return null;
 			}
 		}
-
 	}
 }

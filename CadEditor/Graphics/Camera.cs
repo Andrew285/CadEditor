@@ -13,8 +13,6 @@ namespace CadEditor
     public class Camera: SceneElement
     {
 		private OpenGL gl;
-		private Vector cameraPosition;
-        private Vector rotationPoint;
 
 		public double CameraDistance { get; set; } = 5.0f;
         public double rtri { get; set; }
@@ -22,7 +20,6 @@ namespace CadEditor
 
 
 		private Point position;
-		private Matrix projectionMatrix = new Matrix(4, 4);
 		private double aspectRatio = 1.0f;
 		private double fieldOfView = 60.0f;
 		private double near = 0.5f;
@@ -61,9 +58,7 @@ namespace CadEditor
 		public Camera(OpenGL _gl, Vector _rotationPoint)
         {
             gl = _gl;
-            rotationPoint = _rotationPoint;
 			position = new Point(-1f, -1f, 0.5f, gl);
-			cameraPosition = new Vector(new double[] {0, 0, 5});
         }
 
         public void RotateAxisX()

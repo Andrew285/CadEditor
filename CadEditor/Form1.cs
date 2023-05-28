@@ -1,8 +1,10 @@
 ﻿using CadEditor.Graphics;
+using CadEditor.MeshObjects;
 using SharpGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection.Emit;
+using System.IO;
 using System.Windows.Forms;
 using Label = System.Windows.Forms.Label;
 
@@ -140,7 +142,6 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-
                 IGraphics selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
                 //check type of selected object
@@ -184,6 +185,7 @@ namespace CadEditor
                     openGLControl1.ContextMenu = new ContextMenu();
                     openGLControl1.ContextMenu.MenuItems.Add("Select Object", Select_Object_click);
                     openGLControl1.ContextMenu.MenuItems.Add("Deselect Object", Deselect_Object_click);
+                    openGLControl1.ContextMenu.MenuItems.Add("Divide", Divide_Object_click);
                     openGLControl1.ContextMenu.MenuItems.Add("Delete", Delete_Object_click);
 
                     openGLControl1.ContextMenu.Show(openGLControl1, new System.Drawing.Point(e.X, e.Y));
@@ -214,14 +216,8 @@ namespace CadEditor
                 double sensitivityLevel = 0.01;
                 double value = horizontalAngle * sensitivityLevel;
                 int index = -1;
-
-
-                //int temp = a;
-                //a = b;
-                //b = temp;
-
-                //SelectedObject = NonDrawable;
                 double[] coords = new double[3];
+
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
                     coords = new double[] { value, 0, 0};
@@ -244,7 +240,8 @@ namespace CadEditor
                     index = 2;
 				}
 
-                if(index >= 0)
+                //transform vertices in different way if cube is divided into finite elements
+                if(index >= 0 && SelectedNonDrawableCube != null)
                 {
                     int indexOfPoint = ((Point)SelectedObject).ParentCube.Mesh.GetIndexOfPoint((Point)SelectedObject);
                     Point p = SelectedNonDrawableCube.Mesh.Vertices[indexOfPoint];
@@ -266,7 +263,6 @@ namespace CadEditor
 				SelectedAxisCubeEditMode.Deselect();
                 SelectedAxisCubeEditMode = null;
 			}
-			//SelectedFacetViewMode = null;
 		}
 
 		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
@@ -296,6 +292,33 @@ namespace CadEditor
 			selectedCube.Deselect();
 		}
 
+		private void Divide_Object_click(object sender, EventArgs e)
+		{
+			if (SelectedObject != null && SelectedObject is ComplexCube)
+			{
+				ComplexCube customCube = (ComplexCube)SelectedObject;
+				DividingCubeForm form = new DividingCubeForm();
+				form.TopMost = true;
+				form.FormBorderStyle = FormBorderStyle.FixedDialog;
+				form.StartPosition = FormStartPosition.CenterScreen;
+				form.MinimizeBox = false;
+				form.MaximizeBox = false;
+
+				DialogResult result = form.ShowDialog();
+
+				if (result == DialogResult.OK)
+				{
+					int[] nValues = form.nValues;
+					customCube.Divide(nValues);
+					scene.NonDrawableCubes.Add(customCube, customCube.Clone());
+				}
+			}
+			else
+			{
+				Output.ShowMessageBox("Warning", "There is no selected cube");
+			}
+		}
+
 		private void Delete_Object_click(object sender, EventArgs e)
 		{
 		    scene.DeleteCompletely(selectedCube);
@@ -321,47 +344,9 @@ namespace CadEditor
 			scene.Update();
 		}
 
-        private void openGLControl1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            //this.TopMost = true;
-        }
-
         private void checkBox_DrawFacets_CheckedChanged(object sender, EventArgs e)
         {
             scene.DrawFacets = checkBox_DrawFacets.Checked;
-        }
-
-        private void button_DivideCube_Click(object sender, EventArgs e)
-        {
-            if(SelectedObject != null && SelectedObject is ComplexCube)
-            {
-                ComplexCube customCube= (ComplexCube)SelectedObject;
-                DividingCubeForm form = new DividingCubeForm();
-                form.TopMost = true;
-                form.FormBorderStyle = FormBorderStyle.FixedDialog;
-                form.StartPosition = FormStartPosition.CenterScreen;
-                form.MinimizeBox = false;
-                form.MaximizeBox = false;
-
-                DialogResult result = form.ShowDialog();
-
-                if (result == DialogResult.OK)
-                {
-                    int[] nValues = form.nValues;
-                    customCube.Divide(nValues);
-                    scene.NonDrawableCubes.Add(customCube, customCube.Clone());
-                }
-            }
-            else
-            {
-                Output.ShowMessageBox("Warning", "There is no selected cube");
-            }
-            
         }
 
         public static DialogResult InputBox()
@@ -416,5 +401,87 @@ namespace CadEditor
 
             return dialogResult;
         }
-    }
+
+		private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+            scene.DeselectAll();
+
+            TreeNode selectedTreeNode = treeView1.SelectedNode;
+            if(selectedTreeNode != null)
+            {
+                List<IGraphics> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
+                if(nodeObjects != null)
+                {
+                    if(nodeObjects.Count > 1)
+                    {
+						foreach (IGraphics graphicsObject in nodeObjects)
+						{
+							graphicsObject.Select();
+						}
+					}
+                    else
+                    {
+						SelectedObject = nodeObjects[0];
+						nodeObjects[0].Select();
+						scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+					}
+				}
+            }
+		}
+
+		private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+			saveFileDialog.Title = "Save File";
+			saveFileDialog.FileName = "MyFile.txt"; // Default file name
+
+			DialogResult result = saveFileDialog.ShowDialog();
+			if (result == DialogResult.OK)
+			{
+				string filePath = saveFileDialog.FileName;
+				string exportString = scene.Export();
+
+				try
+				{
+					using (StreamWriter writer = new StreamWriter(filePath))
+					{
+                        writer.WriteLine(exportString);
+						writer.Close(); // Close the writer to flush and release resources
+					}
+
+					MessageBox.Show("File saved successfully.", "Save File", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Error occurred while saving the file: " + ex.Message, "Save File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+
+			}
+
+		}
+
+		private void importToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+			openFileDialog.Title = "Open File";
+
+			DialogResult result = openFileDialog.ShowDialog();
+			if (result == DialogResult.OK)
+			{
+				string filePath = openFileDialog.FileName;
+
+				try
+				{
+					string[] lines = File.ReadAllLines(filePath);
+                    scene.Import(lines);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Error occurred while reading the file: " + ex.Message, "Read File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
+	}
 }

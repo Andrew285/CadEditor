@@ -10,8 +10,6 @@ namespace CadEditor.Graphics
     public interface ISelectable
     {
         bool IsSelected { get; set; }
-        //Color SelectedColor { get; set; }
-        //Color NonSelectedColor { get; set; }
 
         void Select();
         void Deselect();

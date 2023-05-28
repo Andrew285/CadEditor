@@ -1,4 +1,5 @@
 ﻿using CadEditor.Graphics;
+using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph.Primitives;
 using System;
@@ -120,20 +121,19 @@ namespace CadEditor
 	public class Point: IGraphics
     {
 		public OpenGL GL { get; set; }
-
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
         public List<Line> EdgeParents { get; set; }
 		public List<Plane> FacetParents { get; set; }
 		public CustomCube ParentCube { get; set; }
-
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Pink;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-		public Point(double[] values)
+        public Point(double[] values, OpenGL _gl = null)
 		{
+            GL = _gl;
             X = values[0];
             Y = values[1];
             Z = values[2];
@@ -163,7 +163,7 @@ namespace CadEditor
         {
             if(p != null)
             {
-                return this.X == p.X && this.Y == p.Y && this.Z == p.Z;
+                return Math.Abs(this.X - p.X) < 0.00001 && Math.Abs(this.Y - p.Y) < 0.00001 && Math.Abs(this.Z - p.Z) < 0.00001;
             }
 
             return false;
@@ -199,16 +199,6 @@ namespace CadEditor
 			return new Vector(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 		}
 
-		//public override bool Equals(object obj)
-		//{
-		//	return Equals(obj as Point);
-		//}
-
-		//public bool Equals(Point other)
-		//{
-		//	return this == other;
-		//}
-
 		public override int GetHashCode()
 		{
 			return (int)X + (int)Y + (int)Z;
@@ -216,7 +206,7 @@ namespace CadEditor
 
 		public override string ToString()
 		{
-			return String.Format("({0}, {1}, {2})", X, Y, Z);
+			return String.Format("({0},{1},{2})", X, Y, Z);
 		}
 
         public Point GetWorldCoordinates(OpenGL gl)
@@ -274,176 +264,11 @@ namespace CadEditor
             GL.Vertex(X, Y, Z);
 		}
 
-        //public void Move(double _x, double _y, double _z)
-        //{
-        //          Point copiedPoint = this.Clone();
-
-        //          X += _x;
-        //          Y += _y;
-        //          Z += _z;
-
-        //          if (ParentCube != null && ParentCube.ParentCube != null && ParentCube is ComplexCube)
-        //          {
-        //              //Point p = ParentCube.ParentCube.Mesh.ContainsPoint(copiedPoint);
-        //              //if(p != null)
-        //              //{
-        //              //    p.X += _x;
-        //              //    p.Y += _y;
-        //              //    p.Z += _z;
-        //              //}
-        //              //ParentCube.Transform();
-
-        //              //Point foundPoint = null;
-        //              //foreach(Point p in ParentCube.ParentCube.Mesh.Vertices)
-        //              //{
-        //              //    if(p.X == copiedPoint.X && p.Y == copiedPoint.Y && p.Z == copiedPoint.Z)
-        //              //    {
-        //              //        foundPoint = p;
-        //              //        break;
-        //              //    }
-        //              //}
-
-        //              //if (foundPoint != null)
-        //              //{
-        //              //    foundPoint.X += _x;
-        //              //    foundPoint.Y += _y;
-        //              //    foundPoint.Z += _z;
-        //              //}
-        //              ParentCube.Transform();
-        //          }
-        //      }
-
-        //public void Move(double _x, double _y, double _z)
-        //{
-        //    Point copiedPoint = this;
-
-        //    if (_x != 0 || _y != 0 || _z != 0)
-        //    {
-        //        if (ParentCube != null && ParentCube.ParentCube != null && ParentCube is ComplexCube)
-        //        {
-        //            //Point meshPoint = ParentCube.Mesh.ContainsPoint(copiedPoint);
-        //            //int indexOfPoint = ParentCube.Mesh.GetIndexOfPoint(meshPoint);
-        //            //Point p = ParentCube.ChangebaleMesh.Vertices[indexOfPoint];
-
-
-        //            if (ParentCube.ParentCube.CubeMeshPoints.ContainsKey(copiedPoint))
-        //            {
-        //                List<ComplexCube> cubes = ParentCube.ParentCube.CubeChangebaleMeshPoints[copiedPoint];
-        //                for (int i = 0; i < cubes.Count; i++)
-        //                {
-        //                    Point p = cubes[i].ChangebaleMesh.ContainsPoint(copiedPoint);
-        //                    if (p != null)
-        //                    {
-        //                        p.X += _x;
-        //                        p.Y += _y;
-        //                        p.Z += _z;
-        //                    }
-        //                }
-        //            }
-
-        //            int index = 0;
-        //            if (_x == 0 && _y == 0)
-        //            {
-        //                index = 2;
-        //            }
-        //            else if (_x == 0 && _z == 0)
-        //            {
-        //                index = 1;
-        //            }
-        //            else if (_y == 0 && _z == 0){
-        //                index = 0;
-        //            }
-
-        //            ParentCube.Transform(index);
-        //        }
-        //        else
-        //        {
-        //            X += _x;
-        //            Y += _y;
-        //            Z += _z;
-        //        }
-        //    }
-        //}
-
         public void Move(double _x, double _y, double _z)
         {
 			X += _x;
 			Y += _y;
 			Z += _z;
-
-
-
-   //         Point meshPoint;
-
-   //         if()
-   //         int pointIndex = ParentCube.DrawableMesh.GetIndexOfPoint(this);
-   //         if(ParentCube.CenterPoint.X == this.X &&
-			//		ParentCube.CenterPoint.Y == this.Y &&
-			//		ParentCube.CenterPoint.Z == this.Z)
-   //         {
-			//	meshPoint = ParentCube.CenterPoint;
-			//}
-			//else if(pointIndex == -1)
-   //         {
-			//	meshPoint = ParentCube.NonDrawableMesh.ContainsPoint(this);
-   //         }
-   //         else
-   //         {
-   //             meshPoint = ParentCube.NonDrawableMesh.Vertices[pointIndex];
-   //         }
-
-			//meshPoint.X += _x;
-   //         meshPoint.Y += _y;
-   //         meshPoint.Z += _z;
-
-   //         if(ParentCube != null)
-   //         {
-   //             if(ParentCube is ComplexCube)
-   //             {
-   //                 int index = 0;
-   //                 if (_x == 0 && _y == 0)
-   //                 {
-   //                     index = 2;
-   //                 }
-   //                 else if (_x == 0 && _z == 0)
-   //                 {
-   //                     index = 1;
-   //                 }
-   //                 else if (_y == 0 && _z == 0)
-   //                 {
-   //                     index = 0;
-   //                 }
-   //             ((ComplexCube)ParentCube).Transform(index);
-   //             }
-   //         }
-
-            //if(ParentCube != null && ParentCube.ParentCube != null && ((ComplexCube)(ParentCube.ParentCube)).bigCubePoints.Count != 0)
-            //{
-            //    int index = 0;
-            //    if (_x == 0 && _y == 0)
-            //    {
-            //        index = 2;
-            //    }
-            //    else if (_x == 0 && _z == 0)
-            //    {
-            //        index = 1;
-            //    }
-            //    else if (_y == 0 && _z == 0)
-            //    {
-            //        index = 0;
-            //    }
-            //    ((ComplexCube)(ParentCube.ParentCube)).Transform(index);
-            //}
-            //else
-            //{
-            //    Point meshPoint = ParentCube.DrawableMesh.ContainsPoint(this);
-            //    if (meshPoint != null)
-            //    {
-            //        meshPoint.X = this.X;
-            //        meshPoint.Y = this.Y;
-            //        meshPoint.Z = this.Z;
-            //    }
-            //}
         }
 
         public void Select()
@@ -537,9 +362,20 @@ namespace CadEditor
         public Vector CalculateNormal()
         {
             // Calculate two vectors lying on the plane
-            Vector p1 = new Vector(Points[0]);
-            Vector p2 = new Vector(Points[1]);
-            Vector p3 = new Vector(Points[2]);
+            Vector p1 = null, p2 = null, p3 = null;
+            if(Points.Count == 8)
+            {
+				p1 = new Vector(Points[0]);
+				p2 = new Vector(Points[2]);
+				p3 = new Vector(Points[4]);
+			}
+            else if (Points.Count == 4)
+            {
+				p1 = new Vector(Points[0]);
+				p2 = new Vector(Points[1]);
+				p3 = new Vector(Points[2]);
+			}
+
 
             Vector v1 = p2 - p1;
             Vector v2 = p3 - p1;
@@ -548,7 +384,7 @@ namespace CadEditor
             Vector normal = v1.Cross(v2);
 
             // Normalize the normal vector
-            normal = normal.Normalize();
+            //normal = normal.Normalize();
 
             return normal;
         }
@@ -650,12 +486,9 @@ namespace CadEditor
 	public class Line: IEquatable<Line>, IGraphics
 	{
 		public OpenGL GL { get; set; }
-
 		public Point P1 { get; set; }
 		public Point P2 { get; set; }
-
 		public List<Plane> FacetParents { get; set; }
-
 		public float LineWidth { get; set; } = 3.0f;
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
@@ -698,17 +531,6 @@ namespace CadEditor
 
             return false;
         }
-
-
-		//public override bool Equals(object obj)
-		//{
-		//	return Equals(obj as Line);
-		//}
-
-		//public bool Equals(Line other)
-		//{
-		//	return this == other;
-		//}
 
 		public override int GetHashCode()
 		{
@@ -776,7 +598,6 @@ namespace CadEditor
                 return false;
             }
 
-            //Vector intersectionPoint = new Vector(V1) + line1Direction * t;
             return true;
         }
 
