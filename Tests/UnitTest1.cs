@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using SharpGL;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -11,58 +12,58 @@ namespace Tests
         [TestMethod]
         public void IsPointOnLine()
         {
-            Vertex firstVertex = new Vertex(-1, -1, 1);
-            Vertex secondVertex = new Vertex(1, -1, 1);
-            Edge edge = new Edge(firstVertex, secondVertex);
+            Point firstVertex = new Point(-1, -1, 1);
+            Point secondVertex = new Point(1, -1, 1);
+            Line edge = new Line(firstVertex, secondVertex);
 
-            Assert.IsTrue(edge.Contains(new Vertex(-0.9, -1, 1)));
-            Assert.IsTrue(edge.Contains(new Vertex(0, -1, 1)));
-            Assert.IsTrue(edge.Contains(new Vertex(0.9, -1, 1)));
-            Assert.IsTrue(edge.Contains(new Vertex(0.9, -1, 1)));
+            Assert.IsTrue(edge.Contains(new Point(-0.9, -1, 1)));
+            Assert.IsTrue(edge.Contains(new Point(0, -1, 1)));
+            Assert.IsTrue(edge.Contains(new Point(0.9, -1, 1)));
+            Assert.IsTrue(edge.Contains(new Point(0.9, -1, 1)));
 
         }
 
         [TestMethod]
         public void IsPointNotOnLine()
         {
-            Vertex firstVertex = new Vertex(-1, -1, 1);
-            Vertex secondVertex = new Vertex(1, -1, 1);
-            Edge edge = new Edge(firstVertex, secondVertex);
+            Point firstVertex = new Point(-1, -1, 1);
+            Point secondVertex = new Point(1, -1, 1);
+            Line edge = new Line(firstVertex, secondVertex);
 
-            Assert.IsFalse(edge.Contains(new Vertex(1.9, -1, 1)));
-            Assert.IsFalse(edge.Contains(new Vertex(2, -1, 1)));
-            Assert.IsFalse(edge.Contains(new Vertex(-1.1, -1, 1)));
+            Assert.IsFalse(edge.Contains(new Point(1.9, -1, 1)));
+            Assert.IsFalse(edge.Contains(new Point(2, -1, 1)));
+            Assert.IsFalse(edge.Contains(new Point(-1.1, -1, 1)));
         }
 
         [TestMethod]
         public void IsPointOnFacet()
         {
-            Vertex firstVertex = new Vertex(-1, -1, 1);
-            Vertex secondVertex = new Vertex(1, -1, 1);
-            Vertex thirdVertex = new Vertex(1, 1, 1);
-            Vertex fouthVertex = new Vertex(-1, 1, 1);
-            Facet facet = new Facet(new Vertex[] { firstVertex, secondVertex, thirdVertex, fouthVertex });
+            Point firstVertex = new Point(-1, -1, 1);
+            Point secondVertex = new Point(1, -1, 1);
+            Point thirdVertex = new Point(1, 1, 1);
+            Point fouthVertex = new Point(-1, 1, 1);
+            Plane facet = new Plane(new List<Point> { firstVertex, secondVertex, thirdVertex, fouthVertex });
 
-            Assert.IsTrue(facet.Contains(new Vertex(0, 0, 1)));
-            Assert.IsTrue(facet.Contains(new Vertex(0.1, -0.1, 1)));
-            Assert.IsTrue(facet.Contains(new Vertex(-0.9, 0, 1)));
-            Assert.IsTrue(facet.Contains(new Vertex(-0.9, 0.9, 1)));
+            Assert.IsTrue(facet.Contains(new Point(0, 0, 1)));
+            Assert.IsTrue(facet.Contains(new Point(0.1, -0.1, 1)));
+            Assert.IsTrue(facet.Contains(new Point(-0.9, 0, 1)));
+            Assert.IsTrue(facet.Contains(new Point(-0.9, 0.9, 1)));
         }
 
         [TestMethod]
         public void IsPointNotOnFacet()
         {
-            Vertex firstVertex = new Vertex(-1, -1, 1);
-            Vertex secondVertex = new Vertex(1, -1, 1);
-            Vertex thirdVertex = new Vertex(1, 1, 1);
-            Vertex fouthVertex = new Vertex(-1, 1, 1);
-            Facet facet = new Facet(new Vertex[] { firstVertex, secondVertex, thirdVertex, fouthVertex });
+            Point firstVertex = new Point(-1, -1, 1);
+            Point secondVertex = new Point(1, -1, 1);
+            Point thirdVertex = new Point(1, 1, 1);
+            Point fouthVertex = new Point(-1, 1, 1);
+            Plane facet = new Plane(new List<Point> { firstVertex, secondVertex, thirdVertex, fouthVertex });
 
-            Assert.IsFalse(facet.Contains(new Vertex(2, 0, 1)));
-            Assert.IsFalse(facet.Contains(new Vertex(0, -2, 1)));
-            Assert.IsFalse(facet.Contains(new Vertex(-1, 0, 1.1)));
-            Assert.IsFalse(facet.Contains(new Vertex(-1.1, 0, 1)));
-            Assert.IsFalse(facet.Contains(new Vertex(-0.9, 1.9, 1)));
+            Assert.IsFalse(facet.Contains(new Point(2, 0, 1)));
+            Assert.IsFalse(facet.Contains(new Point(0, -2, 1)));
+            Assert.IsFalse(facet.Contains(new Point(-1, 0, 1.1)));
+            Assert.IsFalse(facet.Contains(new Point(-1.1, 0, 1)));
+            Assert.IsFalse(facet.Contains(new Point(-0.9, 1.9, 1)));
         }
     }
 }

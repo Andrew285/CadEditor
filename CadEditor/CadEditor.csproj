@@ -67,24 +67,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Camera.cs" />
-    <Compile Include="CustomCube.cs" />
+    <Compile Include="Graphics\IGraphics.cs" />
+    <Compile Include="Graphics\Camera.cs" />
+    <Compile Include="Maths\TransformMesh.cs" />
+    <Compile Include="MeshObjects\AxisCube.cs" />
+    <Compile Include="MeshObjects\ComplexCube.cs" />
+    <Compile Include="DividingCubeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DividingCubeForm.Designer.cs">
+      <DependentUpon>DividingCubeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Matrix.cs" />
-    <Compile Include="Mesh.cs" />
+    <Compile Include="Maths\Matrix.cs" />
+    <Compile Include="MeshObjects\CustomCube.cs" />
+    <Compile Include="MeshObjects\Mesh.cs" />
+    <Compile Include="Tools\Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CustomSceneGraph.cs" />
-    <Compile Include="Ray.cs" />
-    <Compile Include="Scene.cs" />
-    <Compile Include="SceneCollection.cs" />
-    <Compile Include="SceneGrid.cs" />
-    <Compile Include="Vector.cs" />
+    <Compile Include="Graphics\Ray.cs" />
+    <Compile Include="Scene\Scene.cs" />
+    <Compile Include="Scene\SceneCollection.cs" />
+    <Compile Include="Scene\SceneGrid.cs" />
+    <Compile Include="Maths\Vector.cs" />
+    <EmbeddedResource Include="DividingCubeForm.resx">
+      <DependentUpon>DividingCubeForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

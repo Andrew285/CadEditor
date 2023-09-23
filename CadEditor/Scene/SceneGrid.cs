@@ -13,6 +13,7 @@ namespace CadEditor
         {
             int N = 20;
             gl.Color(1.0f, 1.0f, 1.0f);
+            gl.LineWidth(1.0f);
             gl.Begin(OpenGL.GL_LINES);
             for (int i = 0; i < N; i++)
             {

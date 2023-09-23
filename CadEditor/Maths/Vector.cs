@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CadEditor.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,10 +30,10 @@ namespace CadEditor
 			values = new double[] { X, Y, Z };
 		}
 
-		public Vector(Vertex vertex)
+		public Vector(Point point)
 		{
 			Size = 3;
-				values = new double[] {vertex.X, vertex.Y, vertex.Z};
+			values = new double[] { point.X, point.Y, point.Z};
 		}
 
         public double Length()
