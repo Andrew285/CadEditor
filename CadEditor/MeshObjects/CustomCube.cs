@@ -121,13 +121,13 @@ namespace CadEditor.MeshObjects
 			}
 		}
 
-		public void Move(double x, double y, double z)
+		public void Move(Vector vector)
 		{
 			for (int i = 0; i < Mesh.Vertices.Count; i++)
 			{
-				Mesh.Vertices[i].Move(x, y, z);
+				Mesh.Vertices[i].Move(vector);
 			}
-			CenterPoint.Move(x, y, z);
+			CenterPoint.Move(vector);
 		}
 
 		public void Select()

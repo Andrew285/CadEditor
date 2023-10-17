@@ -12,6 +12,7 @@ namespace CadEditor
     public class ComplexCube: CustomCube
     {
         private const int VERTICES_ON_FACET = 8;
+        private Mesh divideLocalSystem;
         public List<Point> bigCubePoints;           //points used for approximation formulas
 
         public ComplexCube(OpenGL _gl, Point _centerPoint, double? _sizeX = null, double? _sizeZ = null, double? _sizeY = null, string _cubeName = null):
@@ -327,6 +328,7 @@ namespace CadEditor
 
             this.Mesh.Vertices = uniquePoints;
             this.Mesh.Edges = uniqueLines;
+            divideLocalSystem = this.Mesh.Clone();
         }
 
         /// <summary>
@@ -334,31 +336,43 @@ namespace CadEditor
         /// </summary>
         /// <param name="index">defines which coordinate would be operated on</param>
         /// <param name="cube">defines a cube from which all points will be transformed</param>
-        public void Transform(int index, ComplexCube cube)
+        public void Transform(Vector vector, Point point)
         {
-            for (int i = 0; i < cube.Mesh.Vertices.Count; i++)
+            int index = -1;
+            if (vector[0] != 0) index = 0;
+            else if (vector[1] != 0) index = 1;
+            else if (vector[2] != 0) index = 2;
+
+            if(index != -1)
             {
-                Point point1 = cube.Mesh.Vertices[i];
-                double sum = 0;
-                for (int m = 0; m < cube.bigCubePoints.Count; m++)
+                int indexOfPoint = this.Mesh.GetIndexOfPoint(point);
+                Point p = divideLocalSystem.Vertices[indexOfPoint];
+                p.Move(vector);
+
+                for (int i = 0; i < divideLocalSystem.Vertices.Count; i++)
                 {
-                    Point point2 = cube.bigCubePoints[m];
-
-                    Func<Point, Point, double> phiFunc = null;
-                    if (m >= 0 && m < 8)
+                    Point point1 = divideLocalSystem.Vertices[i];
+                    double sum = 0;
+                    for (int m = 0; m < this.bigCubePoints.Count; m++)
                     {
-                        phiFunc = TransformMesh.PhiAngle;
-                    }
-                    else if (m >= 8 && m < cube.bigCubePoints.Count)
-                    {
-                        phiFunc = TransformMesh.PhiEdge;
+                        Point point2 = this.bigCubePoints[m];
+
+                        Func<Point, Point, double> phiFunc = null;
+                        if (m >= 0 && m < 8)
+                        {
+                            phiFunc = TransformMesh.PhiAngle;
+                        }
+                        else if (m >= 8 && m < this.bigCubePoints.Count)
+                        {
+                            phiFunc = TransformMesh.PhiEdge;
+                        }
+
+                        double funcResult = phiFunc(point1, point2);
+                        sum += point2[index] * funcResult;
                     }
 
-                    double funcResult = phiFunc(point1, point2);
-                    sum += point2[index] * funcResult;
+                    this.Mesh.Vertices[i][index] = sum;
                 }
-
-                this.Mesh.Vertices[i][index] = sum;
             }
         }
 

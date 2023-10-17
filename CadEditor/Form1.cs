@@ -216,41 +216,49 @@ namespace CadEditor
                 double sensitivityLevel = 0.01;
                 double value = horizontalAngle * sensitivityLevel;
                 int index = -1;
-                double[] coords = new double[3];
+                Vector coords = new Vector(3);
 
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
-                    coords = new double[] { value, 0, 0};
-                    SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
+                    coords = new Vector(value, 0, 0);
+                    SelectedObject.Move(coords);
+					scene.MoveCoordinateAxes(coords);
                     index = 0;
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
-					coords = new double[] { 0, -value, 0 };
-					SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
+                    coords = new Vector(0, -value, 0);
+					SelectedObject.Move(coords);
+					scene.MoveCoordinateAxes(coords);
                     index = 1;
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
-					coords = new double[] { 0, 0, -value };
-					SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
+                    coords = new Vector(0, 0, -value);
+					SelectedObject.Move(coords);
+					scene.MoveCoordinateAxes(coords);
                     index = 2;
 				}
 
-                //transform vertices in different way if cube is divided into finite elements
-                if(index >= 0 && SelectedNonDrawableCube != null)
-                {
-                    int indexOfPoint = ((Point)SelectedObject).ParentCube.Mesh.GetIndexOfPoint((Point)SelectedObject);
-                    Point p = SelectedNonDrawableCube.Mesh.Vertices[indexOfPoint];
-                    p.Move(coords[0], coords[1], coords[2]);
-					((ComplexCube)((Point)SelectedObject).ParentCube).Transform(index, SelectedNonDrawableCube);
-				}
-			}
+                //SelectedObject.Move(coords);
 
-			mouseX = e.X;
+
+                //if (((Point)SelectedObject).ParentCube is ComplexCube)
+                //{
+                //    if (index != -1)
+                //    {
+                //        (((ComplexCube)((Point)SelectedObject).ParentCube)).Transform(index, SelectedNonDrawableCube);
+                //    }
+                //}
+
+                //transform vertices in different way if cube is divided into finite elements
+                if (index >= 0)
+                {
+                    ((ComplexCube)((Point)SelectedObject).ParentCube).Transform(new Vector(coords[0], coords[1], coords[2]), (Point)SelectedObject);
+                }
+            }
+
+            mouseX = e.X;
 			mouseY = e.Y;
 		}
 

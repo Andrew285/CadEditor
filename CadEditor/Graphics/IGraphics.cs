@@ -20,6 +20,6 @@ namespace CadEditor.Graphics
         OpenGL GL { get; }
 
         void Draw();
-        void Move(double x, double y, double z);
+        void Move(Vector vector);
     }
 }

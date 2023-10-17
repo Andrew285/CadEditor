@@ -264,11 +264,12 @@ namespace CadEditor
             GL.Vertex(X, Y, Z);
 		}
 
-        public void Move(double _x, double _y, double _z)
+        public void Move(Vector vector)
         {
-			X += _x;
-			Y += _y;
-			Z += _z;
+			X += vector[0];
+			Y += vector[1];
+			Z += vector[2];
+
         }
 
         public void Select()
@@ -437,11 +438,11 @@ namespace CadEditor
 			}
 		}
 
-		public void Move(double x, double y, double z)
+		public void Move(Vector vector)
 		{
 			foreach(Point v in Points)
 			{
-				v.Move(x, y, z);
+				v.Move(vector);
 			}
 		}
 
@@ -629,10 +630,10 @@ namespace CadEditor
 			GL.Vertex(P2.X, P2.Y, P2.Z);
 		}
 
-		public void Move(double x, double y, double z)
+		public void Move(Vector vector)
 		{
-			P1.Move(x, y, z);
-			P2.Move(x, y, z);
+			P1.Move(vector);
+			P2.Move(vector);
 		}
 
 		public void Select()

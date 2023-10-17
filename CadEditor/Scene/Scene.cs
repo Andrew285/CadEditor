@@ -556,12 +556,12 @@ namespace CadEditor
 			SceneCollection.AddCube(cube);
 		}
 
-		public void MoveCoordinateAxes(double x, double y, double z)
+		public void MoveCoordinateAxes(Vector vector)
 		{
 			for(int i = 0; i < selectingCoordinateCubes.Length; i++)
 			{
-				selectingCoordinateCubes[i].Move(x, y, z);
-				selectingCoordinateAxes[i].Move(x, y, z);
+				selectingCoordinateCubes[i].Move(vector);
+				selectingCoordinateAxes[i].Move(vector);
 			}
 
 		}
