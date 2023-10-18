@@ -14,6 +14,7 @@ namespace CadEditor
         private const int VERTICES_ON_FACET = 8;
         private Mesh divideLocalSystem;
         public List<Point> bigCubePoints;           //points used for approximation formulas
+        private List<Point> externalPoints;
 
         public ComplexCube(OpenGL _gl, Point _centerPoint, double? _sizeX = null, double? _sizeZ = null, double? _sizeY = null, string _cubeName = null):
             base(_gl, _centerPoint, _sizeX, _sizeY, _sizeZ, _cubeName)
@@ -310,14 +311,20 @@ namespace CadEditor
                 }
             }
 
-			//point of big cube
-			for (int i = 0; i < uniquePoints.Count; i++)
-            {
-                Point p = uniquePoints[i];
+            Mesh prevMesh = this.Mesh.Clone();
 
-                for (int j = 0; j < Mesh.Vertices.Count; j++)
+            this.Mesh.Vertices = uniquePoints;
+            this.Mesh.Edges = uniqueLines;
+            divideLocalSystem = this.Mesh.Clone();
+
+            //point of big cube
+            for (int i = 0; i < divideLocalSystem.Vertices.Count; i++)
+            {
+                Point p = divideLocalSystem.Vertices[i];
+
+                for (int j = 0; j < prevMesh.Vertices.Count; j++)
                 {
-                    Point meshP = Mesh.Vertices[j];
+                    Point meshP = prevMesh.Vertices[j];
                     if (p.Equals(meshP))
                     {
                         bigCubePoints[j] = p;
@@ -325,10 +332,6 @@ namespace CadEditor
                     }
                 }
             }
-
-            this.Mesh.Vertices = uniquePoints;
-            this.Mesh.Edges = uniqueLines;
-            divideLocalSystem = this.Mesh.Clone();
         }
 
         /// <summary>

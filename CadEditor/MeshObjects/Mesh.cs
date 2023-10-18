@@ -270,6 +270,10 @@ namespace CadEditor
 			Y += vector[1];
 			Z += vector[2];
 
+            if(ParentCube != null && ParentCube is ComplexCube)
+            {
+                ((ComplexCube)ParentCube).Transform(vector, this);
+            }
         }
 
         public void Select()

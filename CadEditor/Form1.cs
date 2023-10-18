@@ -221,41 +221,25 @@ namespace CadEditor
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
                     coords = new Vector(value, 0, 0);
-                    SelectedObject.Move(coords);
-					scene.MoveCoordinateAxes(coords);
-                    index = 0;
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
                     coords = new Vector(0, -value, 0);
-					SelectedObject.Move(coords);
-					scene.MoveCoordinateAxes(coords);
-                    index = 1;
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
                     coords = new Vector(0, 0, -value);
-					SelectedObject.Move(coords);
-					scene.MoveCoordinateAxes(coords);
-                    index = 2;
 				}
 
-                //SelectedObject.Move(coords);
 
-
-                //if (((Point)SelectedObject).ParentCube is ComplexCube)
-                //{
-                //    if (index != -1)
-                //    {
-                //        (((ComplexCube)((Point)SelectedObject).ParentCube)).Transform(index, SelectedNonDrawableCube);
-                //    }
-                //}
+                SelectedObject.Move(coords);
+                scene.MoveCoordinateAxes(coords);
 
                 //transform vertices in different way if cube is divided into finite elements
-                if (index >= 0)
-                {
-                    ((ComplexCube)((Point)SelectedObject).ParentCube).Transform(new Vector(coords[0], coords[1], coords[2]), (Point)SelectedObject);
-                }
+                //if (index >= 0)
+                //{
+                //    ((ComplexCube)((Point)SelectedObject).ParentCube).Transform(new Vector(coords[0], coords[1], coords[2]), (Point)SelectedObject);
+                //}
             }
 
             mouseX = e.X;
