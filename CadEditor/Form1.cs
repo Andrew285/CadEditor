@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
+﻿using CadEditor.MeshObjects;
 using SharpGL;
 using System;
 using System.Collections.Generic;
@@ -17,12 +16,11 @@ namespace CadEditor
         private Scene scene;
 
         private ComplexCube selectedCube;
-        private ComplexCube SelectedNonDrawableCube;
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
         private AxisCube SelectedAxisCubeEditMode;
-        private IGraphics SelectedObject;
+        private Object3D SelectedObject;
 		private float sensitivity = 0.5f;
 
 		public Form1()
@@ -142,7 +140,7 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-                IGraphics selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
+                Object3D selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
 
                 //check type of selected object
                 if (selectedCubeElement != null)
@@ -157,16 +155,6 @@ namespace CadEditor
                     {
                         SelectedObject = selectedCubeElement;
                         SelectedAxisCubeEditMode = null;
-
-                        if(SelectedObject is Point && ((Point)SelectedObject).ParentCube is ComplexCube)
-                        {
-							SelectedNonDrawableCube = scene.FindNonDrawableCube((ComplexCube)((Point)SelectedObject).ParentCube);
-						}
-                        else
-                        {
-                            SelectedNonDrawableCube = null;
-                        }
-
 						scene.InitSelectingCoordAxes(SelectedObject, 2.8f, 1.0);
                     }
                     else
@@ -215,7 +203,6 @@ namespace CadEditor
             {
                 double sensitivityLevel = 0.01;
                 double value = horizontalAngle * sensitivityLevel;
-                int index = -1;
                 Vector coords = new Vector(3);
 
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
@@ -231,15 +218,8 @@ namespace CadEditor
                     coords = new Vector(0, 0, -value);
 				}
 
-
                 SelectedObject.Move(coords);
                 scene.MoveCoordinateAxes(coords);
-
-                //transform vertices in different way if cube is divided into finite elements
-                //if (index >= 0)
-                //{
-                //    ((ComplexCube)((Point)SelectedObject).ParentCube).Transform(new Vector(coords[0], coords[1], coords[2]), (Point)SelectedObject);
-                //}
             }
 
             mouseX = e.X;
@@ -300,7 +280,7 @@ namespace CadEditor
 
 				if (result == DialogResult.OK)
 				{
-					int[] nValues = form.nValues;
+					Vector nValues = form.nValues;
 					customCube.Divide(nValues);
 					scene.NonDrawableCubes.Add(customCube, customCube.Clone());
 				}
@@ -401,12 +381,12 @@ namespace CadEditor
             TreeNode selectedTreeNode = treeView1.SelectedNode;
             if(selectedTreeNode != null)
             {
-                List<IGraphics> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
+                List<Object3D> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
                 if(nodeObjects != null)
                 {
                     if(nodeObjects.Count > 1)
                     {
-						foreach (IGraphics graphicsObject in nodeObjects)
+						foreach (Object3D graphicsObject in nodeObjects)
 						{
 							graphicsObject.Select();
 						}

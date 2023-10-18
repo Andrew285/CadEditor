@@ -3,63 +3,69 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using SharpGL;
-using CadEditor.Graphics;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
 
 namespace CadEditor
 {
-    public class ComplexCube: CustomCube
+    public class ComplexCube: MeshObject3D
     {
+        private const int OUTER_VERTICES = 20;
         private const int VERTICES_ON_FACET = 8;
-        private Mesh divideLocalSystem;
-        public List<Point> bigCubePoints;           //points used for approximation formulas
-        private List<Point> externalPoints;
+        private Mesh localSystem;
+        public Point3D[] bigCubePoints;           //points used for approximation formulas
+        private List<Point3D> externalPoints;
 
-        public ComplexCube(OpenGL _gl, Point _centerPoint, double? _sizeX = null, double? _sizeZ = null, double? _sizeY = null, string _cubeName = null):
-            base(_gl, _centerPoint, _sizeX, _sizeY, _sizeZ, _cubeName)
+        public ComplexCube(OpenGL _gl, Point3D _centerPoint, Vector _size, string _cubeName = null):
+            base(_gl, _centerPoint, _size, _cubeName)
 		{
 			//Initializing Mesh
-			Mesh.Vertices = InitPoints(CenterPoint, sizeX, sizeY, sizeZ, GL);
+			Mesh.Vertices = InitPoints(CenterPoint, size, GL);
             Mesh.Facets = InitFacets(Mesh);
             Mesh.Edges = InitEdges(Mesh);
 
-            bigCubePoints = new List<Point>();
+            bigCubePoints = new Point3D[OUTER_VERTICES];
+            localSystem = this.Mesh.Clone();
+            bigCubePoints = GetOuterCubeVertices(Mesh, Mesh);
         }
 
         public ComplexCube(Mesh mesh, OpenGL _gl = null) : base(mesh, _gl) 
         {
-            bigCubePoints = new List<Point>();
+            bigCubePoints = new Point3D[20];
         }
 
-        private List<Point> InitPoints(Point CenterPoint, double sizeX, double sizeY, double sizeZ, OpenGL GL)
+        private List<Point3D> InitPoints(Point3D CenterPoint, Vector size, OpenGL GL)
         {
-            List<Point> points = new List<Point>
-            {
-                new Point(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+            double sizeX = size[0];
+            double sizeY = size[1];
+            double sizeZ = size[2];
 
-                new Point(0 + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
-                new Point(0 + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, 0 + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, 0 + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, 0 + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, 0 + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(0 + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
-                new Point(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
-                new Point(0 + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
-                new Point(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
+            List<Point3D> points = new List<Point3D>
+            {
+                new Point3D(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+
+                new Point3D(0 + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
+                new Point3D(0 + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, 0 + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, 0 + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, 0 + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, 0 + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(0 + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z, GL),
+                new Point3D(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
+                new Point3D(0 + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z, GL),
+                new Point3D(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, 0 + CenterPoint.Z, GL),
             };
 
-            foreach (Point p in points)
+            foreach (Point3D p in points)
             {
                 p.ParentCube = this;
             }
@@ -73,7 +79,7 @@ namespace CadEditor
             List<Plane> facets = new List<Plane>
             {
 				//FRONT
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[0],
                     mesh.Vertices[8],
@@ -86,7 +92,7 @@ namespace CadEditor
                 }, GL),
 
 				//RIGHT
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[1],
                     mesh.Vertices[9],
@@ -99,7 +105,7 @@ namespace CadEditor
                 }, GL),
 
 				//BACK
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[2],
                     mesh.Vertices[10],
@@ -112,7 +118,7 @@ namespace CadEditor
                 }, GL),
 
 				//LEFT
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[3],
                     mesh.Vertices[11],
@@ -125,7 +131,7 @@ namespace CadEditor
                 }, GL),
 
 				//TOP
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[4],
                     mesh.Vertices[16],
@@ -138,7 +144,7 @@ namespace CadEditor
                 }, GL),
 
 				//BOTTOM
-				new Plane(new List<Point>
+				new Plane(new List<Point3D>
                 {
                     mesh.Vertices[1],
                     mesh.Vertices[8],
@@ -192,12 +198,12 @@ namespace CadEditor
         {
             base.Draw();
 
-            if(bigCubePoints.Count > 0)
+            if(bigCubePoints.Length > 0)
             {
 				//Draw Vertexes
 				GL.PointSize(7.0f);
 				GL.Begin(OpenGL.GL_POINTS);
-				for (int i = 0; i < bigCubePoints.Count; i++)
+				for (int i = 0; i < bigCubePoints.Length; i++)
 				{
 					if (IsSelected)
 					{
@@ -220,9 +226,15 @@ namespace CadEditor
         /// After dividing into smaller cubes, the method Compress will be used to remove duplicated vertices and edges.
         /// </summary>
         /// <param name="nValues"> This array shows how many cubes should be the big one divided into in some axis</param>
-        public void Divide(int[] nValues)
+        public void Divide(Vector nValues)
         {
+            Mesh prevMesh = this.Mesh.Clone();
+            localSystem = GetDividedLocalSystem(nValues);
+            bigCubePoints = GetOuterCubeVertices(localSystem, prevMesh);
+        }
 
+        private Mesh GetDividedLocalSystem(Vector nValues)
+        {
             double feAmountX = nValues[0];
             double feAmountY = nValues[1];
             double feAmountZ = nValues[2];
@@ -232,27 +244,27 @@ namespace CadEditor
             double VerticesAmountZ = feAmountZ * 2 + 1;
 
             //size of smaller cube
-            double feSizeX = sizeX / feAmountX;
-            double feSizeY = sizeY / feAmountY;
-            double feSizeZ = sizeZ / feAmountZ;
+            double feSizeX = size[0] / feAmountX;
+            double feSizeY = size[1] / feAmountY;
+            double feSizeZ = size[2] / feAmountZ;
 
             //dividing into small cubes
             List<ComplexCube> FeCubeList = new List<ComplexCube>();
             for (int i_z = 1; i_z < VerticesAmountZ; i_z += 2)
             {
-                double feCenterPointZ = -sizeZ + i_z * feSizeZ;
+                double feCenterPointZ = -size[2] + i_z * feSizeZ;
 
                 for (int i_y = 1; i_y < VerticesAmountY; i_y += 2)
                 {
-                    double feCenterPointY = -sizeY + i_y * feSizeY;
+                    double feCenterPointY = -size[1] + i_y * feSizeY;
 
                     for (int i_x = 1; i_x < VerticesAmountX; i_x += 2)
                     {
-                        double feCenterPointX = -sizeX + i_x * feSizeX;
+                        double feCenterPointX = -size[0] + i_x * feSizeX;
 
-                        Point feCenterPoint = new Point(feCenterPointX + CenterPoint[0], feCenterPointY + CenterPoint[1], feCenterPointZ + CenterPoint[2], GL);  //create a center point of finite element (cube)
-                        ComplexCube feCube = new ComplexCube(GL, feCenterPoint, feSizeX, feSizeY, feSizeZ); //create a finite element (cube) with sizes
-                        feCube.ParentCube = this;
+                        Point3D feCenterPoint = new Point3D(feCenterPointX + CenterPoint[0], feCenterPointY + CenterPoint[1], feCenterPointZ + CenterPoint[2], GL);  //create a center point of finite element (cube)
+                        ComplexCube feCube = new ComplexCube(GL, feCenterPoint, new Vector(feSizeX, feSizeY, feSizeZ)); //create a finite element (cube) with sizes
+                        feCube.ParentObject = this;
                         FeCubeList.Add(feCube);                                                             //add it to list of finite elements
                     }
                 }
@@ -260,19 +272,14 @@ namespace CadEditor
 
             //convert all cubes into big one mesh
 
-            List<Point> uniquePoints = new List<Point>();
+            List<Point3D> uniquePoints = new List<Point3D>();
             List<Line> uniqueLines = new List<Line>();
-            bigCubePoints = new List<Point>();
-            for (int i = 0; i < this.Mesh.Vertices.Count; i++)
-            {
-                bigCubePoints.Add(null);
-            }
 
             for (int i = 0; i < FeCubeList.Count; i++)
             {
                 for (int j = 0; j < FeCubeList[i].Mesh.Vertices.Count; j++)
                 {
-                    Point p = FeCubeList[i].Mesh.Vertices[j];
+                    Point3D p = FeCubeList[i].Mesh.Vertices[j];
 
                     if ((uniquePoints.Count > 0 && !uniquePoints.Contains(p)) || uniquePoints.Count == 0)
                     {
@@ -291,15 +298,15 @@ namespace CadEditor
                     Line line = feCube.Mesh.Edges[j];
 
                     //if line is not found then create another one base on unique points
-                    Point p1 = null;
-                    Point p2 = null;
-                    foreach(Point p in uniquePoints)
+                    Point3D p1 = null;
+                    Point3D p2 = null;
+                    foreach (Point3D p in uniquePoints)
                     {
-                        if(line.P1.Equals(p))
+                        if (line.P1.Equals(p))
                         {
                             p1 = p;
                         }
-                        else if(line.P2.Equals(p))
+                        else if (line.P2.Equals(p))
                         {
                             p2 = p;
                         }
@@ -307,31 +314,36 @@ namespace CadEditor
 
                     Line newLine = new Line(p1, p2, GL);
 
-					uniqueLines.Add(newLine);
+                    uniqueLines.Add(newLine);
                 }
             }
 
-            Mesh prevMesh = this.Mesh.Clone();
 
             this.Mesh.Vertices = uniquePoints;
             this.Mesh.Edges = uniqueLines;
-            divideLocalSystem = this.Mesh.Clone();
+            return this.Mesh.Clone();
+        }
 
+        private Point3D[] GetOuterCubeVertices(Mesh currentMesh, Mesh prevMesh)
+        {
+            Point3D[] resultVertices = new Point3D[OUTER_VERTICES];
             //point of big cube
-            for (int i = 0; i < divideLocalSystem.Vertices.Count; i++)
+            for (int i = 0; i < currentMesh.Vertices.Count; i++)
             {
-                Point p = divideLocalSystem.Vertices[i];
+                Point3D p = currentMesh.Vertices[i];
 
                 for (int j = 0; j < prevMesh.Vertices.Count; j++)
                 {
-                    Point meshP = prevMesh.Vertices[j];
+                    Point3D meshP = prevMesh.Vertices[j];
                     if (p.Equals(meshP))
                     {
-                        bigCubePoints[j] = p;
+                        resultVertices[j] = p;
                         break;
                     }
                 }
             }
+
+            return resultVertices;
         }
 
         /// <summary>
@@ -339,7 +351,7 @@ namespace CadEditor
         /// </summary>
         /// <param name="index">defines which coordinate would be operated on</param>
         /// <param name="cube">defines a cube from which all points will be transformed</param>
-        public void Transform(Vector vector, Point point)
+        public void Transform(Vector vector, Point3D point)
         {
             int index = -1;
             if (vector[0] != 0) index = 0;
@@ -349,23 +361,25 @@ namespace CadEditor
             if(index != -1)
             {
                 int indexOfPoint = this.Mesh.GetIndexOfPoint(point);
-                Point p = divideLocalSystem.Vertices[indexOfPoint];
-                p.Move(vector);
+                Point3D p = localSystem.Vertices[indexOfPoint];
+                p.X += vector[0];
+                p.Y += vector[1];
+                p.Z += vector[2];
 
-                for (int i = 0; i < divideLocalSystem.Vertices.Count; i++)
+                for (int i = 0; i < localSystem.Vertices.Count; i++)
                 {
-                    Point point1 = divideLocalSystem.Vertices[i];
+                    Point3D point1 = localSystem.Vertices[i];
                     double sum = 0;
-                    for (int m = 0; m < this.bigCubePoints.Count; m++)
+                    for (int m = 0; m < this.bigCubePoints.Length; m++)
                     {
-                        Point point2 = this.bigCubePoints[m];
+                        Point3D point2 = this.bigCubePoints[m];
 
-                        Func<Point, Point, double> phiFunc = null;
+                        Func<Point3D, Point3D, double> phiFunc = null;
                         if (m >= 0 && m < 8)
                         {
                             phiFunc = TransformMesh.PhiAngle;
                         }
-                        else if (m >= 8 && m < this.bigCubePoints.Count)
+                        else if (m >= 8 && m < this.bigCubePoints.Length)
                         {
                             phiFunc = TransformMesh.PhiEdge;
                         }
@@ -383,13 +397,13 @@ namespace CadEditor
         {
             ComplexCube cube = new ComplexCube(Mesh.Clone());
 
-            foreach(Point p in this.bigCubePoints)
+            for(int i = 0; i < this.bigCubePoints.Length; i++)
             {
-                int indexOfPoint = this.Mesh.GetIndexOfPoint(p);
+                int indexOfPoint = this.Mesh.GetIndexOfPoint(this.bigCubePoints[i]);
                 if(indexOfPoint != -1)
                 {
-                    Point point = cube.Mesh.Vertices[indexOfPoint];
-                    cube.bigCubePoints.Add(point);
+                    Point3D point = cube.Mesh.Vertices[indexOfPoint];
+                    cube.bigCubePoints[i] = point;
                 }
             }
 

@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
+﻿using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph.Primitives;
 using System;
@@ -13,10 +12,10 @@ namespace CadEditor
 	public class Mesh
 	{
 		private List<Plane> facets;
-		private List<Point> vertices;
+		private List<Point3D> vertices;
 		private List<Line> edges;
 
-		public List<Point> Vertices 
+		public List<Point3D> Vertices 
 		{
 			get { return vertices; }
 			set { vertices = value; }
@@ -37,8 +36,15 @@ namespace CadEditor
         public Mesh()
         {
             facets = new List<Plane>();
-            vertices = new List<Point>();
+            vertices = new List<Point3D>();
             edges = new List<Line>();
+        }
+
+        public Mesh(List<Point3D> vertices, List<Line> edges, List<Plane> facets)
+        {
+            Facets = (facets != null) ? facets : new List<Plane>();
+            Edges = (edges != null) ? edges : new List<Line>();
+            Vertices = (vertices != null) ? vertices : new List<Point3D>();
         }
 
         public bool Equals(Mesh mesh)
@@ -70,9 +76,9 @@ namespace CadEditor
             return true;
 		}
 
-        public Point ContainsPoint(Point point)
+        public Point3D ContainsPoint(Point3D point)
         {
-            foreach(Point p in Vertices)
+            foreach(Point3D p in Vertices)
             {
                 if(p == point)
                 {
@@ -82,7 +88,7 @@ namespace CadEditor
             return null;
         }
 
-        public int GetIndexOfPoint(Point point)
+        public int GetIndexOfPoint(Point3D point)
         {
             for(int i = 0; i < Vertices.Count; i++)
             {
@@ -118,7 +124,7 @@ namespace CadEditor
 		}
 	}
 
-	public class Point: IGraphics
+	public class Point3D: Object3D
     {
 		public OpenGL GL { get; set; }
         public double X { get; set; }
@@ -126,12 +132,12 @@ namespace CadEditor
         public double Z { get; set; }
         public List<Line> EdgeParents { get; set; }
 		public List<Plane> FacetParents { get; set; }
-		public CustomCube ParentCube { get; set; }
+		public MeshObject3D ParentCube { get; set; }
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Pink;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-        public Point(double[] values, OpenGL _gl = null)
+        public Point3D(double[] values, OpenGL _gl = null)
 		{
             GL = _gl;
             X = values[0];
@@ -140,7 +146,7 @@ namespace CadEditor
             IsSelected = false;
 		}
 
-		public Point(Vector v)
+		public Point3D(Vector v)
 		{
             X = v[0];
             Y = v[1];
@@ -148,7 +154,7 @@ namespace CadEditor
             IsSelected = false;
 		}
 
-		public Point(double _x, double _y, double _z, OpenGL _gl=null)
+		public Point3D(double _x, double _y, double _z, OpenGL _gl=null)
 		{
 			GL = _gl;
 			X = _x;
@@ -159,7 +165,7 @@ namespace CadEditor
 			FacetParents = new List<Plane>();
 		}
 
-        public bool Equals(Point p)
+        public bool Equals(Point3D p)
         {
             if(p != null)
             {
@@ -169,7 +175,7 @@ namespace CadEditor
             return false;
         }
 
-		public static bool operator ==(Point a, Point b)
+		public static bool operator ==(Point3D a, Point3D b)
 		{
 			if (object.ReferenceEquals(a, b))
 			{
@@ -184,17 +190,17 @@ namespace CadEditor
 			return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
 		}
 
-		public static bool operator !=(Point a, Point b)
+		public static bool operator !=(Point3D a, Point3D b)
 		{
 			return !(a == b);
 		}
 
-		public static Vector operator -(Point a, Point b)
+		public static Vector operator -(Point3D a, Point3D b)
 		{
 			return new Vector(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
 		}
 
-		public static Vector operator +(Point a, Point b)
+		public static Vector operator +(Point3D a, Point3D b)
 		{
 			return new Vector(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 		}
@@ -209,12 +215,12 @@ namespace CadEditor
 			return String.Format("({0},{1},{2})", X, Y, Z);
 		}
 
-        public Point GetWorldCoordinates(OpenGL gl)
+        public Point3D GetWorldCoordinates(OpenGL gl)
         {
-            return new Point(gl.UnProject(X, Y, Z));
+            return new Point3D(gl.UnProject(X, Y, Z));
         }
 
-        public bool IsLower(Point v)
+        public bool IsLower(Point3D v)
         {
             return this.X < v.X && this.Y < v.Y && this.Z < v.Z;
         }
@@ -243,14 +249,14 @@ namespace CadEditor
             }
         }
 
-        public Point Clone()
+        public Point3D Clone()
         {
-            Point clonePoint = new Point(X, Y, Z, GL);
+            Point3D clonePoint = new Point3D(X, Y, Z, GL);
             clonePoint.ParentCube = ParentCube;
             return clonePoint;
         }
 
-        public void Draw()
+        public override void Draw()
 		{
             if (IsSelected)
             {
@@ -264,7 +270,7 @@ namespace CadEditor
             GL.Vertex(X, Y, Z);
 		}
 
-        public void Move(Vector vector)
+        public override void Move(Vector vector)
         {
 			X += vector[0];
 			Y += vector[1];
@@ -276,33 +282,33 @@ namespace CadEditor
             }
         }
 
-        public void Select()
+        public override void Select()
 		{
 			IsSelected = true;
 		}
 
-        public void Deselect()
+        public override void Deselect()
         {
 			IsSelected = false;
         }
     }
 
-	public class Plane: IGraphics
+	public class Plane: Object3D
 	{
 		public OpenGL GL { get; set; }
-		public List<Point> Points { get; set; }
+		public List<Point3D> Points { get; set; }
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Brown;
 		public Color NonSelectedColor { get; set; } = Color.LightGray;
 
-		public Plane(List<Point> _vertices, OpenGL _gl=null)
+		public Plane(List<Point3D> _vertices, OpenGL _gl=null)
 		{
             Points = _vertices;
             IsSelected = false;
 			GL = _gl;
         }
 
-        public Point this[int index]
+        public Point3D this[int index]
         {
             get
             {
@@ -346,7 +352,7 @@ namespace CadEditor
             return false;
         }
 
-        public bool Contains(Point point)
+        public bool Contains(Point3D point)
         {
             Line centerToPointEdge = new Line(GetCenterPoint(), point);
 
@@ -394,7 +400,7 @@ namespace CadEditor
             return normal;
         }
 
-        public Point GetCenterPoint()
+        public Point3D GetCenterPoint()
         {
             double x = 0;
             double y = 0;
@@ -411,20 +417,20 @@ namespace CadEditor
             y /= Points.Count;
             z /= Points.Count;
 
-            return new Point(x, y, z);
+            return new Point3D(x, y, z);
         }
 
         public override string ToString()
 		{
 			string result = "";
-			foreach(Point p in Points)
+			foreach(Point3D p in Points)
 			{
 				result += "Vertex: " + p.ToString() + "\n";
 			}
 			return result;
 		}
 
-		public void Draw()
+		public override void Draw()
 		{
             if (IsSelected)
             {
@@ -436,33 +442,33 @@ namespace CadEditor
             }
 
 
-            foreach (Point v in Points)
+            foreach (Point3D v in Points)
 			{
 				GL.Vertex(v.X, v.Y, v.Z);
 			}
 		}
 
-		public void Move(Vector vector)
+		public override void Move(Vector vector)
 		{
-			foreach(Point v in Points)
+			foreach(Point3D v in Points)
 			{
 				v.Move(vector);
 			}
 		}
 
-		public void Select()
+		public override void Select()
 		{
 			IsSelected = true;
 		}
 
-        public void Deselect()
+        public override void Deselect()
         {
             IsSelected = false;
         }
 
         public Plane Clone()
         {
-			List<Point> newPoints = new List<Point>();
+			List<Point3D> newPoints = new List<Point3D>();
 
             for (int i = 0; i < this.Points.Count; i++)
             {
@@ -478,28 +484,28 @@ namespace CadEditor
 
 			for(int i = 0; i < resultFacet.Points.Count; i++)
 			{
-				Point currentVertex = resultFacet.Points[i].Clone();
+				Point3D currentVertex = resultFacet.Points[i].Clone();
 				Vector directionToCenter = currentVertex - GetCenterPoint();
 
-				resultFacet[i] = new Point(new Vector(currentVertex) - directionToCenter * tolerance);
+				resultFacet[i] = new Point3D(new Vector(currentVertex) - directionToCenter * tolerance);
 			}
 
 			return resultFacet;
 		}
 	}
 
-	public class Line: IEquatable<Line>, IGraphics
+	public class Line: Object3D, IEquatable<Line>
 	{
 		public OpenGL GL { get; set; }
-		public Point P1 { get; set; }
-		public Point P2 { get; set; }
+		public Point3D P1 { get; set; }
+		public Point3D P2 { get; set; }
 		public List<Plane> FacetParents { get; set; }
 		public float LineWidth { get; set; } = 3.0f;
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-		public Line(Point _v1, Point _v2, OpenGL _gl=null)
+		public Line(Point3D _v1, Point3D _v2, OpenGL _gl=null)
 		{
 			GL = _gl;
 			P1 = _v1;
@@ -556,13 +562,13 @@ namespace CadEditor
         }
 
         //Check if point contains edge
-        public bool Contains(Point point)
+        public bool Contains(Point3D point)
         {
             double lengthErrorThreshold = 1e-3;
 
             // See if this lies on the segment
             if ((new Vector(point) - new Vector(P1)).LengthSquared() + (new Vector(point) - new Vector(P2)).LengthSquared()
-            <= new Vector(new Point(P2 - P1)).LengthSquared() + lengthErrorThreshold)
+            <= new Vector(new Point3D(P2 - P1)).LengthSquared() + lengthErrorThreshold)
             {
                 return true;
             }
@@ -572,13 +578,13 @@ namespace CadEditor
             }
         }
 
-        public Point GetCenterPoint()
+        public Point3D GetCenterPoint()
         {
             double x = (P1.X + P2.X) / 2;
             double y = (P1.Y + P2.Y) / 2;
             double z = (P1.Z + P2.Z) / 2;
 
-            return new Point(x, y, z);
+            return new Point3D(x, y, z);
         }
 
         public bool IntersectsLine(Line line)
@@ -611,7 +617,7 @@ namespace CadEditor
             return new Line(P1.Clone(), P2.Clone(), GL);
         }
 
-        public void Draw()
+        public override void Draw()
 		{
 
             if (IsSelected)
@@ -634,18 +640,18 @@ namespace CadEditor
 			GL.Vertex(P2.X, P2.Y, P2.Z);
 		}
 
-		public void Move(Vector vector)
+		public override void Move(Vector vector)
 		{
 			P1.Move(vector);
 			P2.Move(vector);
 		}
 
-		public void Select()
+		public override void Select()
 		{
 			IsSelected = true;
 		}
 
-		public void Deselect()
+		public override void Deselect()
         {
 			IsSelected = false;
         }
@@ -653,13 +659,13 @@ namespace CadEditor
         public Line GetClickableArea(double tolerance)
         {
             Line resultEdge = (Line)this.Clone();
-			Point[] edgeVertices = new Point[] { resultEdge.P1, resultEdge.P2 };
+			Point3D[] edgeVertices = new Point3D[] { resultEdge.P1, resultEdge.P2 };
             for (int i = 0; i < edgeVertices.Length; i++)
             {
-                Point currentVertex = edgeVertices[i];
+                Point3D currentVertex = edgeVertices[i];
                 Vector directionToCenter = currentVertex - GetCenterPoint();
 
-				edgeVertices[i] = new Point(new Vector(currentVertex) - directionToCenter * tolerance);
+				edgeVertices[i] = new Point3D(new Vector(currentVertex) - directionToCenter * tolerance);
             }
 
 			resultEdge.P1 = edgeVertices[0];
@@ -673,7 +679,7 @@ namespace CadEditor
 	{
 		public CoordinateAxis CoordinateAxis { get; set; }
 
-		public Axis(Point v1, Point v2, CoordinateAxis axis, OpenGL openGL = null): base(v1, v2, openGL)
+		public Axis(Point3D v1, Point3D v2, CoordinateAxis axis, OpenGL openGL = null): base(v1, v2, openGL)
 		{
 			CoordinateAxis = axis;
 		}

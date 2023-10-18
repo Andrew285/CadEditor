@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
+﻿using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.SceneGraph.Primitives;
@@ -32,9 +31,9 @@ namespace CadEditor
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
-		public IGraphics SelectedCube;
-		public IGraphics SelectedObject;
-		public IGraphics SelectedPreviousObject;
+		public Object3D SelectedCube;
+		public Object3D SelectedObject;
+		public Object3D SelectedPreviousObject;
 
 
 		public Scene(OpenGL _gl, Camera _camera, SceneCollection _sceneCollection)
@@ -55,27 +54,27 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			ComplexCube cube = new ComplexCube(GL, new Point(0, 0, 0, GL), 1, 1, 1, "Cube_1");
+			ComplexCube cube = new ComplexCube(GL, new Point3D(0, 0, 0, GL), new Vector(1, 1, 1), "Cube_1");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
 
-		public void InitSelectingCoordAxes(IGraphics obj, float lineWidth, double axisLength)
+		public void InitSelectingCoordAxes(Object3D obj, float lineWidth, double axisLength)
 		{
-			Point v = null;
+			Point3D v = null;
 
 			//Get a point where axis coordinates will be shown
-			if (obj is Point)
+			if (obj is Point3D)
 			{
-				v = (Point)obj;
+				v = (Point3D)obj;
 			}
 			else if (obj is Line)
 			{
-				v = (Point)((Line)obj).GetCenterPoint();
+				v = (Point3D)((Line)obj).GetCenterPoint();
 			}
 			else if (obj is Plane)
 			{
-				v = (Point)((Plane)obj).GetCenterPoint();
+				v = (Point3D)((Plane)obj).GetCenterPoint();
 			}
 			else if(obj is ComplexCube)
 			{
@@ -107,9 +106,9 @@ namespace CadEditor
 				axisXYZLengths[i] = axisLength * multiplier;
 			}
 
-			Axis axisX = new Axis(new Point(v.X, v.Y, v.Z, GL), new Point(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, GL);
-			Axis axisY = new Axis(new Point(v.X, v.Y, v.Z, GL), new Point(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, GL);
-			Axis axisZ = new Axis(new Point(v.X, v.Y, v.Z, GL), new Point(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, GL);
+			Axis axisX = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, GL);
+			Axis axisY = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, GL);
+			Axis axisZ = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, GL);
 
 			axisX.LineWidth = lineWidth;
 			axisY.LineWidth = lineWidth;
@@ -117,9 +116,9 @@ namespace CadEditor
 			selectingCoordinateAxes = new Axis[] { axisX, axisY, axisZ };
 
 			//Create Axis Cubes
-			AxisCube cubeX = new AxisCube(GL, new Point(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, 0.1, 0.1, 0.1, "cubeAxisX");
-			AxisCube cubeY = new AxisCube(GL, new Point(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, 0.1, 0.1, 0.1, "cubeAxisY");
-			AxisCube cubeZ = new AxisCube(GL, new Point(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, 0.1, 0.1, 0.1, "cubeAxisZ");
+			AxisCube cubeX = new AxisCube(GL, new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
+			AxisCube cubeY = new AxisCube(GL, new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
+			AxisCube cubeZ = new AxisCube(GL, new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
 
 			//Set colors
 			cubeX.FacetSelectedColor = Color.Red;
@@ -156,7 +155,7 @@ namespace CadEditor
 			camera.RotateAxisY();
 
 			//Draw Scene Grid
-			DrawCordinateAxes(new Point(0, 0, 0, GL), 3.0, 20);
+			DrawCordinateAxes(new Point3D(0, 0, 0, GL), 3.0, 20);
 
             //Draw Coordinate Axes if selected Vertex
             if (selectingCoordinateAxes != null)
@@ -178,7 +177,7 @@ namespace CadEditor
 			}
 		}
 
-        public void DrawCordinateAxes(Point v, double lineWidth, double axisLength)
+        public void DrawCordinateAxes(Point3D v, double lineWidth, double axisLength)
         {
             GL.LineWidth((float)lineWidth);
             GL.Begin(OpenGL.GL_LINES);
@@ -243,7 +242,7 @@ namespace CadEditor
 
 		#region --- Selection ---
 
-		public IGraphics CheckSelectedElement(int x, int y, OpenGL gl)
+		public Object3D CheckSelectedElement(int x, int y, OpenGL gl)
 		{
 			// Convert the mouse coordinates to world coordinates
 			Vector near = new Vector(gl.UnProject(x, y, 0));
@@ -255,8 +254,8 @@ namespace CadEditor
 			selectingRay = new Ray(gl);
 			selectingRay.Origin = near;
 
-            IGraphics selectedCube = null;
-            IGraphics selectedObject = null;
+            Object3D selectedCube = null;
+            Object3D selectedObject = null;
 
 			//Check if any coordinate axis is selected
 			if (selectingCoordinateCubes != null)
@@ -292,13 +291,13 @@ namespace CadEditor
             return selectedObject;
         }
 
-		private void CheckCubeElements(ComplexCube cube, ref IGraphics selectedObject, ref IGraphics selectedCube)
+		private void CheckCubeElements(ComplexCube cube, ref Object3D selectedObject, ref Object3D selectedCube)
 		{
 			//deselect all facets, edges and vertices before another selecting
             cube.Deselect();
 
 			//check if any vertex is selected
-			Point selectedVertex = CheckSelectedVertex(cube, ray);
+			Point3D selectedVertex = CheckSelectedVertex(cube, ray);
 			if (selectedVertex != null)
 			{
 				selectedObject = selectedVertex;
@@ -325,22 +324,22 @@ namespace CadEditor
 			}
 		}
 
-		public Plane CheckSelectedFacet(CustomCube cube, Ray ray)
+		public Plane CheckSelectedFacet(MeshObject3D cube, Ray ray)
 		{
 			double? minDistance = null; //minimal distance between facet and ray origin
 			Plane selectedFacet = null; //facet that is selected
-			Point minIntersectionPoint = null;
+			Point3D minIntersectionPoint = null;
 
 			for(int i = 0; i < cube.Mesh.Facets.Count; i++)
 			{
 				Plane currentFacet = cube.Mesh.Facets[i];
-                Point intersectionPoint = ray.RayIntersectsPlane(currentFacet);
+                Point3D intersectionPoint = ray.RayIntersectsPlane(currentFacet);
 
 				//check if facet contains intersection point
 				if (intersectionPoint != null && currentFacet.Contains(intersectionPoint))
 				{
 					//compare distances from ray origin to intersection point
-                    double distanceToPoint = GetDistance(intersectionPoint, new Point(ray.Origin));
+                    double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
                     
 					if (minDistance != null)
 					{
@@ -379,18 +378,18 @@ namespace CadEditor
 		{
 			double? minDistance = null; //minimal distance between edge and ray origin
 			Line selectedEdge = null; //edge that is selected
-			Point minIntersectionPoint = null;
+			Point3D minIntersectionPoint = null;
 
 			for (int i = 0; i < cube.Mesh.Edges.Count; i++)
 			{
                 Line currentEdge = cube.Mesh.Edges[i];
-                Point intersectionPoint = ray.RayIntersectsLine(currentEdge);
+                Point3D intersectionPoint = ray.RayIntersectsLine(currentEdge);
 
                 //check if edge contains intersection point
                 if (intersectionPoint != null && currentEdge.Contains(intersectionPoint))
                 {
                     //compare distances from ray origin to intersection point
-                    double distanceToPoint = GetDistance(intersectionPoint, new Point(ray.Origin));
+                    double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
                     
 					if (minDistance != null)
                     {
@@ -425,22 +424,22 @@ namespace CadEditor
             return selectedEdge;
 		}
 
-		public Point CheckSelectedVertex(ComplexCube cube, Ray ray)
+		public Point3D CheckSelectedVertex(ComplexCube cube, Ray ray)
 		{
 			double? minDistance = null; //minimal distance between vertex and ray origin
-			Point selectedVertex = null; //vertex that is selected
-            Point minIntersectionPoint = null;
+			Point3D selectedVertex = null; //vertex that is selected
+            Point3D minIntersectionPoint = null;
 
 			for (int i = 0; i < cube.Mesh.Vertices.Count; i++)
 			{
-                Point currentVertex = cube.Mesh.Vertices[i];
-                Point intersectionPoint = ray.RayIntersectsVertex(currentVertex);
+                Point3D currentVertex = cube.Mesh.Vertices[i];
+                Point3D intersectionPoint = ray.RayIntersectsVertex(currentVertex);
 
                 //check if edge contains intersection point
                 if (intersectionPoint != null)
                 {
                     //compare distances from ray origin to intersection point
-                    double distanceToPoint = GetDistance(intersectionPoint, new Point(ray.Origin));
+                    double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
 
                     if (minDistance != null)
                     {
@@ -474,7 +473,7 @@ namespace CadEditor
 			{
 				foreach (Axis line in selectingCoordinateAxes)
 				{
-					Point intersectionPoint = ray.RayIntersectsLine(line);
+					Point3D intersectionPoint = ray.RayIntersectsLine(line);
 
 					if (intersectionPoint != null)
 					{
@@ -533,7 +532,7 @@ namespace CadEditor
 
 		public void DeselectAll()
 		{
-			foreach (CustomCube c in DrawableCubes)
+			foreach (MeshObject3D c in DrawableCubes)
 			{
 				c.Deselect();
 			}
@@ -551,7 +550,7 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			ComplexCube cube = new ComplexCube(GL, new Point(0, 0, 0, GL), null, null, null, "Cube2");
+			ComplexCube cube = new ComplexCube(GL, new Point3D(0, 0, 0, GL), null, "Cube2");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
@@ -579,7 +578,7 @@ namespace CadEditor
 			}
 		}
 
-        private double GetDistance(Point v1, Point v2)
+        private double GetDistance(Point3D v1, Point3D v2)
         {
             return Math.Sqrt(Math.Pow((v2.X - v1.X), 2) + Math.Pow((v2.Y - v1.Y), 2) + Math.Pow((v2.Z - v1.Z), 2));
         }
@@ -626,7 +625,7 @@ namespace CadEditor
 		public void Import(string[] importStrings)
 		{
 			List<ComplexCube> cubes = new List<ComplexCube>();
-			List<Point> currentPoints = new List<Point>();
+			List<Point3D> currentPoints = new List<Point3D>();
 			List<Line> currentLines = new List<Line>();
 			string name = "";
 
@@ -642,7 +641,7 @@ namespace CadEditor
 						ComplexCube newCube = new ComplexCube(currentMesh, GL);
 						newCube.Name = name;
 						cubes.Add(newCube);
-						currentPoints = new List<Point>();
+						currentPoints = new List<Point3D>();
 						currentLines = new List<Line>();
 					}
 					else
@@ -661,14 +660,14 @@ namespace CadEditor
 						coords[j] = double.Parse(splited[j]);
 					}
 
-					currentPoints.Add(new Point(coords, GL));
+					currentPoints.Add(new Point3D(coords, GL));
 				}
 				else if (importStrings[i].Contains('L'))
 				{
 					string trimmedString = importStrings[i].Substring(2);
 					string[] splited = trimmedString.Split(' ');
-					Point p1 = currentPoints[Int32.Parse(splited[0])];
-					Point p2 = currentPoints[Int32.Parse(splited[1])];
+					Point3D p1 = currentPoints[Int32.Parse(splited[0])];
+					Point3D p2 = currentPoints[Int32.Parse(splited[1])];
 
 					currentLines.Add(new Line(p1, p2, GL));
 				}
@@ -682,7 +681,7 @@ namespace CadEditor
 				ComplexCube newCube = new ComplexCube(currentMesh, GL);
 				newCube.Name = name;
 				cubes.Add(newCube);
-				currentPoints = new List<Point>();
+				currentPoints = new List<Point3D>();
 				currentLines = new List<Line>();
 			}
 

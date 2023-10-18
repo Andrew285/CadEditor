@@ -67,9 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Graphics\IGraphics.cs" />
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
+    <Compile Include="Maths\Triangulation.cs" />
     <Compile Include="MeshObjects\AxisCube.cs" />
     <Compile Include="MeshObjects\ComplexCube.cs" />
     <Compile Include="DividingCubeForm.cs">
@@ -85,8 +85,9 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Maths\Matrix.cs" />
-    <Compile Include="MeshObjects\CustomCube.cs" />
+    <Compile Include="MeshObjects\MeshObject3D.cs" />
     <Compile Include="MeshObjects\Mesh.cs" />
+    <Compile Include="Object3D.cs" />
     <Compile Include="Tools\Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

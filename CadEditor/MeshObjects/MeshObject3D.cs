@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using SharpGL;
+﻿using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,28 +8,14 @@ using System.Threading.Tasks;
 
 namespace CadEditor.MeshObjects
 {
-	public interface IObject3D : IGraphics
+	public class MeshObject3D : Object3D
 	{
-		string Name { get; set; }
-		Mesh Mesh { get; set; }
-		Point CenterPoint { get; set; }
-	}
-
-	public class CustomCube : IObject3D
-	{
-		public OpenGL GL { get; set; }
 		public string Name { get; set; }
 		public Mesh Mesh { get; set; }
-		public Point CenterPoint { set; get; }
-		protected double sizeX { get; set; }
-		protected double sizeY { get; set; }
-		protected double sizeZ { get; set; }
 
+		protected Vector size;
 		public bool DrawFacets { get; set; }
-		public CustomCube ParentCube;
 
-		public CoordinateAxis Axis { get; set; }
-		public bool IsSelected { get; set; }
 		public Color VertexSelectedColor = Color.Red;
 		public Color EdgeSelectedColor = Color.Red;
 		public Color FacetSelectedColor = Color.LightGray;
@@ -38,26 +23,30 @@ namespace CadEditor.MeshObjects
 		public Color EdgeNonSelectedColor = Color.Black;
 		public Color FacetNonSelectedColor = Color.LightGray;
 
-		public CustomCube(OpenGL _Gl, Point _centerPoint, double? _sizeX, double? _sizeY, double? _sizeZ, string _cubeName)
+		public MeshObject3D(OpenGL _Gl, Point3D _centerPoint, Vector _size, string _cubeName)
 		{
 			GL = _Gl;
 			Name = _cubeName;
 			Mesh = new Mesh();
 			CenterPoint = _centerPoint;
 
-			sizeX = (_sizeX != null) ? (double)_sizeX : 1.0;
-			sizeY = (_sizeY != null) ? (double)_sizeY : 1.0;
-			sizeZ = (_sizeZ != null) ? (double)_sizeZ : 1.0;
+			if(_size != null)
+			{
+                size = new Vector(_size.Size);
+                size[0] = (_size[0] != 0) ? (double)_size[0] : 1.0;
+                size[1] = (_size[1] != 0) ? (double)_size[1] : 1.0;
+                size[2] = (_size[2] != 0) ? (double)_size[2] : 1.0;
+            }
 		}
 
-		public CustomCube(Mesh mesh, OpenGL _GL = null)
+		public MeshObject3D(Mesh mesh, OpenGL _GL = null)
 		{
 			GL = _GL;
 			Name = "CubeName";
 			Mesh = mesh;
 		}
 
-		public void Draw()
+		public override void Draw()
 		{
 
 			//Draw Vertexes
@@ -121,7 +110,7 @@ namespace CadEditor.MeshObjects
 			}
 		}
 
-		public void Move(Vector vector)
+		public override void Move(Vector vector)
 		{
 			for (int i = 0; i < Mesh.Vertices.Count; i++)
 			{
@@ -130,7 +119,7 @@ namespace CadEditor.MeshObjects
 			CenterPoint.Move(vector);
 		}
 
-		public void Select()
+		public override void Select()
 		{
 			foreach (Line edge in Mesh.Edges)
 			{
@@ -138,7 +127,7 @@ namespace CadEditor.MeshObjects
 			}
 		}
 
-		public virtual void Deselect()
+		public override void Deselect()
 		{
 			foreach (Plane facet in Mesh.Facets)
 			{
@@ -150,7 +139,7 @@ namespace CadEditor.MeshObjects
 				edge.IsSelected = false;
 			}
 
-			foreach (Point vertex in Mesh.Vertices)
+			foreach (Point3D vertex in Mesh.Vertices)
 			{
 				vertex.IsSelected = false;
 			}
