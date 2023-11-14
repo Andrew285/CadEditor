@@ -1,4 +1,5 @@
-﻿using SharpGL;
+﻿using CadEditor.Graphics;
+using SharpGL;
 using SharpGL.SceneGraph.Cameras;
 using SharpGL.SceneGraph.Core;
 using System;
@@ -12,14 +13,12 @@ namespace CadEditor
 {
     public class Camera: SceneElement
     {
-		private OpenGL gl;
-
 		public double CameraDistance { get; set; } = 5.0f;
         public double rtri { get; set; }
         public double utri { get; set; }
 
 
-		private Point position;
+		private Point3D position;
 		private double aspectRatio = 1.0f;
 		private double fieldOfView = 60.0f;
 		private double near = 0.5f;
@@ -44,7 +43,7 @@ namespace CadEditor
 		}
 
 
-		public Point Position
+		public Point3D Position
 		{
 			get { return position; }
 		}
@@ -55,20 +54,19 @@ namespace CadEditor
 			set { aspectRatio = value; }
 		}
 
-		public Camera(OpenGL _gl, Vector _rotationPoint)
+		public Camera(Vector _rotationPoint)
         {
-            gl = _gl;
-			position = new Point(-1f, -1f, 0.5f, gl);
+			position = new Point3D(-1f, -1f, 0.5f);
         }
 
         public void RotateAxisX()
         {
-			gl.Rotate(utri, 1.0f, 0.0f, 0.0f);
+			GraphicsGL.GL.Rotate(utri, 1.0f, 0.0f, 0.0f);
         }
 
         public void RotateAxisY() 
         {
-			gl.Rotate(rtri, 0.0f, 1.0f, 0.0f);
+            GraphicsGL.GL.Rotate(rtri, 0.0f, 1.0f, 0.0f);
         }
 
 		public void UpdateAxisX(double cameraAngle)

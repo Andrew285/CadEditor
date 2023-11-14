@@ -13,16 +13,14 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
-        private OpenGL gl;
         private Scene scene;
 
         private ComplexCube selectedCube;
-        private ComplexCube SelectedNonDrawableCube;
         private int mouseX;
         private int mouseY;
 		private bool isMiddleButtonPressed;
         private AxisCube SelectedAxisCubeEditMode;
-        private IGraphics SelectedObject;
+        private Object3D SelectedObject;
 		private float sensitivity = 0.5f;
 
 		public Form1()
@@ -41,13 +39,13 @@ namespace CadEditor
 
 		private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
-            gl = openGLControl1.OpenGL;
-            gl.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+            GraphicsGL graphics = new GraphicsGL(openGLControl1.OpenGL);
+            GraphicsGL.GL.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
             //Initializing fundemental objects of scene
-            Camera camera = new Camera(gl, new Vector(new double[]{ 0, 0, 0}));
+            Camera camera = new Camera(new Vector(new double[]{ 0, 0, 0}));
             SceneCollection sceneCollection = new SceneCollection(treeView1, "Collection");
-            scene = new Scene(gl, camera, sceneCollection);
+            scene = new Scene(camera, sceneCollection);
             scene.DrawFacets = checkBox_DrawFacets.Checked;
 
             //Initializing objects by default
@@ -57,7 +55,7 @@ namespace CadEditor
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
             scene.DrawScene(openGLControl1.Width, openGLControl1.Height);
-            SceneGrid.Init(gl);
+            SceneGrid.Init();
         }
 
         private void openGLControl1_Resized_1(object sender, EventArgs e)
@@ -142,7 +140,7 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-                IGraphics selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
+                Object3D selectedCubeElement = scene.GetSelectedElement(e.X, openGLControl1.Height - e.Y);
 
                 //check type of selected object
                 if (selectedCubeElement != null)
@@ -157,16 +155,6 @@ namespace CadEditor
                     {
                         SelectedObject = selectedCubeElement;
                         SelectedAxisCubeEditMode = null;
-
-                        if(SelectedObject is Point && ((Point)SelectedObject).ParentCube is ComplexCube)
-                        {
-							SelectedNonDrawableCube = scene.FindNonDrawableCube((ComplexCube)((Point)SelectedObject).ParentCube);
-						}
-                        else
-                        {
-                            SelectedNonDrawableCube = null;
-                        }
-
 						scene.InitSelectingCoordAxes(SelectedObject, 2.8f, 1.0);
                     }
                     else
@@ -179,7 +167,7 @@ namespace CadEditor
             else if (e.Button == MouseButtons.Right)
             {
 				openGLControl1.ContextMenu = null;
-				selectedCube = scene.GetSelectedCube(e.X, openGLControl1.Height - e.Y, gl);
+				selectedCube = scene.GetSelectedCube(e.X, openGLControl1.Height - e.Y);
                 if(selectedCube != null)
                 {
                     openGLControl1.ContextMenu = new ContextMenu();
@@ -215,42 +203,31 @@ namespace CadEditor
             {
                 double sensitivityLevel = 0.01;
                 double value = horizontalAngle * sensitivityLevel;
-                int index = -1;
-                double[] coords = new double[3];
+                Vector coords = new Vector(3);
 
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
-                    coords = new double[] { value, 0, 0};
-                    SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
-                    index = 0;
+                    Scene.ActiveMovingAxis = CoordinateAxis.X;
+                    coords = new Vector(value, 0, 0);
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
-					coords = new double[] { 0, -value, 0 };
-					SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
-                    index = 1;
+                    Scene.ActiveMovingAxis = CoordinateAxis.Y;
+                    coords = new Vector(0, -value, 0);
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
-					coords = new double[] { 0, 0, -value };
-					SelectedObject.Move(coords[0], coords[1], coords[2]);
-					scene.MoveCoordinateAxes(coords[0], coords[1], coords[2]);
-                    index = 2;
+                    Scene.ActiveMovingAxis = CoordinateAxis.Z;
+                    coords = new Vector(0, 0, -value);
 				}
 
-                //transform vertices in different way if cube is divided into finite elements
-                if(index >= 0 && SelectedNonDrawableCube != null)
-                {
-                    int indexOfPoint = ((Point)SelectedObject).ParentCube.Mesh.GetIndexOfPoint((Point)SelectedObject);
-                    Point p = SelectedNonDrawableCube.Mesh.Vertices[indexOfPoint];
-                    p.Move(coords[0], coords[1], coords[2]);
-					((ComplexCube)((Point)SelectedObject).ParentCube).Transform(index, SelectedNonDrawableCube);
-				}
-			}
+                Scene.MovingVector = coords;
 
-			mouseX = e.X;
+                SelectedObject.Move(coords);
+                scene.MoveCoordinateAxes(coords);
+            }
+
+            mouseX = e.X;
 			mouseY = e.Y;
 		}
 
@@ -308,9 +285,8 @@ namespace CadEditor
 
 				if (result == DialogResult.OK)
 				{
-					int[] nValues = form.nValues;
+					Vector nValues = form.nValues;
 					customCube.Divide(nValues);
-					scene.NonDrawableCubes.Add(customCube, customCube.Clone());
 				}
 			}
 			else
@@ -409,12 +385,12 @@ namespace CadEditor
             TreeNode selectedTreeNode = treeView1.SelectedNode;
             if(selectedTreeNode != null)
             {
-                List<IGraphics> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
+                List<Object3D> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
                 if(nodeObjects != null)
                 {
                     if(nodeObjects.Count > 1)
                     {
-						foreach (IGraphics graphicsObject in nodeObjects)
+						foreach (Object3D graphicsObject in nodeObjects)
 						{
 							graphicsObject.Select();
 						}

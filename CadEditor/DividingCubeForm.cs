@@ -12,7 +12,7 @@ namespace CadEditor
 {
     public partial class DividingCubeForm : Form
     {
-        public int[] nValues;
+        public Vector nValues;
 
         public DividingCubeForm()
         {
@@ -34,7 +34,7 @@ namespace CadEditor
                 int Ny = Convert.ToInt32(NyString);
                 int Nz = Convert.ToInt32(NzString);
 
-                nValues = new int[] { Nx, Ny, Nz};
+                nValues = new Vector(Nx, Ny, Nz);
                 DialogResult = DialogResult.OK;
             }
             else

@@ -7,27 +7,24 @@ namespace CadEditor
 	{
 		private Vector origin;
 		private Vector direction;
-		private OpenGL gl;
 
-		public Ray(OpenGL _gl)
+		public Ray()
 		{
-			gl = _gl;
 		}
-		public Ray(Vector start, Vector end, OpenGL _gl)
+		public Ray(Vector start, Vector end)
 		{
 			origin = start;
 			direction = end;
-			gl = _gl;
 		}
 
 		public Vector Origin { get { return origin; } set { origin = value; } }
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public Point RayIntersectsPlane(Plane facet)
+		public Point3D RayIntersectsPlane(Plane facet)
 		{
 			Vector intersectionPoint;
-			Point facetCenterPoint = (Point)facet.GetCenterPoint();
+			Point3D facetCenterPoint = (Point3D)facet.GetCenterPoint();
 
 			//Calculate planeNormal
 			Vector planeNormal = facet.CalculateNormal();
@@ -54,10 +51,10 @@ namespace CadEditor
 			// Calculate the intersection point
 			intersectionPoint = origin + distance * direction;
 
-			return new Point(intersectionPoint);
+			return new Point3D(intersectionPoint);
 		}
 
-		public Point RayIntersectsLine(Line edge)
+		public Point3D RayIntersectsLine(Line edge)
 		{
 			double coPlanerThreshold = 0.7;
 
@@ -77,7 +74,7 @@ namespace CadEditor
 			if (s >= 0.0)   // Means we have an intersection
 			{
 				Vector intersection = Origin + s * da;
-				return new Point(intersection);
+				return new Point3D(intersection);
 			}
 			else
 			{
@@ -86,7 +83,7 @@ namespace CadEditor
 
 		}
 
-		public Point RayIntersectsVertex(Point vertex)
+		public Point3D RayIntersectsVertex(Point3D vertex)
 		{
 			// Calculate the components of the direction vector.
 			double dx = Direction[0];
@@ -103,7 +100,7 @@ namespace CadEditor
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
-				return new Point(tx, ty, tz, gl);
+				return new Point3D(tx, ty, tz);
 			}
 			else
 			{
