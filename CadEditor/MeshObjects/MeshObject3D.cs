@@ -1,4 +1,5 @@
-﻿using SharpGL;
+﻿using CadEditor.Graphics;
+using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,7 +14,7 @@ namespace CadEditor.MeshObjects
 		public string Name { get; set; }
 		public Mesh Mesh { get; set; }
 
-		protected Vector size;
+		public Vector Size { get; set; }
 		public bool DrawFacets { get; set; }
 
 		public Color VertexSelectedColor = Color.Red;
@@ -23,25 +24,23 @@ namespace CadEditor.MeshObjects
 		public Color EdgeNonSelectedColor = Color.Black;
 		public Color FacetNonSelectedColor = Color.LightGray;
 
-		public MeshObject3D(OpenGL _Gl, Point3D _centerPoint, Vector _size, string _cubeName)
+		public MeshObject3D(Point3D _centerPoint, Vector _size, string _cubeName)
 		{
-			GL = _Gl;
 			Name = _cubeName;
 			Mesh = new Mesh();
 			CenterPoint = _centerPoint;
 
 			if(_size != null)
 			{
-                size = new Vector(_size.Size);
-                size[0] = (_size[0] != 0) ? (double)_size[0] : 1.0;
-                size[1] = (_size[1] != 0) ? (double)_size[1] : 1.0;
-                size[2] = (_size[2] != 0) ? (double)_size[2] : 1.0;
+                Size = new Vector(_size.Size);
+                Size[0] = (_size[0] != 0) ? (double)_size[0] : 1.0;
+                Size[1] = (_size[1] != 0) ? (double)_size[1] : 1.0;
+                Size[2] = (_size[2] != 0) ? (double)_size[2] : 1.0;
             }
 		}
 
 		public MeshObject3D(Mesh mesh, OpenGL _GL = null)
 		{
-			GL = _GL;
 			Name = "CubeName";
 			Mesh = mesh;
 		}
@@ -50,8 +49,8 @@ namespace CadEditor.MeshObjects
 		{
 
 			//Draw Vertexes
-			GL.PointSize(7.0f);
-			GL.Begin(OpenGL.GL_POINTS);
+			GraphicsGL.GL.PointSize(7.0f);
+            GraphicsGL.GL.Begin(OpenGL.GL_POINTS);
 			for (int i = 0; i < Mesh.Vertices.Count; i++)
 			{
 				if (IsSelected)
@@ -65,12 +64,12 @@ namespace CadEditor.MeshObjects
 
 				Mesh.Vertices[i].Draw();
 			}
-			GL.End();
-			GL.Flush();
+            GraphicsGL.GL.End();
+            GraphicsGL.GL.Flush();
 
 
-			//Draw Edges
-			GL.Begin(OpenGL.GL_LINES);
+            //Draw Edges
+            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 			for (int i = 0; i < Mesh.Edges.Count; i++)
 			{
 				if (IsSelected)
@@ -84,14 +83,14 @@ namespace CadEditor.MeshObjects
 
 				Mesh.Edges[i].Draw();
 			}
-			GL.End();
-			GL.Flush();
+            GraphicsGL.GL.End();
+            GraphicsGL.GL.Flush();
 
 
 			//Draw Facets
 			if (DrawFacets)
 			{
-				GL.Begin(OpenGL.GL_POLYGON);
+                GraphicsGL.GL.Begin(OpenGL.GL_POLYGON);
 				for (int i = 0; i < Mesh.Facets.Count; i++)
 				{
 					if (IsSelected)
@@ -105,8 +104,8 @@ namespace CadEditor.MeshObjects
 
 					Mesh.Facets[i].Draw();
 				}
-				GL.End();
-				GL.Flush();
+                GraphicsGL.GL.End();
+                GraphicsGL.GL.Flush();
 			}
 		}
 

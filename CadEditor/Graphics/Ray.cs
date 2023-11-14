@@ -7,17 +7,14 @@ namespace CadEditor
 	{
 		private Vector origin;
 		private Vector direction;
-		private OpenGL gl;
 
-		public Ray(OpenGL _gl)
+		public Ray()
 		{
-			gl = _gl;
 		}
-		public Ray(Vector start, Vector end, OpenGL _gl)
+		public Ray(Vector start, Vector end)
 		{
 			origin = start;
 			direction = end;
-			gl = _gl;
 		}
 
 		public Vector Origin { get { return origin; } set { origin = value; } }
@@ -103,7 +100,7 @@ namespace CadEditor
 			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
 			{
 				// The point lies on the ray.
-				return new Point3D(tx, ty, tz, gl);
+				return new Point3D(tx, ty, tz);
 			}
 			else
 			{

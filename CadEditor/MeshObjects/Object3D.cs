@@ -9,6 +9,7 @@ namespace CadEditor
 {
     public abstract class Object3D
     {
+        public OpenGL GL { get; set; }
         public bool IsSelected { get; set; }
         public bool Movable { get; set; } = true;
 

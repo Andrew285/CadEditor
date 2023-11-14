@@ -1,4 +1,5 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Graphics;
+using CadEditor.MeshObjects;
 using SharpGL;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,6 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
-        private OpenGL gl;
         private Scene scene;
 
         private ComplexCube selectedCube;
@@ -39,13 +39,13 @@ namespace CadEditor
 
 		private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
-            gl = openGLControl1.OpenGL;
-            gl.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+            GraphicsGL graphics = new GraphicsGL(openGLControl1.OpenGL);
+            GraphicsGL.GL.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
             //Initializing fundemental objects of scene
-            Camera camera = new Camera(gl, new Vector(new double[]{ 0, 0, 0}));
+            Camera camera = new Camera(new Vector(new double[]{ 0, 0, 0}));
             SceneCollection sceneCollection = new SceneCollection(treeView1, "Collection");
-            scene = new Scene(gl, camera, sceneCollection);
+            scene = new Scene(camera, sceneCollection);
             scene.DrawFacets = checkBox_DrawFacets.Checked;
 
             //Initializing objects by default
@@ -55,7 +55,7 @@ namespace CadEditor
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
             scene.DrawScene(openGLControl1.Width, openGLControl1.Height);
-            SceneGrid.Init(gl);
+            SceneGrid.Init();
         }
 
         private void openGLControl1_Resized_1(object sender, EventArgs e)
@@ -140,7 +140,7 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
 				openGLControl1.ContextMenu = null;
-                Object3D selectedCubeElement = scene.CheckSelectedElement(e.X, openGLControl1.Height - e.Y, gl);
+                Object3D selectedCubeElement = scene.GetSelectedElement(e.X, openGLControl1.Height - e.Y);
 
                 //check type of selected object
                 if (selectedCubeElement != null)
@@ -167,7 +167,7 @@ namespace CadEditor
             else if (e.Button == MouseButtons.Right)
             {
 				openGLControl1.ContextMenu = null;
-				selectedCube = scene.GetSelectedCube(e.X, openGLControl1.Height - e.Y, gl);
+				selectedCube = scene.GetSelectedCube(e.X, openGLControl1.Height - e.Y);
                 if(selectedCube != null)
                 {
                     openGLControl1.ContextMenu = new ContextMenu();
@@ -207,16 +207,21 @@ namespace CadEditor
 
                 if (SelectedAxisCubeEditMode.Axis == CoordinateAxis.X)
                 {
+                    Scene.ActiveMovingAxis = CoordinateAxis.X;
                     coords = new Vector(value, 0, 0);
                 }
                 else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Y)
                 {
+                    Scene.ActiveMovingAxis = CoordinateAxis.Y;
                     coords = new Vector(0, -value, 0);
 				}
 				else if(SelectedAxisCubeEditMode.Axis == CoordinateAxis.Z)
                 {
+                    Scene.ActiveMovingAxis = CoordinateAxis.Z;
                     coords = new Vector(0, 0, -value);
 				}
+
+                Scene.MovingVector = coords;
 
                 SelectedObject.Move(coords);
                 scene.MoveCoordinateAxes(coords);
@@ -282,7 +287,6 @@ namespace CadEditor
 				{
 					Vector nValues = form.nValues;
 					customCube.Divide(nValues);
-					scene.NonDrawableCubes.Add(customCube, customCube.Clone());
 				}
 			}
 			else

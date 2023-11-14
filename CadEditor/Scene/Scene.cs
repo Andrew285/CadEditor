@@ -1,4 +1,5 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Graphics;
+using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.SceneGraph.Primitives;
@@ -15,9 +16,7 @@ namespace CadEditor
     {
         private Camera camera;
         public SceneCollection SceneCollection { get; private set; }
-        private OpenGL GL;
         public List<ComplexCube> DrawableCubes { get; private set; }
-		public Dictionary<ComplexCube, ComplexCube> NonDrawableCubes { get; private set; }
         public Ray ray;
 		public Ray selectingRay;
 		public float selectedObjAxisLength { get; set; }
@@ -26,6 +25,9 @@ namespace CadEditor
 
 		private readonly double facetTolerance = 0.08;
 		private readonly double edgeTolerance = 0.08;
+
+		public static Vector MovingVector;
+		public static CoordinateAxis ActiveMovingAxis;
 
 		public bool DrawFacets { get; set; }
 
@@ -36,13 +38,11 @@ namespace CadEditor
 		public Object3D SelectedPreviousObject;
 
 
-		public Scene(OpenGL _gl, Camera _camera, SceneCollection _sceneCollection)
+		public Scene(Camera _camera, SceneCollection _sceneCollection)
         {
-			GL = _gl;
 			camera = _camera;
 			SceneCollection = _sceneCollection;
 			DrawableCubes = new List<ComplexCube>();
-			NonDrawableCubes = new Dictionary<ComplexCube, ComplexCube>();
         }
 
 		public Camera Camera
@@ -54,7 +54,7 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			ComplexCube cube = new ComplexCube(GL, new Point3D(0, 0, 0, GL), new Vector(1, 1, 1), "Cube_1");
+			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube_1");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
@@ -106,9 +106,9 @@ namespace CadEditor
 				axisXYZLengths[i] = axisLength * multiplier;
 			}
 
-			Axis axisX = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, GL);
-			Axis axisY = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, GL);
-			Axis axisZ = new Axis(new Point3D(v.X, v.Y, v.Z, GL), new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, GL);
+			Axis axisX = new Axis(new Point3D(v.X, v.Y, v.Z), new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z), CoordinateAxis.X);
+			Axis axisY = new Axis(new Point3D(v.X, v.Y, v.Z), new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z), CoordinateAxis.Y);
+			Axis axisZ = new Axis(new Point3D(v.X, v.Y, v.Z), new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z), CoordinateAxis.Z);
 
 			axisX.LineWidth = lineWidth;
 			axisY.LineWidth = lineWidth;
@@ -116,9 +116,9 @@ namespace CadEditor
 			selectingCoordinateAxes = new Axis[] { axisX, axisY, axisZ };
 
 			//Create Axis Cubes
-			AxisCube cubeX = new AxisCube(GL, new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z, GL), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
-			AxisCube cubeY = new AxisCube(GL, new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z, GL), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
-			AxisCube cubeZ = new AxisCube(GL, new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z, GL), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
+			AxisCube cubeX = new AxisCube(new Point3D(axisXYZLengths[0] + v.X, v.Y, v.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
+			AxisCube cubeY = new AxisCube(new Point3D(v.X, axisXYZLengths[1] + v.Y, v.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
+			AxisCube cubeZ = new AxisCube(new Point3D(v.X, v.Y, axisXYZLengths[2] + v.Z), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
 
 			//Set colors
 			cubeX.FacetSelectedColor = Color.Red;
@@ -138,24 +138,24 @@ namespace CadEditor
 
 		public void DrawScene(int Width, int Height)
         {
-			GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
-			// Set up the projection matrix
-			GL.MatrixMode(OpenGL.GL_PROJECTION);
-			GL.LoadIdentity();
-			GL.Perspective(45.0, (double)Width / (double)Height, 0.1, 100.0);
+            // Set up the projection matrix
+            GraphicsGL.GL.MatrixMode(OpenGL.GL_PROJECTION);
+            GraphicsGL.GL.LoadIdentity();
+            GraphicsGL.GL.Perspective(45.0, (double)Width / (double)Height, 0.1, 100.0);
 
-			// Set up the view matrix
-			GL.MatrixMode(OpenGL.GL_MODELVIEW);
-			GL.LoadIdentity();
-			GL.LookAt(0, 0, camera.CameraDistance, 0, 0, 0, 0, 1, 0);
+            // Set up the view matrix
+            GraphicsGL.GL.MatrixMode(OpenGL.GL_MODELVIEW);
+            GraphicsGL.GL.LoadIdentity();
+            GraphicsGL.GL.LookAt(0, 0, camera.CameraDistance, 0, 0, 0, 0, 1, 0);
 
 			//Rotate Camera
 			camera.RotateAxisX();
 			camera.RotateAxisY();
 
 			//Draw Scene Grid
-			DrawCordinateAxes(new Point3D(0, 0, 0, GL), 3.0, 20);
+			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, 20);
 
             //Draw Coordinate Axes if selected Vertex
             if (selectingCoordinateAxes != null)
@@ -179,29 +179,29 @@ namespace CadEditor
 
         public void DrawCordinateAxes(Point3D v, double lineWidth, double axisLength)
         {
-            GL.LineWidth((float)lineWidth);
-            GL.Begin(OpenGL.GL_LINES);
+            GraphicsGL.GL.LineWidth((float)lineWidth);
+            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 
-			GL.Color(1f, 0, 0, 0);
-			GL.Vertex(-axisLength + v.X, v.Y, v.Z);
-			GL.Vertex(axisLength + v.X, v.Y, v.Z);
+            GraphicsGL.GL.Color(1f, 0, 0, 0);
+            GraphicsGL.GL.Vertex(-axisLength + v.X, v.Y, v.Z);
+            GraphicsGL.GL.Vertex(axisLength + v.X, v.Y, v.Z);
 
 
-			GL.Color(0, 1f, 0, 0);
-			GL.Vertex(v.X, -axisLength + v.Y, v.Z);
-            GL.Vertex(v.X, axisLength + v.Y, v.Z);
+            GraphicsGL.GL.Color(0, 1f, 0, 0);
+            GraphicsGL.GL.Vertex(v.X, -axisLength + v.Y, v.Z);
+            GraphicsGL.GL.Vertex(v.X, axisLength + v.Y, v.Z);
 
-			GL.Color(0, 0, 1f, 0);
-			GL.Vertex(v.X, v.Y, -axisLength + v.Z);
-            GL.Vertex(v.X, v.Y, axisLength + v.Z);
+            GraphicsGL.GL.Color(0, 0, 1f, 0);
+            GraphicsGL.GL.Vertex(v.X, v.Y, -axisLength + v.Z);
+            GraphicsGL.GL.Vertex(v.X, v.Y, axisLength + v.Z);
 
-            GL.End();
-            GL.Flush();
+            GraphicsGL.GL.End();
+            GraphicsGL.GL.Flush();
         }
 
         public void DrawSelectingCoordAxes()
 		{
-			GL.Begin(OpenGL.GL_LINES);
+            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 
 			selectingCoordinateAxes[0].NonSelectedColor = Color.Red;
 			selectingCoordinateAxes[1].NonSelectedColor = Color.Green;
@@ -215,22 +215,22 @@ namespace CadEditor
 			selectingCoordinateCubes[1].Draw();
 			selectingCoordinateCubes[2].Draw();
 
-			GL.End();
-			GL.Flush();
+            GraphicsGL.GL.End();
+            GraphicsGL.GL.Flush();
 		}
 
 		public void DrawLine(Vector v1, Vector v2)
         {
-            GL.LineWidth(3.0f);
-            GL.Begin(OpenGL.GL_LINES);
+            GraphicsGL.GL.LineWidth(3.0f);
+            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 
-			GL.Color(1, 0, 0);
-			GL.Vertex(v1[0], v1[1], v1[2]);
+            GraphicsGL.GL.Color(1, 0, 0);
+            GraphicsGL.GL.Vertex(v1[0], v1[1], v1[2]);
 
-            GL.Color(1, 0, 0);
-			GL.Vertex(v2[0], v2[1], v2[2]);
+            GraphicsGL.GL.Color(1, 0, 0);
+            GraphicsGL.GL.Vertex(v2[0], v2[1], v2[2]);
 
-			GL.End();
+            GraphicsGL.GL.End();
 		}
 
 		public void DeleteSelectingCoordAxes()
@@ -242,16 +242,20 @@ namespace CadEditor
 
 		#region --- Selection ---
 
-		public Object3D CheckSelectedElement(int x, int y, OpenGL gl)
+		public Object3D GetSelectedElement(int x, int y)
 		{
 			// Convert the mouse coordinates to world coordinates
-			Vector near = new Vector(gl.UnProject(x, y, 0));
-			Vector far = new Vector(gl.UnProject(x, y, 1));
+
+			double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
+			double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+
+            Vector near = new Vector(unProject1);
+			Vector far = new Vector(unProject2);
 			Vector direction = (far - near).Normalize();
 
 			//initialize a ray
-			ray = new Ray(near, direction, gl);
-			selectingRay = new Ray(gl);
+			ray = new Ray(near, direction);
+			selectingRay = new Ray();
 			selectingRay.Origin = near;
 
             Object3D selectedCube = null;
@@ -486,15 +490,18 @@ namespace CadEditor
 			return null;
 		}
 
-		public ComplexCube GetSelectedCube(int x, int y, OpenGL gl)
+		public ComplexCube GetSelectedCube(int x, int y)
 		{
-			// Convert the mouse coordinates to world coordinates
-			Vector near = new Vector(gl.UnProject(x, y, 0));
-			Vector far = new Vector(gl.UnProject(x, y, 1));
+            // Convert the mouse coordinates to world coordinates
+            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
+            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+
+            Vector near = new Vector(unProject1);
+			Vector far = new Vector(unProject2);
 			Vector direction = (far - near).Normalize();
 
-			ray = new Ray(near, direction, gl);
-			selectingRay = new Ray(gl);
+			ray = new Ray(near, direction);
+			selectingRay = new Ray();
 			selectingRay.Origin = near;
 
 			// Iterate over each object in the scene
@@ -510,15 +517,18 @@ namespace CadEditor
 			return null;
 		}
 
-		public bool IsSelectedAxisCube(int x, int y, AxisCube cube, OpenGL gl)
+		public bool IsSelectedAxisCube(int x, int y, AxisCube cube)
 		{
-			// Convert the mouse coordinates to world coordinates
-			Vector near = new Vector(gl.UnProject(x, y, 0));
-			Vector far = new Vector(gl.UnProject(x, y, 1));
+            // Convert the mouse coordinates to world coordinates
+            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
+            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+
+            Vector near = new Vector(unProject1);
+			Vector far = new Vector(unProject2);
 			Vector direction = (far - near).Normalize();
 
-			ray = new Ray(near, direction, gl);
-			selectingRay = new Ray(gl);
+			ray = new Ray(near, direction);
+			selectingRay = new Ray();
 			selectingRay.Origin = near;
 
 			Plane selectedFacet = CheckSelectedFacet(cube, ray);
@@ -550,7 +560,7 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			ComplexCube cube = new ComplexCube(GL, new Point3D(0, 0, 0, GL), null, "Cube2");
+			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), null, "Cube2");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
@@ -596,16 +606,6 @@ namespace CadEditor
 			return -1;
 		}
 
-		public ComplexCube FindNonDrawableCube(ComplexCube drawableCube)
-		{
-			if (NonDrawableCubes.ContainsKey(drawableCube))
-			{
-				return NonDrawableCubes[drawableCube];
-			}
-
-			return null;
-		}
-
 		#endregion
 
 		#region --- Export/Import ---
@@ -638,7 +638,7 @@ namespace CadEditor
 						Mesh currentMesh = new Mesh();
 						currentMesh.Vertices = currentPoints;
 						currentMesh.Edges = currentLines;
-						ComplexCube newCube = new ComplexCube(currentMesh, GL);
+						ComplexCube newCube = new ComplexCube(currentMesh);
 						newCube.Name = name;
 						cubes.Add(newCube);
 						currentPoints = new List<Point3D>();
@@ -660,7 +660,7 @@ namespace CadEditor
 						coords[j] = double.Parse(splited[j]);
 					}
 
-					currentPoints.Add(new Point3D(coords, GL));
+					currentPoints.Add(new Point3D(coords));
 				}
 				else if (importStrings[i].Contains('L'))
 				{
@@ -669,7 +669,7 @@ namespace CadEditor
 					Point3D p1 = currentPoints[Int32.Parse(splited[0])];
 					Point3D p2 = currentPoints[Int32.Parse(splited[1])];
 
-					currentLines.Add(new Line(p1, p2, GL));
+					currentLines.Add(new Line(p1, p2));
 				}
 			}
 
@@ -678,7 +678,7 @@ namespace CadEditor
 				Mesh currentMesh = new Mesh();
 				currentMesh.Vertices = currentPoints;
 				currentMesh.Edges = currentLines;
-				ComplexCube newCube = new ComplexCube(currentMesh, GL);
+				ComplexCube newCube = new ComplexCube(currentMesh);
 				newCube.Name = name;
 				cubes.Add(newCube);
 				currentPoints = new List<Point3D>();

@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Graphics\Camera.cs" />
+    <Compile Include="Graphics\GraphicsGL.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
     <Compile Include="Maths\Triangulation.cs" />
     <Compile Include="MeshObjects\AxisCube.cs" />
@@ -85,6 +86,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Maths\Matrix.cs" />
+    <Compile Include="MeshObjects\IMeshEnumerable.cs" />
     <Compile Include="MeshObjects\MeshObject3D.cs" />
     <Compile Include="MeshObjects\Mesh.cs" />
     <Compile Include="Object3D.cs" />

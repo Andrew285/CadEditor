@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class RayPointTest
     {
         [TestMethod]
         public void IsPointOnLine()

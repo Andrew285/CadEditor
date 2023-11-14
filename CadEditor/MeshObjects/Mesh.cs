@@ -1,4 +1,5 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Graphics;
+using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph.Primitives;
 using System;
@@ -101,6 +102,30 @@ namespace CadEditor
             return -1;
         }
 
+        public static List<Point3D> CloneVertices(List<Point3D> listToClone)
+        {
+            List<Point3D> resultList = new List<Point3D>();
+
+            for (int i = 0; i < listToClone.Count; i++)
+            {
+                resultList.Add(listToClone[i].Clone());
+            }
+
+            return resultList;
+        }
+
+        public static Point3D[] CloneVertices(Point3D[] listToClone)
+        {
+            Point3D[] resultList = new Point3D[listToClone.Length];
+
+            for (int i = 0; i < listToClone.Length; i++)
+            {
+                resultList[i] = listToClone[i].Clone();
+            }
+
+            return resultList;
+        }
+
         public Mesh Clone()
         {
             Mesh cloneMesh = new Mesh();
@@ -112,13 +137,19 @@ namespace CadEditor
 
 			for (int i = 0; i < this.Edges.Count; i++)
 			{
-				cloneMesh.Edges.Add(Edges[i].Clone());
+                Point3D p1 = cloneMesh.ContainsPoint(this.Edges[i].P1);
+                Point3D p2 = cloneMesh.ContainsPoint(this.Edges[i].P2);
+                cloneMesh.Edges.Add(new Line(p1, p2));
 			}
 
 			for (int i = 0; i < this.Facets.Count; i++)
 			{
-				cloneMesh.Facets.Add(Facets[i].Clone());
-			}
+                Point3D p1 = cloneMesh.ContainsPoint(this.Facets[i][0]);
+                Point3D p2 = cloneMesh.ContainsPoint(this.Facets[i][1]);
+                Point3D p3 = cloneMesh.ContainsPoint(this.Facets[i][2]);
+                Point3D p4 = cloneMesh.ContainsPoint(this.Facets[i][3]);
+                cloneMesh.Facets.Add(new Plane(new List<Point3D> {p1, p2, p3, p4 }));
+            }
 
             return cloneMesh;
 		}
@@ -126,20 +157,19 @@ namespace CadEditor
 
 	public class Point3D: Object3D
     {
-		public OpenGL GL { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
         public List<Line> EdgeParents { get; set; }
 		public List<Plane> FacetParents { get; set; }
 		public MeshObject3D ParentCube { get; set; }
+        public int PositionInCube { get; set; }
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Pink;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-        public Point3D(double[] values, OpenGL _gl = null)
+        public Point3D(double[] values)
 		{
-            GL = _gl;
             X = values[0];
             Y = values[1];
             Z = values[2];
@@ -154,9 +184,8 @@ namespace CadEditor
             IsSelected = false;
 		}
 
-		public Point3D(double _x, double _y, double _z, OpenGL _gl=null)
+		public Point3D(double _x, double _y, double _z)
 		{
-			GL = _gl;
 			X = _x;
 			Y = _y;
 			Z = _z;
@@ -215,9 +244,9 @@ namespace CadEditor
 			return String.Format("({0},{1},{2})", X, Y, Z);
 		}
 
-        public Point3D GetWorldCoordinates(OpenGL gl)
+        public Point3D GetWorldCoordinates()
         {
-            return new Point3D(gl.UnProject(X, Y, Z));
+            return new Point3D(GraphicsGL.GL.UnProject(X, Y, Z));
         }
 
         public bool IsLower(Point3D v)
@@ -251,8 +280,9 @@ namespace CadEditor
 
         public Point3D Clone()
         {
-            Point3D clonePoint = new Point3D(X, Y, Z, GL);
+            Point3D clonePoint = new Point3D(X, Y, Z);
             clonePoint.ParentCube = ParentCube;
+            clonePoint.PositionInCube = PositionInCube;
             return clonePoint;
         }
 
@@ -260,14 +290,14 @@ namespace CadEditor
 		{
             if (IsSelected)
             {
-                GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+                GraphicsGL.GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
             }
             else
             {
-                GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+                GraphicsGL.GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
             }
 
-            GL.Vertex(X, Y, Z);
+            GraphicsGL.GL.Vertex(X, Y, Z);
 		}
 
         public override void Move(Vector vector)
@@ -276,9 +306,10 @@ namespace CadEditor
 			Y += vector[1];
 			Z += vector[2];
 
-            if(ParentCube != null && ParentCube is ComplexCube)
+            if (ParentCube != null && ParentCube is ComplexCube && ((ComplexCube)ParentCube).IsDivided)
             {
-                ((ComplexCube)ParentCube).Transform(vector, this);
+                ((ComplexCube)ParentCube).Update(this);
+                ((ComplexCube)ParentCube).Transform();
             }
         }
 
@@ -295,17 +326,15 @@ namespace CadEditor
 
 	public class Plane: Object3D
 	{
-		public OpenGL GL { get; set; }
 		public List<Point3D> Points { get; set; }
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Brown;
 		public Color NonSelectedColor { get; set; } = Color.LightGray;
 
-		public Plane(List<Point3D> _vertices, OpenGL _gl=null)
+		public Plane(List<Point3D> _vertices)
 		{
             Points = _vertices;
             IsSelected = false;
-			GL = _gl;
         }
 
         public Point3D this[int index]
@@ -434,17 +463,17 @@ namespace CadEditor
 		{
             if (IsSelected)
             {
-                GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+                GraphicsGL.GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
             }
             else
             {
-                GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+                GraphicsGL.GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
             }
 
 
             foreach (Point3D v in Points)
 			{
-				GL.Vertex(v.X, v.Y, v.Z);
+                GraphicsGL.GL.Vertex(v.X, v.Y, v.Z);
 			}
 		}
 
@@ -475,7 +504,7 @@ namespace CadEditor
                 newPoints.Add(this.Points[i].Clone());
             }
 
-            return new Plane(newPoints, GL);
+            return new Plane(newPoints);
         }
 
         public Plane GetClickableArea(double tolerance)
@@ -496,7 +525,6 @@ namespace CadEditor
 
 	public class Line: Object3D, IEquatable<Line>
 	{
-		public OpenGL GL { get; set; }
 		public Point3D P1 { get; set; }
 		public Point3D P2 { get; set; }
 		public List<Plane> FacetParents { get; set; }
@@ -505,9 +533,8 @@ namespace CadEditor
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
 
-		public Line(Point3D _v1, Point3D _v2, OpenGL _gl=null)
+		public Line(Point3D _v1, Point3D _v2)
 		{
-			GL = _gl;
 			P1 = _v1;
 			P2 = _v2;
 			FacetParents = new List<Plane>();
@@ -614,7 +641,7 @@ namespace CadEditor
 
         public Line Clone()
         {
-            return new Line(P1.Clone(), P2.Clone(), GL);
+            return new Line(P1.Clone(), P2.Clone());
         }
 
         public override void Draw()
@@ -622,11 +649,11 @@ namespace CadEditor
 
             if (IsSelected)
             {
-                GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+                GraphicsGL.GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
             }
             else
             {
-                GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+                GraphicsGL.GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
             }
 
             LineWidth = (float)LineWidth;
@@ -635,9 +662,9 @@ namespace CadEditor
 				LineWidth += 1.0f;
 			}
 
-			GL.LineWidth((float)LineWidth);
-			GL.Vertex(P1.X, P1.Y, P1.Z);
-			GL.Vertex(P2.X, P2.Y, P2.Z);
+            GraphicsGL.GL.LineWidth((float)LineWidth);
+            GraphicsGL.GL.Vertex(P1.X, P1.Y, P1.Z);
+            GraphicsGL.GL.Vertex(P2.X, P2.Y, P2.Z);
 		}
 
 		public override void Move(Vector vector)
@@ -679,7 +706,7 @@ namespace CadEditor
 	{
 		public CoordinateAxis CoordinateAxis { get; set; }
 
-		public Axis(Point3D v1, Point3D v2, CoordinateAxis axis, OpenGL openGL = null): base(v1, v2, openGL)
+		public Axis(Point3D v1, Point3D v2, CoordinateAxis axis): base(v1, v2)
 		{
 			CoordinateAxis = axis;
 		}
