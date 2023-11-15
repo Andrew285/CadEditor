@@ -142,6 +142,7 @@ namespace CadEditor.MeshObjects
 			{
 				vertex.IsSelected = false;
 			}
+
 		}
 	}
 }

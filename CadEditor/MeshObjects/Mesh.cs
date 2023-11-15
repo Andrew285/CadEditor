@@ -1,12 +1,8 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
-using SharpGL;
-using SharpGL.SceneGraph.Primitives;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace CadEditor
 {

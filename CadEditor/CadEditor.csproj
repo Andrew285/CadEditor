@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\GraphicsGL.cs" />
+    <Compile Include="Graphics\MouseController.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
     <Compile Include="Maths\Triangulation.cs" />
     <Compile Include="MeshObjects\AxisCube.cs" />
@@ -89,7 +90,7 @@
     <Compile Include="MeshObjects\IMeshEnumerable.cs" />
     <Compile Include="MeshObjects\MeshObject3D.cs" />
     <Compile Include="MeshObjects\Mesh.cs" />
-    <Compile Include="Object3D.cs" />
+    <Compile Include="MeshObjects\Object3D.cs" />
     <Compile Include="Tools\Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

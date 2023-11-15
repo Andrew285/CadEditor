@@ -38,6 +38,7 @@ namespace CadEditor.MeshObjects
 			foreach (Point3D p in Mesh.Vertices)
 			{
 				p.ParentCube = this;
+				p.ParentObject = this;
 			}
 			CenterPoint.ParentCube = this;
 
@@ -99,8 +100,13 @@ namespace CadEditor.MeshObjects
 				})
 			};
 
-			//Initializing Edges
-			List<Line> edges = new List<Line>();
+            foreach (Plane plane in Mesh.Facets)
+            {
+                plane.ParentObject = this;
+            }
+
+            //Initializing Edges
+            List<Line> edges = new List<Line>();
 			for (int i = 0; i < Mesh.Facets.Count; i++)
 			{
 				Plane currentFacet = Mesh.Facets[i];
@@ -128,7 +134,13 @@ namespace CadEditor.MeshObjects
 					}
 				}
 			}
-			Mesh.Edges = edges;
+
+            foreach (Line line in Mesh.Edges)
+            {
+                line.ParentObject = this;
+            }
+
+            Mesh.Edges = edges;
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿using SharpGL;
-using System;
+﻿using System;
 
 namespace CadEditor
 {
@@ -21,10 +20,27 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
+		public Point3D Intersects(Object3D obj)
+		{
+			if (obj != null)
+			{
+				if(obj is Plane)
+				{
+					return RayIntersectsPlane((Plane)obj);
+				}
+				else if (obj is Line)
+				{
+					return RayIntersectsLine((Line)obj);
+				}
+			}
+
+			return null;
+		} 
+
 		public Point3D RayIntersectsPlane(Plane facet)
 		{
 			Vector intersectionPoint;
-			Point3D facetCenterPoint = (Point3D)facet.GetCenterPoint();
+			Point3D facetCenterPoint = facet.GetCenterPoint();
 
 			//Calculate planeNormal
 			Vector planeNormal = facet.CalculateNormal();
