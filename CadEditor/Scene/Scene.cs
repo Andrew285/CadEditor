@@ -1,5 +1,6 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
+using MathNet.Spatial.Euclidean;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.SceneGraph.Primitives;
@@ -9,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -18,8 +20,7 @@ namespace CadEditor
         public SceneCollection SceneCollection { get; private set; }
         public List<ComplexCube> DrawableCubes { get; private set; }
         public Ray ray;
-		public Ray selectingRay;
-		public float selectedObjAxisLength { get; set; }
+		//public Ray selectingRay;
 		private Axis[] selectingCoordinateAxes;
 		private AxisCube[] selectingCoordinateCubes;
 
@@ -28,15 +29,12 @@ namespace CadEditor
 
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
+		public Object3D SelectedObject { get; set; }
+		public AxisCube SelectedAxisCube { get; set; }
 
 		public bool DrawFacets { get; set; }
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
-
-		public Object3D SelectedCube;
-		public Object3D SelectedObject;
-		public Object3D SelectedPreviousObject;
-
 
 		public Scene(Camera _camera, SceneCollection _sceneCollection)
         {
@@ -136,14 +134,14 @@ namespace CadEditor
 
 		#region --- Drawing ---
 
-		public void DrawScene(int Width, int Height)
+		public void Draw()
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
             // Set up the projection matrix
             GraphicsGL.GL.MatrixMode(OpenGL.GL_PROJECTION);
             GraphicsGL.GL.LoadIdentity();
-            GraphicsGL.GL.Perspective(45.0, (double)Width / (double)Height, 0.1, 100.0);
+            GraphicsGL.GL.Perspective(45.0, (double)GraphicsGL.GetWidth() / (double)GraphicsGL.GetHeight(), 0.1, 100.0);
 
             // Set up the view matrix
             GraphicsGL.GL.MatrixMode(OpenGL.GL_MODELVIEW);
@@ -163,11 +161,11 @@ namespace CadEditor
 				DrawSelectingCoordAxes();
 			}
 
-            //Draw ray when user clicks with left button
-            if (selectingRay != null && selectingRay.Direction != null)
-			{
-				DrawLine(selectingRay.Origin, selectingRay.Direction);
-			}
+   //         //Draw ray when user clicks with left button
+   //         if (selectingRay != null && selectingRay.Direction != null)
+			//{
+			//	DrawLine(selectingRay.Origin, selectingRay.Direction);
+			//}
 
             //Draw all objects
             foreach (var cube in DrawableCubes)
@@ -242,23 +240,13 @@ namespace CadEditor
 
 		#region --- Selection ---
 
-		public Object3D GetSelectedElement(int x, int y)
+		public void SelectObject(int x, int y)
 		{
-			// Convert the mouse coordinates to world coordinates
+			ray = GraphicsGL.InitializeRay(x, y);
+            //selectingRay = new Ray();
+            //selectingRay.Origin = ray.Origin;
 
-			double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
-			double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
-
-            Vector near = new Vector(unProject1);
-			Vector far = new Vector(unProject2);
-			Vector direction = (far - near).Normalize();
-
-			//initialize a ray
-			ray = new Ray(near, direction);
-			selectingRay = new Ray();
-			selectingRay.Origin = near;
-
-            Object3D selectedCube = null;
+            //Object3D selectedCube = null;
             Object3D selectedObject = null;
 
 			//Check if any coordinate axis is selected
@@ -276,26 +264,71 @@ namespace CadEditor
 					if (selectedFacet != null)
 					{
 						selectingCoordinateCubes[i].IsSelected = true;
-						return selectingCoordinateCubes[i];
-					}
+						selectedObject = selectingCoordinateCubes[i];
+						CheckSelectedObject(selectedObject);
+						return;
+                    }
 				}
 			}
 
             // Iterate over each object in the scene
             foreach (ComplexCube cube in DrawableCubes)
             {
-				CheckCubeElements(cube, ref selectedObject, ref selectedCube);
+				selectedObject = CheckCubeElements(cube);
+				if(selectedObject != null)
+				{
+					break;
+				}
             }
 
-            if (selectedObject != null && SceneMode == SceneMode.VIEW)
-            {
-                selectedObject = selectedCube;
-            }
-
-            return selectedObject;
+            CheckSelectedObject(selectedObject);
         }
 
-		private void CheckCubeElements(ComplexCube cube, ref Object3D selectedObject, ref Object3D selectedCube)
+		private void CheckSelectedObject(Object3D obj)
+		{
+
+            if (obj != null)
+            {
+                if (obj is AxisCube)
+                {
+                    SelectedAxisCube = (AxisCube)obj;
+                }
+                else if (!(obj is AxisCube))
+                {
+					if(obj is Point3D)
+					{
+                        SelectedObject = (Point3D)obj;
+                    }
+					else if (obj is Line)
+					{
+                        SelectedObject = (Line)obj;
+                    }
+                    else if (obj is Plane)
+                    {
+                        SelectedObject = (Plane)obj;
+                    }
+
+					if(SceneMode == SceneMode.VIEW)
+					{
+						SelectedObject = (MeshObject3D)SelectedObject.ParentObject;
+                    }
+
+					if(SelectedObject != null)
+					{
+                        SelectedObject.Select();
+                        InitSelectingCoordAxes(SelectedObject, 2.8f, 1.0);
+                    }
+                }
+                else
+                {
+					//obj.Select();
+                    DeleteSelectingCoordAxes();
+                }
+
+            }
+        }
+
+		private Object3D CheckCubeElements(ComplexCube cube)
 		{
 			//deselect all facets, edges and vertices before another selecting
             cube.Deselect();
@@ -304,79 +337,105 @@ namespace CadEditor
 			Point3D selectedVertex = CheckSelectedVertex(cube, ray);
 			if (selectedVertex != null)
 			{
-				selectedObject = selectedVertex;
-				selectedCube = cube;
-				return;
+				return selectedVertex;
 			}
 
 			//check if any edge is selected
 			Line selectedEdge = CheckSelectedEdge(cube, ray);
             if (selectedEdge != null)
             {
-                selectedObject = selectedEdge;
-                selectedCube = cube;
-				return;
+                return selectedEdge;
             }
 
-			//check if any facet is selected
-			Plane selectedFacet = CheckSelectedFacet(cube, ray);
+            //check if any facet is selected
+            Plane selectedFacet = CheckSelectedFacet(cube, ray);
 			if (selectedFacet != null)
 			{
-				selectedObject = selectedFacet;
-				selectedCube = cube;
-				return;
-			}
-		}
+				return selectedFacet;
+            }
+
+			return null;
+        }
 
 		public Plane CheckSelectedFacet(MeshObject3D cube, Ray ray)
 		{
-			double? minDistance = null; //minimal distance between facet and ray origin
-			Plane selectedFacet = null; //facet that is selected
-			Point3D minIntersectionPoint = null;
+			var result = GetIntersectionPoint(cube, ray);
 
-			for(int i = 0; i < cube.Mesh.Facets.Count; i++)
+			if(!IsOnClickableArea(result.Item1, result.Item2))
 			{
-				Plane currentFacet = cube.Mesh.Facets[i];
+				return null;
+			}
+
+            return (Plane)result.Item1;
+		}
+
+		private (Object3D, Point3D) GetIntersectionPoint(MeshObject3D cube, Ray ray)
+		{
+            double? minDistance = null; //minimal distance between facet and ray origin
+            Plane selectedFacet = null; //facet that is selected
+            Point3D minIntersectionPoint = null;
+
+            for (int i = 0; i < cube.Mesh.Facets.Count; i++)
+            {
+                Plane currentFacet = cube.Mesh.Facets[i];
                 Point3D intersectionPoint = ray.RayIntersectsPlane(currentFacet);
 
-				//check if facet contains intersection point
-				if (intersectionPoint != null && currentFacet.Contains(intersectionPoint))
-				{
-					//compare distances from ray origin to intersection point
+                //check if facet contains intersection point
+                if (intersectionPoint != null && currentFacet.Contains(intersectionPoint))
+                {
+                    //compare distances from ray origin to intersection point
                     double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
-                    
-					if (minDistance != null)
-					{
-						if(distanceToPoint < minDistance)
-						{
-							minDistance = distanceToPoint;
+
+                    if (minDistance != null)
+                    {
+                        if (distanceToPoint < minDistance)
+                        {
+                            minDistance = distanceToPoint;
                             selectedFacet = currentFacet;
-							minIntersectionPoint = intersectionPoint;
+                            minIntersectionPoint = intersectionPoint;
                         }
                     }
-					else
-					{
-						minDistance = distanceToPoint;
+                    else
+                    {
+                        minDistance = distanceToPoint;
                         selectedFacet = currentFacet;
                         minIntersectionPoint = intersectionPoint;
                     }
-				}
+                }
             }
 
-			//check if clickable area of facet contains the intersection point
-			if(selectedFacet != null && minIntersectionPoint != null)
-			{
-                Plane facetArea = selectedFacet.GetClickableArea(facetTolerance);
-				if (!facetArea.Contains(minIntersectionPoint))
+			return (selectedFacet, minIntersectionPoint);
+        }
+
+		private bool IsOnClickableArea(Object3D element, Point3D intersection)
+		{
+            //check if clickable area of facet contains the intersection point
+            if (element != null && intersection != null)
+            {
+				if (element is Line) 
 				{
-					return null;
-				}
+                    Line line = ((Line)element).GetClickableArea(facetTolerance);
+                    if (!line.Contains(intersection))
+                    {
+                        return false;
+                    }
+                } 
+                else if (element is Plane)
+				{
+					Plane plane = ((Plane)element).GetClickableArea(facetTolerance);
+                    if (!plane.Contains(intersection))
+                    {
+						return false;
+                    }
+                }
 
-				selectingRay.Direction = new Vector(minIntersectionPoint);
+				return true;
+
+                //selectingRay.Direction = new Vector(minIntersectionPoint);
             }
 
-            return selectedFacet;
-		}
+			return false;
+        }
 
 		public Line CheckSelectedEdge(ComplexCube cube, Ray ray)
 		{
@@ -413,16 +472,9 @@ namespace CadEditor
                 }
             }
 
-            //check if clickable area of facet contains the intersection point
-            if (selectedEdge != null && minIntersectionPoint != null)
+            if (!IsOnClickableArea(selectedEdge, minIntersectionPoint))
             {
-                Line edgeArea = selectedEdge.GetClickableArea(edgeTolerance);
-                if (!edgeArea.Contains(minIntersectionPoint))
-                {
-                    return null;
-                }
-
-                selectingRay.Direction = new Vector(minIntersectionPoint);
+                return null;
             }
 
             return selectedEdge;
@@ -463,10 +515,10 @@ namespace CadEditor
                 }
             }
 
-			if(minIntersectionPoint != null)
-			{
-                selectingRay.Direction = new Vector(minIntersectionPoint);
-            }
+			//if(minIntersectionPoint != null)
+			//{
+   //             selectingRay.Direction = new Vector(minIntersectionPoint);
+   //         }
 
             return selectedVertex;
 		}
@@ -492,17 +544,9 @@ namespace CadEditor
 
 		public ComplexCube GetSelectedCube(int x, int y)
 		{
-            // Convert the mouse coordinates to world coordinates
-            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
-            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
-
-            Vector near = new Vector(unProject1);
-			Vector far = new Vector(unProject2);
-			Vector direction = (far - near).Normalize();
-
-			ray = new Ray(near, direction);
-			selectingRay = new Ray();
-			selectingRay.Origin = near;
+			ray = GraphicsGL.InitializeRay(x, y);
+			//selectingRay = new Ray();
+			//selectingRay.Origin = near;
 
 			// Iterate over each object in the scene
 			foreach (ComplexCube cube in DrawableCubes)
@@ -519,19 +563,12 @@ namespace CadEditor
 
 		public bool IsSelectedAxisCube(int x, int y, AxisCube cube)
 		{
-            // Convert the mouse coordinates to world coordinates
-            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
-            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+            ray = GraphicsGL.InitializeRay(x, y);
 
-            Vector near = new Vector(unProject1);
-			Vector far = new Vector(unProject2);
-			Vector direction = (far - near).Normalize();
+            //selectingRay = new Ray();
+            //selectingRay.Origin = near;
 
-			ray = new Ray(near, direction);
-			selectingRay = new Ray();
-			selectingRay.Origin = near;
-
-			Plane selectedFacet = CheckSelectedFacet(cube, ray);
+            Plane selectedFacet = CheckSelectedFacet(cube, ray);
 			if (selectedFacet != null)
 			{
 				return true;
@@ -552,10 +589,10 @@ namespace CadEditor
 
 		#region --- Manipulation ---
 
-		public void DeleteCompletely(ComplexCube cube)
+		public void DeleteCompletely(Object3D cube)
 		{
-			DrawableCubes.Remove(cube);
-			SceneCollection.RemoveCube(cube);
+			DrawableCubes.Remove((ComplexCube)cube);
+			SceneCollection.RemoveCube((ComplexCube)cube);
 		}
 
 		public void AddCube()

@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace CadEditor
 {
@@ -20,6 +21,23 @@ namespace CadEditor
 		public Vector Origin { get { return origin; } set { origin = value; } }
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
+
+		public Point3D Intersects(Object3D obj)
+		{
+			if (obj != null)
+			{
+				if(obj is Plane)
+				{
+					return RayIntersectsPlane((Plane)obj);
+				}
+				else if (obj is Line)
+				{
+					return RayIntersectsLine((Line)obj);
+				}
+			}
+
+			return null;
+		} 
 
 		public Point3D RayIntersectsPlane(Plane facet)
 		{

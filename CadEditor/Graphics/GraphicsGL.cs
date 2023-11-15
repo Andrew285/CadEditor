@@ -1,4 +1,5 @@
 ﻿using SharpGL;
+using SharpGL.SceneGraph.Raytracing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,23 +11,57 @@ namespace CadEditor.Graphics
     public class GraphicsGL
     {
         public static OpenGL GL { get; set; }
+        public static OpenGLControl Control { get; set; }
 
-        public GraphicsGL(OpenGL gl)
+        public GraphicsGL(OpenGLControl control)
         {
-            GL = gl;
+            if(control != null)
+            {
+                Control = control;
+                GL = Control.OpenGL;
+            }
         }
 
-        public static OpenGL getInstance()
+        public static void CreateInstance(OpenGLControl openGL)
         {
             if (GraphicsGL.GL == null)
             {
-                return new OpenGL();
-            }
-            else
-            {
-                return GL;
+                new GraphicsGL(openGL);
             }
 
+        }
+
+        public static int GetHeight()
+        {
+            return Control.Height;
+        }
+
+        public static int GetWidth()
+        {
+            return Control.Width;
+        }
+
+        public static Ray InitializeRay(double x, double y)
+        {
+            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
+            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+
+            Vector near = new Vector(unProject1);
+            Vector far = new Vector(unProject2);
+            Vector direction = (far - near).Normalize();
+
+            //initialize a ray
+            return new Ray(near, direction);
+        }
+
+        public static void DisableContexMenu()
+        {
+            Control.ContextMenu = null;
+        }
+
+        public static void Invalidate()
+        {
+            Control.Invalidate();
         }
 
     }

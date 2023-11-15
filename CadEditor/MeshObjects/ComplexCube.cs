@@ -92,6 +92,7 @@ namespace CadEditor
                             {
                                 p.ParentCube = cubeToDivide;
                                 p.PositionInCube = j;
+                                p.ParentObject = cubeToDivide;
                                 outerVerticesIndices.Add(j);
                                 uniquePoints.Add(p.Clone());
                             }
@@ -100,6 +101,7 @@ namespace CadEditor
                         {
                             p.ParentCube = cubeToDivide;
                             p.PositionInCube = j;
+                            p.ParentObject = cubeToDivide;
                             outerVerticesIndices.Add(j);
                             uniquePoints.Add(p.Clone());
                         }
@@ -133,7 +135,7 @@ namespace CadEditor
                         }
 
                         Line newLine = new Line(p1, p2);
-
+                        newLine.ParentObject = cubeToDivide;
                         uniqueLines.Add(newLine);
                     }
                 }
@@ -148,25 +150,6 @@ namespace CadEditor
 
             public void InitLocalOuterVertices(Mesh prevMesh)
             {
-                //Point3D[] resultVertices = new Point3D[OUTER_VERTICES_AMOUNT];
-                ////point of big cube
-                //for (int i = 0; i < currentMesh.Vertices.Count; i++)
-                //{
-                //    Point3D p = currentMesh.Vertices[i];
-
-                //    for (int j = 0; j < prevMesh.Vertices.Count; j++)
-                //    {
-                //        Point3D meshP = prevMesh.Vertices[j];
-                //        if (p == meshP)
-                //        {
-                //            resultVertices[j] = p.Clone();
-                //            break;
-                //        }
-                //    }
-                //}
-
-                //OuterVertices = resultVertices;
-
                 for (int i = 0; i < prevMesh.Vertices.Count; i++)
                 {
                     OuterVertices[i] = prevMesh.Vertices[i].Clone();
@@ -295,6 +278,7 @@ namespace CadEditor
             {
                 Mesh.Vertices[i].PositionInCube = i;
                 Mesh.Vertices[i].ParentCube = this;
+                Mesh.Vertices[i].ParentObject = this;
             }
             CenterPoint.ParentCube = this;
         }
@@ -382,6 +366,11 @@ namespace CadEditor
                 })
             };
 
+            foreach(Plane plane in facets)
+            {
+                plane.ParentObject = this;
+            }
+
             Mesh.Facets = facets;
         }
 
@@ -414,6 +403,11 @@ namespace CadEditor
                         mesh.Vertices[(j + 1) % VERTICES_ON_FACET_AMOUNT].EdgeParents.Add(newEdge);
                     }
                 }
+            }
+
+            foreach (Line line in meshEdges)
+            {
+                line.ParentObject = this;
             }
 
             Mesh.Edges = meshEdges;
