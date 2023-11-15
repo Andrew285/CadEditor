@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using SharpGL;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
-using MathNet.Spatial.Euclidean;
-using System.Linq.Expressions;
 using CadEditor.Graphics;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace CadEditor
 {
@@ -19,6 +14,7 @@ namespace CadEditor
         private const int VERTICES_ON_FACET_AMOUNT = 8;
         public Point3D[] bigCubePoints;
         public LocalSystem localSystem;
+        public bool IsDivided { get; private set; } = false;
 
         public class LocalSystem
         {
@@ -217,9 +213,6 @@ namespace CadEditor
                 }
             }
         }
-
-
-        public bool IsDivided { get; private set; } = false;
 
         public ComplexCube(Point3D _centerPoint, Vector _size, string _cubeName = null):
             base(_centerPoint, _size, _cubeName)
@@ -440,30 +433,16 @@ namespace CadEditor
             }
         }
 
-        /// <summary>
-        /// This method divide big Cube into some smaller ones. Each cube is called as finite element (feCube in code)
-        /// After dividing into smaller cubes, the method Compress will be used to remove duplicated vertices and edges.
-        /// </summary>
-        /// <param name="nValues"> This array shows how many cubes should be the big one divided into in some axis</param>
+        //Main method to divide cube into small finite elements
         public void Divide(Vector nValues)
         {
             Mesh prevMesh = this.Mesh.Clone();
-            //localSystem = GetDividedLocalSystem(nValues);
+
+            //Initializing local system
             localSystem.InitLocalSystem(this, nValues);
             localSystem.InitLocalOuterVertices(prevMesh);
 
-            //this.Mesh.Vertices.Clear();
-            //foreach(Point3D p in localSystem.Vertices)
-            //{
-            //    this.Mesh.Vertices.Add(p.Clone());
-            //}
-
-            //this.Mesh.Edges.Clear();
-            //foreach (Line p in localSystem.Edges)
-            //{
-            //    this.Mesh.Edges.Add(p.Clone());
-            //}
-
+            //Transform cube in all axes
             Scene.ActiveMovingAxis = CoordinateAxis.X;
             Transform();
 
@@ -473,13 +452,9 @@ namespace CadEditor
             Scene.ActiveMovingAxis = CoordinateAxis.Z;
             Transform();
 
-            //localSystem.InitLocalOuterVertices(prevMesh);
-            //bigCubePoints = GetOuterCubeVertices(Mesh);
+            //Points of mesh has changed. Cube needs to be updated
             UpdateBigCubePoints();
-            //OuterVertices = GetOuterCubeVertices(this.Mesh, prevMesh);
             IsDivided = true;
-
-
         }
 
         private void UpdateBigCubePoints()
@@ -492,15 +467,10 @@ namespace CadEditor
             }
         }
 
-        //private Mesh GetDividedLocalSystem(Vector nValues)
-        //{
-            
-        //}
-
         private Point3D[] GetOuterCubeVertices(Mesh currentMesh)
         {
             Point3D[] resultVertices = new Point3D[OUTER_VERTICES_AMOUNT];
-            //point of big cube
+
             int counter = 0;
             for (int i = 0; i < currentMesh.Vertices.Count; i++)
             {
@@ -522,20 +492,10 @@ namespace CadEditor
             localSystem.OuterVertices[index][2] += Scene.MovingVector[2];
         }
 
-        /// <summary>
-        /// Transform method used to transform each point of this cube using approximation formulas
-        /// </summary>
-        /// <param name="index">defines which coordinate would be operated on</param>
-        /// <param name="cube">defines a cube from which all points will be transformed</param>
+        //Main method to transform points after cube was divided into finite elements
         public void Transform()
         {
-            //Vector vector = Scene.MovingVector;
             Mesh currentMesh = this.Mesh;
-            //int index = -1;
-            //if (vector[0] != 0) index = 0;
-            //else if (vector[1] != 0) index = 1;
-            //else if (vector[2] != 0) index = 2;
-
             int index = -1;
 
             switch(Scene.ActiveMovingAxis)
@@ -554,19 +514,24 @@ namespace CadEditor
 
                 for (int i = 0; i < localSystem.localMesh.Vertices.Count; i++)
                 {
+                    //One of the points generated during dividing the cube
                     Point3D point1 = localSystem.localMesh.Vertices[i];
+
                     double sum = 0;
                     for (int m = 0; m < localSystem.OuterVertices.Length; m++)
                     {
+                        //One of the outer points of cube. There only 20 outer points in the cube
                         Point3D point2 = localSystem.OuterVertices[m];
 
                         Func<Point3D, Point3D, double> phiFunc = null;
                         if (m >= 0 && m < 8)
                         {
+                            //Specific function for points that are on ends (edges) of the cube
                             phiFunc = TransformMesh.PhiAngle;
                         }
                         else if (m >= 8 && m < localSystem.OuterVertices.Length)
                         {
+                            //Specific function for points that are in the middle of edges.
                             phiFunc = TransformMesh.PhiEdge;
                         }
 
@@ -580,51 +545,7 @@ namespace CadEditor
 
             this.Mesh = currentMesh;
         }
-
-        //public void Transform(Vector vector, Point3D point)
-        //{
-
-
-        //    if (vector[0] == 0 && vector[1] == 0 && vector[2] == 0)
-        //    {
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        int index = 2;
-        //        Point3D[] cloneList = new Point3D[20];
-        //        for (int i = 0; i < bigCubePoints.Length; i++)
-        //        {
-        //            cloneList[i] = bigCubePoints[i].Clone();
-        //        }
-
-        //        for (int i = 0; i < localSystem.Vertices.Count; i++)
-        //        {
-        //            Point3D point1 = localSystem.Vertices[i];
-        //            double sum = 0;
-        //            for (int m = 0; m < cloneList.Length; m++)
-        //            {
-        //                Point3D point2 = cloneList[m];
-
-        //                Func<Point3D, Point3D, double> phiFunc = null;
-        //                if (m >= 0 && m < 8)
-        //                {
-        //                    phiFunc = TransformMesh.PhiAngle;
-        //                }
-        //                else if (m >= 8 && m < cloneList.Length)
-        //                {
-        //                    phiFunc = TransformMesh.PhiEdge;
-        //                }
-
-        //                double funcResult = phiFunc(point2, point1);
-        //                sum += point1[index] * funcResult;
-        //            }
-
-        //            this.Mesh.Vertices[i][index] = sum;
-        //        }
-        //    }
-        //}
-
+        
         public ComplexCube Clone()
         {
             ComplexCube cube = new ComplexCube(Mesh.Clone());

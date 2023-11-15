@@ -1,15 +1,6 @@
 ﻿using CadEditor.Graphics;
-using SharpGL;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Cameras;
 using SharpGL.SceneGraph.Core;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -100,7 +91,7 @@ namespace CadEditor
 
 		public void Zoom(double value)
 		{
-            CameraDistance += value * ZoomSensitivity;
+            CameraDistance += -value * ZoomSensitivity;
         }
 
 	}

@@ -1,16 +1,10 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
-using MathNet.Spatial.Euclidean;
 using SharpGL;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -246,7 +240,6 @@ namespace CadEditor
             //selectingRay = new Ray();
             //selectingRay.Origin = ray.Origin;
 
-            //Object3D selectedCube = null;
             Object3D selectedObject = null;
 
 			//Check if any coordinate axis is selected

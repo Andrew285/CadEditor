@@ -1,6 +1,4 @@
-﻿using SharpGL;
-using System;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System;
 
 namespace CadEditor
 {
@@ -42,7 +40,7 @@ namespace CadEditor
 		public Point3D RayIntersectsPlane(Plane facet)
 		{
 			Vector intersectionPoint;
-			Point3D facetCenterPoint = (Point3D)facet.GetCenterPoint();
+			Point3D facetCenterPoint = facet.GetCenterPoint();
 
 			//Calculate planeNormal
 			Vector planeNormal = facet.CalculateNormal();
