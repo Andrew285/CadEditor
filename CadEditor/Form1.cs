@@ -33,7 +33,7 @@ namespace CadEditor
             GraphicsGL.GL.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
             //Initializing fundemental objects of scene
-            Camera camera = new Camera(new Vector(new double[]{ 0, 0, 0}));
+            Camera camera = new Camera();
             SceneCollection sceneCollection = new SceneCollection(treeView1, "Collection");
             scene = new Scene(camera, sceneCollection)
             {
@@ -52,13 +52,11 @@ namespace CadEditor
 
         private void openGLControl1_Resized_1(object sender, EventArgs e)
         {
-            GraphicsGL.GL.MatrixMode(OpenGL.GL_PROJECTION);
-            GraphicsGL.GL.LoadIdentity();
-            GraphicsGL.GL.Perspective(60.0f, (double)Width / (double)Height, 0.01, 100.0);
-            GraphicsGL.GL.LookAt(2, 2, scene.Camera.CameraDistance,
-                      0, 0, 0,
-                      0, 1, 0);
-            GraphicsGL.GL.MatrixMode(OpenGL.GL_MODELVIEW);
+            // Set up the projection matrix
+            GraphicsGL.SetUpProjectionMatrix();
+
+            // Set up the view matrix
+            GraphicsGL.SetUpViewMatrix(scene.Camera);
         }
 
 		#endregion
@@ -130,6 +128,11 @@ namespace CadEditor
             {
                 GraphicsGL.DisableContexMenu();
                 scene.SelectObject(e.X, openGLControl1.Height - e.Y);
+
+                if(scene.SelectedObject == null)
+                {
+                    scene.DeselectAll();
+                }
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -172,6 +175,7 @@ namespace CadEditor
             {
                 double sensitivityLevel = 0.01;
                 double value = MouseController.GetHorizontalAngle(e.X) * sensitivityLevel;
+                double valueY = MouseController.GetVerticalAngle(e.Y) * sensitivityLevel;
                 Vector coords = new Vector(3);
 
                 if (scene.SelectedAxisCube.Axis == CoordinateAxis.X)
@@ -182,12 +186,12 @@ namespace CadEditor
                 else if(scene.SelectedAxisCube.Axis == CoordinateAxis.Y)
                 {
                     Scene.ActiveMovingAxis = CoordinateAxis.Y;
-                    coords = new Vector(0, -value, 0);
+                    coords = new Vector(0, -valueY, 0);
 				}
 				else if(scene.SelectedAxisCube.Axis == CoordinateAxis.Z)
                 {
                     Scene.ActiveMovingAxis = CoordinateAxis.Z;
-                    coords = new Vector(0, 0, -value);
+                    coords = new Vector(0, 0, value);
 				}
 
                 Scene.MovingVector = coords;
@@ -381,5 +385,23 @@ namespace CadEditor
 				}
 			}
 		}
-	}
+
+
+        //Set view by axis
+        private void viewByXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.X);
+        }
+
+        private void viewYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
+        }
+
+        private void viewZToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
+        }
+
+    }
 }

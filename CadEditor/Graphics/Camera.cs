@@ -1,12 +1,15 @@
 ﻿using CadEditor.Graphics;
+using SharpGL;
+using SharpGL.SceneGraph;
+using SharpGL.SceneGraph.Cameras;
 using SharpGL.SceneGraph.Core;
 using System;
+using System.Windows.Forms;
 
 namespace CadEditor
 {
     public class Camera: SceneElement
     {
-		public double CameraDistance { get; set; } = 5.0f;
 		public static double ZoomSensitivity { get; set; } = 0.01f;
 		public static double MinZoom { get; set; } = 1.0f;
 		public static double MaxZoom { get; set; } = 20.0f;
@@ -14,7 +17,9 @@ namespace CadEditor
         public double utri { get; set; }
 
 
-		private Point3D position;
+		public Vector Position { get; set; } = new Vector(0, 0, 5.0f);
+		public Point3D Target { get; set; } = new Point3D(0, 0, 0);
+		public Vector RotationAxis { get; set; } = new Vector(0, 1, 0);
 		private double aspectRatio = 1.0f;
 		private double fieldOfView = 60.0f;
 		private double near = 0.5f;
@@ -38,29 +43,15 @@ namespace CadEditor
 			set { far = value; }
 		}
 
-		public Point3D Position
-		{
-			get { return position; }
-		}
-
 		public double AspectRatio
 		{
 			get { return aspectRatio; }
 			set { aspectRatio = value; }
 		}
 
-		public Camera(Vector _rotationPoint)
-        {
-			position = new Point3D(-1f, -1f, 0.5f);
-        }
-
-        public void RotateAxisX()
-        {
-			GraphicsGL.GL.Rotate(utri, 1.0f, 0.0f, 0.0f);
-        }
-
-        public void RotateAxisY() 
-        {
+		public void Rotate()
+		{
+            GraphicsGL.GL.Rotate(utri, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(rtri, 0.0f, 1.0f, 0.0f);
         }
 
@@ -79,20 +70,42 @@ namespace CadEditor
             double horizontalAngle = MouseController.GetHorizontalAngle(x);
             double verticalAngle = MouseController.GetVerticalAngle(y);
 
-            UpdateAxisX(verticalAngle);
+			UpdateAxisX(verticalAngle);
 			UpdateAxisY(horizontalAngle);
 		}
 
 		public void LimitDistance()
 		{
-            CameraDistance = Math.Max(CameraDistance, MinZoom);
-            CameraDistance = Math.Min(CameraDistance, MaxZoom);
+			Position[2] = Math.Max(Position[2], MinZoom);
+            Position[2] = Math.Min(Position[2], MaxZoom);
         }
 
 		public void Zoom(double value)
 		{
-            CameraDistance += -value * ZoomSensitivity;
+			Position[2] += -value * ZoomSensitivity;
         }
 
-	}
+		public void SetViewByAxis(CoordinateAxis axis)
+		{
+			if(axis == CoordinateAxis.X)
+			{
+                utri = 0.0f;
+                rtri = 0.0f;
+
+            }
+			else if(axis == CoordinateAxis.Y)
+			{
+                utri = 90.0f;
+                rtri = 0.0f;
+            }
+			else if(axis == CoordinateAxis.Z)
+            {
+                utri = 0.0f;
+                rtri = 90.0f;
+            }
+
+            Rotate();
+        }
+
+    }
 }

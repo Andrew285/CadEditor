@@ -307,6 +307,13 @@ namespace CadEditor
                 ((ComplexCube)ParentCube).Update(this);
                 ((ComplexCube)ParentCube).Transform();
             }
+
+            //if(ParentCube != null && ParentCube is ComplexCube)
+            //{
+            //    ParentCube.CenterPoint.X += vector[0];
+            //    ParentCube.CenterPoint.Y += vector[1];
+            //    ParentCube.CenterPoint.Z += vector[2];
+            //}
         }
 
         public override void Select()

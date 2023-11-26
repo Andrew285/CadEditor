@@ -19,7 +19,6 @@ namespace CadEditor
 		private AxisCube[] selectingCoordinateCubes;
 
 		private readonly double facetTolerance = 0.08;
-		private readonly double edgeTolerance = 0.08;
 
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
@@ -49,9 +48,10 @@ namespace CadEditor
 			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube_1");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
-		}
+            Camera.Target = cube.CenterPoint;
+        }
 
-		public void InitSelectingCoordAxes(Object3D obj, float lineWidth, double axisLength)
+        public void InitSelectingCoordAxes(Object3D obj, float lineWidth, double axisLength)
 		{
 			Point3D v = null;
 
@@ -132,19 +132,14 @@ namespace CadEditor
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
-            // Set up the projection matrix
-            GraphicsGL.GL.MatrixMode(OpenGL.GL_PROJECTION);
-            GraphicsGL.GL.LoadIdentity();
-            GraphicsGL.GL.Perspective(45.0, (double)GraphicsGL.GetWidth() / (double)GraphicsGL.GetHeight(), 0.1, 100.0);
+			// Set up the projection matrix
+			GraphicsGL.SetUpProjectionMatrix();
 
-            // Set up the view matrix
-            GraphicsGL.GL.MatrixMode(OpenGL.GL_MODELVIEW);
-            GraphicsGL.GL.LoadIdentity();
-            GraphicsGL.GL.LookAt(0, 0, camera.CameraDistance, 0, 0, 0, 0, 1, 0);
+			// Set up the view matrix
+			GraphicsGL.SetUpViewMatrix(camera);
 
 			//Rotate Camera
-			camera.RotateAxisX();
-			camera.RotateAxisY();
+			camera.Rotate();
 
 			//Draw Scene Grid
 			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, 20);
@@ -319,6 +314,10 @@ namespace CadEditor
                 }
 
             }
+			else
+			{
+				DeleteSelectingCoordAxes();
+			}
         }
 
 		private Object3D CheckCubeElements(ComplexCube cube)
@@ -590,7 +589,7 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), null, "Cube2");
+			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube2");
 			DrawableCubes.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
