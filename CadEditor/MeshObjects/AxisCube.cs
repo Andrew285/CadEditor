@@ -22,17 +22,18 @@ namespace CadEditor.MeshObjects
             double sizeY = Size[1];
             double sizeZ = Size[2];
 
-            //Initializing Vertices
+			//Initializing Vertices
+			Point3D centerPoint = GetCenterPoint();
             Mesh.Vertices = new List<Point3D>
 			{
-				new Point3D(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z),
-				new Point3D(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z),
-				new Point3D(sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z),
-				new Point3D(-sizeX + CenterPoint.X, -sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z),
-				new Point3D(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z),
-				new Point3D(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, sizeZ + CenterPoint.Z),
-				new Point3D(sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z),
-				new Point3D(-sizeX + CenterPoint.X, sizeY + CenterPoint.Y, -sizeZ + CenterPoint.Z),
+				new Point3D(-sizeX + centerPoint.X, -sizeY + centerPoint.Y, sizeZ + centerPoint.Z),
+				new Point3D(sizeX + centerPoint.X, -sizeY + centerPoint.Y, sizeZ + centerPoint.Z),
+				new Point3D(sizeX + centerPoint.X, -sizeY + centerPoint.Y, -sizeZ + centerPoint.Z),
+				new Point3D(-sizeX + centerPoint.X, -sizeY + centerPoint.Y, -sizeZ + centerPoint.Z),
+				new Point3D(-sizeX + centerPoint.X, sizeY + centerPoint.Y, sizeZ + centerPoint.Z),
+				new Point3D(sizeX + centerPoint.X, sizeY + centerPoint.Y, sizeZ + centerPoint.Z),
+				new Point3D(sizeX + centerPoint.X, sizeY + centerPoint.Y, -sizeZ + centerPoint.Z),
+				new Point3D(-sizeX + centerPoint.X, sizeY + centerPoint.Y, -sizeZ + centerPoint.Z),
 			};
 
 			foreach (Point3D p in Mesh.Vertices)
@@ -40,7 +41,7 @@ namespace CadEditor.MeshObjects
 				p.ParentCube = this;
 				p.ParentObject = this;
 			}
-			CenterPoint.ParentCube = this;
+			centerPoint.ParentCube = this;
 
 			//Initializing Facets
 			Mesh.Facets = new List<Plane>

@@ -52,7 +52,7 @@ namespace CadEditor
                         {
                             double feCenterPointX = -cubeToDivide.Size[0] + i_x * feSizeX;
 
-                            Point3D feCenterPoint = new Point3D(feCenterPointX + cubeToDivide.CenterPoint[0], feCenterPointY + cubeToDivide.CenterPoint[1], feCenterPointZ + cubeToDivide.CenterPoint[2]);  //create a center point of finite element (cube)
+                            Point3D feCenterPoint = new Point3D(feCenterPointX + cubeToDivide.GetCenterPoint()[0], feCenterPointY + cubeToDivide.GetCenterPoint()[1], feCenterPointZ + cubeToDivide.GetCenterPoint()[2]);  //create a center point of finite element (cube)
                             ComplexCube feCube = new ComplexCube(feCenterPoint, new Vector(feSizeX, feSizeY, feSizeZ)); //create a finite element (cube) with sizes
                             feCube.ParentObject = cubeToDivide;
                             FeCubeList.Add(feCube);                                                             //add it to list of finite elements
@@ -218,7 +218,7 @@ namespace CadEditor
             base(_centerPoint, _size, _cubeName)
 		{
 			//Initializing Mesh
-			InitPoints(CenterPoint, Size);
+			InitPoints(GetCenterPoint(), Size);
             InitFacets(Mesh);
             InitEdges(Mesh);
 
@@ -598,5 +598,7 @@ namespace CadEditor
 
 			return exportString;
         }
+
+
     }
 }

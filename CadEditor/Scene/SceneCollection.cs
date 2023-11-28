@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CadEditor.MeshObjects;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,13 +87,13 @@ namespace CadEditor
 			return null;
 		}
 
-		public List<Object3D> FindObjectByTreeNode(TreeNode node, Scene scene)
+		public List<ISceneObject> FindObjectByTreeNode(TreeNode node, Scene scene)
 		{
 			string nodeString = node.Text;
 			if (nodeString == "Collection")
 			{
-				List<Object3D> objects = new List<Object3D>();
-				foreach (ComplexCube c in scene.DrawableCubes)
+				List<ISceneObject> objects = new List<ISceneObject>();
+				foreach (ComplexCube c in scene.ObjectCollection)
 				{
 					objects.Add(c);
 				}
@@ -101,14 +102,14 @@ namespace CadEditor
 			else if (nodeString.Contains("Cube_"))
 			{
 				int indexOfCube = Int32.Parse(nodeString.Substring(5));
-				return new List<Object3D>() { scene.DrawableCubes[indexOfCube-1] };
+				return new List<ISceneObject>() { scene.ObjectCollection[indexOfCube-1] };
 			}
 			else if (nodeString.Contains("P_"))
 			{
 				TreeNode cubeNode = node.Parent.Parent.Parent;
 				int indexOfPoint = Int32.Parse(nodeString.Substring(2));
 				int indexOfCube = sceneCollection.Nodes[0].Nodes.IndexOf(cubeNode);
-				return new List<Object3D>() { scene.DrawableCubes[indexOfCube].Mesh.Vertices[indexOfPoint] };
+				return new List<ISceneObject>() { ((MeshObject3D)scene.ObjectCollection[indexOfCube]).Mesh.Vertices[indexOfPoint] };
 			}
 
 			return null;

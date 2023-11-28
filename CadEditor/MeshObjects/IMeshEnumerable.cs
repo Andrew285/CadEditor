@@ -8,9 +8,9 @@ namespace CadEditor.MeshObjects
 {
     public interface IMeshEnumerable
     {
-        Object3D Contains(Object3D object3D);
+        //Object3D Contains(Object3D object3D);
 
-        List<Object3D> Clone();
+        //List<Object3D> Clone();
 
 
     }

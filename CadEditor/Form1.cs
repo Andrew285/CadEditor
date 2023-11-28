@@ -311,12 +311,12 @@ namespace CadEditor
             TreeNode selectedTreeNode = treeView1.SelectedNode;
             if(selectedTreeNode != null)
             {
-                List<Object3D> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
+                List<ISceneObject> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
                 if(nodeObjects != null)
                 {
                     if(nodeObjects.Count > 1)
                     {
-						foreach (Object3D graphicsObject in nodeObjects)
+						foreach (ISceneObject graphicsObject in nodeObjects)
 						{
 							graphicsObject.Select();
 						}
@@ -325,7 +325,9 @@ namespace CadEditor
                     {
                         scene.SelectedObject = nodeObjects[0];
 						nodeObjects[0].Select();
-						scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+                        //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+                        AxisSystem axisSystem = new AxisSystem(nodeObjects[0]);
+                        scene.ObjectCollection.Insert(0, axisSystem);
 					}
 				}
             }

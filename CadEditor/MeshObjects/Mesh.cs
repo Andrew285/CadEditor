@@ -151,7 +151,7 @@ namespace CadEditor
 		}
 	}
 
-	public class Point3D: Object3D
+	public class Point3D: ISceneObject
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -163,32 +163,21 @@ namespace CadEditor
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Pink;
 		public Color NonSelectedColor { get; set; } = Color.Black;
+        public ISceneObject ParentObject { get; set; }
 
-        public Point3D(double[] values)
-		{
-            X = values[0];
-            Y = values[1];
-            Z = values[2];
+        public Point3D(double _x, double _y, double _z)
+        {
+            X = _x;
+            Y = _y;
+            Z = _z;
             IsSelected = false;
-		}
+            EdgeParents = new List<Line>();
+            FacetParents = new List<Plane>();
+        }
 
-		public Point3D(Vector v)
-		{
-            X = v[0];
-            Y = v[1];
-            Z = v[2];
-            IsSelected = false;
-		}
+        public Point3D(double[] values): this(values[0], values[1], values[2]) { }
 
-		public Point3D(double _x, double _y, double _z)
-		{
-			X = _x;
-			Y = _y;
-			Z = _z;
-			IsSelected = false;
-			EdgeParents = new List<Line>();
-			FacetParents = new List<Plane>();
-		}
+        public Point3D(Vector v): this(v[0], v[1], v[2]) { }
 
         public bool Equals(Point3D p)
         {
@@ -240,6 +229,11 @@ namespace CadEditor
 			return String.Format("({0},{1},{2})", X, Y, Z);
 		}
 
+        public Point3D GetCenterPoint()
+        {
+            return this.Clone();
+        }
+
         public Point3D GetWorldCoordinates()
         {
             return new Point3D(GraphicsGL.GL.UnProject(X, Y, Z));
@@ -282,7 +276,7 @@ namespace CadEditor
             return clonePoint;
         }
 
-        public override void Draw()
+        public void Draw()
 		{
             if (IsSelected)
             {
@@ -296,7 +290,7 @@ namespace CadEditor
             GraphicsGL.GL.Vertex(X, Y, Z);
 		}
 
-        public override void Move(Vector vector)
+        public void Move(Vector vector)
         {
 			X += vector[0];
 			Y += vector[1];
@@ -316,217 +310,24 @@ namespace CadEditor
             //}
         }
 
-        public override void Select()
+        public void Select()
 		{
 			IsSelected = true;
 		}
 
-        public override void Deselect()
+        public void Deselect()
         {
 			IsSelected = false;
         }
+
+        public ISceneObject CheckSelected(Ray ray)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-	public class Plane: Object3D
-	{
-		public List<Point3D> Points { get; set; }
-		public bool IsSelected { get; set; }
-		public Color SelectedColor { get; set; } = Color.Brown;
-		public Color NonSelectedColor { get; set; } = Color.LightGray;
 
-		public Plane(List<Point3D> _vertices)
-		{
-            Points = _vertices;
-            IsSelected = false;
-        }
-
-        public Point3D this[int index]
-        {
-            get
-            {
-                if (index < Points.Count && index >= 0)
-                {
-                    return Points[index];
-                }
-                else
-                {
-                    throw new ArgumentException("Wrong index!");
-                }
-            }
-            set
-            {
-                if (index < Points.Count && index >= 0)
-                {
-                    Points[index] = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Wrong index!");
-                }
-            }
-        }
-
-        public bool Equals(Plane plane)
-        {
-            if(plane != null)
-            {
-                for(int i = 0; i < plane.Points.Count; i++)
-                {
-                    if (!this.Points[i].Equals(plane.Points[i]))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool Contains(Point3D point)
-        {
-            Line centerToPointEdge = new Line(GetCenterPoint(), point);
-
-            for (int i = 0; i < this.Points.Count; i++)
-            {
-                int j = i;
-                Line cubeEdge = new Line(Points[i], Points[(j + 1) % Points.Count]);
-
-                if (centerToPointEdge.IntersectsLine(cubeEdge))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public Vector CalculateNormal()
-        {
-            // Calculate two vectors lying on the plane
-            Vector p1 = null, p2 = null, p3 = null;
-            if(Points.Count == 8)
-            {
-				p1 = new Vector(Points[0]);
-				p2 = new Vector(Points[2]);
-				p3 = new Vector(Points[4]);
-			}
-            else if (Points.Count == 4)
-            {
-				p1 = new Vector(Points[0]);
-				p2 = new Vector(Points[1]);
-				p3 = new Vector(Points[2]);
-			}
-
-
-            Vector v1 = p2 - p1;
-            Vector v2 = p3 - p1;
-
-            // Calculate the cross product of the two vectors
-            Vector normal = v1.Cross(v2);
-
-            // Normalize the normal vector
-            //normal = normal.Normalize();
-
-            return normal;
-        }
-
-        public Point3D GetCenterPoint()
-        {
-            double x = 0;
-            double y = 0;
-            double z = 0;
-
-            for (int j = 0; j < Points.Count; j++)
-            {
-                x += Points[j].X;
-                y += Points[j].Y;
-                z += Points[j].Z;
-            }
-
-            x /= Points.Count;
-            y /= Points.Count;
-            z /= Points.Count;
-
-            return new Point3D(x, y, z);
-        }
-
-        public override string ToString()
-		{
-			string result = "";
-			foreach(Point3D p in Points)
-			{
-				result += "Vertex: " + p.ToString() + "\n";
-			}
-			return result;
-		}
-
-		public override void Draw()
-		{
-            if (IsSelected)
-            {
-                GraphicsGL.GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
-            }
-            else
-            {
-                GraphicsGL.GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
-            }
-
-
-            foreach (Point3D v in Points)
-			{
-                GraphicsGL.GL.Vertex(v.X, v.Y, v.Z);
-			}
-		}
-
-		public override void Move(Vector vector)
-		{
-			foreach(Point3D v in Points)
-			{
-				v.Move(vector);
-			}
-		}
-
-		public override void Select()
-		{
-			IsSelected = true;
-		}
-
-        public override void Deselect()
-        {
-            IsSelected = false;
-        }
-
-        public Plane Clone()
-        {
-			List<Point3D> newPoints = new List<Point3D>();
-
-            for (int i = 0; i < this.Points.Count; i++)
-            {
-                newPoints.Add(this.Points[i].Clone());
-            }
-
-            return new Plane(newPoints);
-        }
-
-        public Plane GetClickableArea(double tolerance)
-		{
-			Plane resultFacet = this.Clone();
-
-			for(int i = 0; i < resultFacet.Points.Count; i++)
-			{
-				Point3D currentVertex = resultFacet.Points[i].Clone();
-				Vector directionToCenter = currentVertex - GetCenterPoint();
-
-				resultFacet[i] = new Point3D(new Vector(currentVertex) - directionToCenter * tolerance);
-			}
-
-			return resultFacet;
-		}
-	}
-
-	public class Line: Object3D, IEquatable<Line>
+	public class Line: ISceneObject, IEquatable<Line>
 	{
 		public Point3D P1 { get; set; }
 		public Point3D P2 { get; set; }
@@ -535,8 +336,9 @@ namespace CadEditor
 		public bool IsSelected { get; set; }
 		public Color SelectedColor { get; set; } = Color.Red;
 		public Color NonSelectedColor { get; set; } = Color.Black;
+        public ISceneObject ParentObject { get; set; }
 
-		public Line(Point3D _v1, Point3D _v2)
+        public Line(Point3D _v1, Point3D _v2)
 		{
 			P1 = _v1;
 			P2 = _v2;
@@ -647,7 +449,7 @@ namespace CadEditor
             return new Line(P1.Clone(), P2.Clone());
         }
 
-        public override void Draw()
+        public void Draw()
 		{
 
             if (IsSelected)
@@ -670,18 +472,18 @@ namespace CadEditor
             GraphicsGL.GL.Vertex(P2.X, P2.Y, P2.Z);
 		}
 
-		public override void Move(Vector vector)
+		public void Move(Vector vector)
 		{
 			P1.Move(vector);
 			P2.Move(vector);
 		}
 
-		public override void Select()
+		public void Select()
 		{
 			IsSelected = true;
 		}
 
-		public override void Deselect()
+		public void Deselect()
         {
 			IsSelected = false;
         }
@@ -703,9 +505,220 @@ namespace CadEditor
 
             return resultEdge;
         }
+
+        public ISceneObject CheckSelected(Ray ray)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-	public class Axis: Line
+    public class Plane : ISceneObject
+    {
+        public List<Point3D> Points { get; set; }
+        public bool IsSelected { get; set; }
+        public Color SelectedColor { get; set; } = Color.Brown;
+        public Color NonSelectedColor { get; set; } = Color.LightGray;
+        public ISceneObject ParentObject { get; set; }
+
+        public Plane(List<Point3D> _vertices)
+        {
+            Points = _vertices;
+            IsSelected = false;
+        }
+
+        public Point3D this[int index]
+        {
+            get
+            {
+                if (index < Points.Count && index >= 0)
+                {
+                    return Points[index];
+                }
+                else
+                {
+                    throw new ArgumentException("Wrong index!");
+                }
+            }
+            set
+            {
+                if (index < Points.Count && index >= 0)
+                {
+                    Points[index] = value;
+                }
+                else
+                {
+                    throw new ArgumentException("Wrong index!");
+                }
+            }
+        }
+
+        public bool Equals(Plane plane)
+        {
+            if (plane != null)
+            {
+                for (int i = 0; i < plane.Points.Count; i++)
+                {
+                    if (!this.Points[i].Equals(plane.Points[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool Contains(Point3D point)
+        {
+            Line centerToPointEdge = new Line(GetCenterPoint(), point);
+
+            for (int i = 0; i < this.Points.Count; i++)
+            {
+                int j = i;
+                Line cubeEdge = new Line(Points[i], Points[(j + 1) % Points.Count]);
+
+                if (centerToPointEdge.IntersectsLine(cubeEdge))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public Vector CalculateNormal()
+        {
+            // Calculate two vectors lying on the plane
+            Vector p1 = null, p2 = null, p3 = null;
+            if (Points.Count == 8)
+            {
+                p1 = new Vector(Points[0]);
+                p2 = new Vector(Points[2]);
+                p3 = new Vector(Points[4]);
+            }
+            else if (Points.Count == 4)
+            {
+                p1 = new Vector(Points[0]);
+                p2 = new Vector(Points[1]);
+                p3 = new Vector(Points[2]);
+            }
+
+
+            Vector v1 = p2 - p1;
+            Vector v2 = p3 - p1;
+
+            // Calculate the cross product of the two vectors
+            Vector normal = v1.Cross(v2);
+
+            // Normalize the normal vector
+            //normal = normal.Normalize();
+
+            return normal;
+        }
+
+        public Point3D GetCenterPoint()
+        {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+
+            for (int j = 0; j < Points.Count; j++)
+            {
+                x += Points[j].X;
+                y += Points[j].Y;
+                z += Points[j].Z;
+            }
+
+            x /= Points.Count;
+            y /= Points.Count;
+            z /= Points.Count;
+
+            return new Point3D(x, y, z);
+        }
+
+        public override string ToString()
+        {
+            string result = "";
+            foreach (Point3D p in Points)
+            {
+                result += "Vertex: " + p.ToString() + "\n";
+            }
+            return result;
+        }
+
+        public void Draw()
+        {
+            if (IsSelected)
+            {
+                GraphicsGL.GL.Color(SelectedColor.R, SelectedColor.G, SelectedColor.B);
+            }
+            else
+            {
+                GraphicsGL.GL.Color(NonSelectedColor.R, NonSelectedColor.G, NonSelectedColor.B);
+            }
+
+
+            foreach (Point3D v in Points)
+            {
+                GraphicsGL.GL.Vertex(v.X, v.Y, v.Z);
+            }
+        }
+
+        public void Move(Vector vector)
+        {
+            foreach (Point3D v in Points)
+            {
+                v.Move(vector);
+            }
+        }
+
+        public void Select()
+        {
+            IsSelected = true;
+        }
+
+        public void Deselect()
+        {
+            IsSelected = false;
+        }
+
+        public Plane Clone()
+        {
+            List<Point3D> newPoints = new List<Point3D>();
+
+            for (int i = 0; i < this.Points.Count; i++)
+            {
+                newPoints.Add(this.Points[i].Clone());
+            }
+
+            return new Plane(newPoints);
+        }
+
+        public Plane GetClickableArea(double tolerance)
+        {
+            Plane resultFacet = this.Clone();
+
+            for (int i = 0; i < resultFacet.Points.Count; i++)
+            {
+                Point3D currentVertex = resultFacet.Points[i].Clone();
+                Vector directionToCenter = currentVertex - GetCenterPoint();
+
+                resultFacet[i] = new Point3D(new Vector(currentVertex) - directionToCenter * tolerance);
+            }
+
+            return resultFacet;
+        }
+
+        public ISceneObject CheckSelected(Ray ray)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    public class Axis: Line
 	{
 		public CoordinateAxis CoordinateAxis { get; set; }
 
