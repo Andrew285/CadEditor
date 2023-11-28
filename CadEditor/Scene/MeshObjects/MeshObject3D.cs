@@ -56,8 +56,6 @@ namespace CadEditor.MeshObjects
 		{
 
 			//Draw Vertexes
-			GraphicsGL.GL.PointSize(7.0f);
-            GraphicsGL.GL.Begin(OpenGL.GL_POINTS);
 			for (int i = 0; i < Mesh.Vertices.Count; i++)
 			{
 				if (IsSelected)
@@ -71,12 +69,9 @@ namespace CadEditor.MeshObjects
 
 				Mesh.Vertices[i].Draw();
 			}
-            GraphicsGL.GL.End();
-            GraphicsGL.GL.Flush();
 
 
             //Draw Edges
-            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 			for (int i = 0; i < Mesh.Edges.Count; i++)
 			{
 				if (IsSelected)
@@ -90,14 +85,11 @@ namespace CadEditor.MeshObjects
 
 				Mesh.Edges[i].Draw();
 			}
-            GraphicsGL.GL.End();
-            GraphicsGL.GL.Flush();
 
 
-			//Draw Facets
-			if (DrawFacets)
+            //Draw Facets
+            if (DrawFacets)
 			{
-                GraphicsGL.GL.Begin(OpenGL.GL_POLYGON);
 				for (int i = 0; i < Mesh.Facets.Count; i++)
 				{
 					if (IsSelected)
@@ -111,9 +103,8 @@ namespace CadEditor.MeshObjects
 
 					Mesh.Facets[i].Draw();
 				}
-                GraphicsGL.GL.End();
-                GraphicsGL.GL.Flush();
 			}
+
 		}
 
 		public void Move(Vector vector)

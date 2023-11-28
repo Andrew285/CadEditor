@@ -47,7 +47,6 @@ namespace CadEditor
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
             scene.Draw();
-            SceneGrid.Init();
         }
 
         private void openGLControl1_Resized_1(object sender, EventArgs e)
@@ -127,7 +126,7 @@ namespace CadEditor
             if (e.Button == MouseButtons.Left)
             {
                 GraphicsGL.DisableContexMenu();
-                scene.SelectObject(e.X, openGLControl1.Height - e.Y);
+                scene.Select(e.X, openGLControl1.Height - e.Y);
 
                 if(scene.SelectedObject == null)
                 {
@@ -137,7 +136,7 @@ namespace CadEditor
             else if (e.Button == MouseButtons.Right)
             {
                 GraphicsGL.DisableContexMenu();
-                scene.SelectObject(e.X, GraphicsGL.GetHeight() - e.Y);
+                scene.Select(e.X, GraphicsGL.GetHeight() - e.Y);
 
                 if (scene.SelectedObject != null)
                 {

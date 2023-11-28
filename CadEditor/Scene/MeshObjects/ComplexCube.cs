@@ -413,8 +413,7 @@ namespace CadEditor
             if (bigCubePoints.Length > 0)
             {
                 //Draw Vertexes
-                GraphicsGL.GL.PointSize(7.0f);
-                GraphicsGL.GL.Begin(OpenGL.GL_POINTS);
+
                 for (int i = 0; i < bigCubePoints.Length; i++)
                 {
                     if (IsSelected)

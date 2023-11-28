@@ -21,10 +21,10 @@ namespace Tests
                                                    new Point3D(new Vector(0, 1, 1)),
                                                    new Point3D(new Vector(1, 1, 0))};
 
-            mesh1.Edges = new List<Line>() { new Line(mesh1.Vertices[0], mesh1.Vertices[1]),
-                                             new Line(mesh1.Vertices[1], mesh1.Vertices[2]),
-                                             new Line(mesh1.Vertices[2], mesh1.Vertices[3]),
-                                             new Line(mesh1.Vertices[3], mesh1.Vertices[0]),};
+            mesh1.Edges = new List<Line3D>() { new Line3D(mesh1.Vertices[0], mesh1.Vertices[1]),
+                                             new Line3D(mesh1.Vertices[1], mesh1.Vertices[2]),
+                                             new Line3D(mesh1.Vertices[2], mesh1.Vertices[3]),
+                                             new Line3D(mesh1.Vertices[3], mesh1.Vertices[0]),};
 
             Mesh mesh2 = mesh1.Clone();
 
@@ -35,8 +35,8 @@ namespace Tests
             Assert.IsTrue(p1 != p2);
             Assert.IsTrue(p1[0] == 4 && p2[0] == 0);
 
-            Line l1 = mesh1.Edges[0];
-            Line l2 = mesh2.Edges[0];
+            Line3D l1 = mesh1.Edges[0];
+            Line3D l2 = mesh2.Edges[0];
             Assert.IsTrue(l1 != l2);
             Assert.IsTrue(l1.P1[0] == 4);
             Assert.IsTrue(l2.P2[0] == 0);

@@ -72,9 +72,10 @@
     <Compile Include="Graphics\MouseController.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
     <Compile Include="Maths\Triangulation.cs" />
-    <Compile Include="MeshObjects\AxisCube.cs" />
-    <Compile Include="MeshObjects\AxisSystem.cs" />
-    <Compile Include="MeshObjects\ComplexCube.cs" />
+    <Compile Include="Scene\ExtraObjects\SceneGrid.cs" />
+    <Compile Include="Scene\MeshObjects\AxisCube.cs" />
+    <Compile Include="Scene\ExtraObjects\AxisSystem.cs" />
+    <Compile Include="Scene\MeshObjects\ComplexCube.cs" />
     <Compile Include="DividingCubeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,17 +89,18 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Maths\Matrix.cs" />
-    <Compile Include="MeshObjects\IMeshEnumerable.cs" />
-    <Compile Include="MeshObjects\MeshObject3D.cs" />
-    <Compile Include="MeshObjects\Mesh.cs" />
-    <Compile Include="MeshObjects\ISceneObject.cs" />
+    <Compile Include="Scene\MeshObjects\MeshObject3D.cs" />
+    <Compile Include="Scene\MeshObjects\Mesh.cs" />
+    <Compile Include="Scene\ISceneObject.cs" />
+    <Compile Include="Scene\PlainObjects\Plane3D.cs" />
+    <Compile Include="Scene\PlainObjects\Line3D.cs" />
+    <Compile Include="Scene\PlainObjects\Point3D.cs" />
     <Compile Include="Tools\Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\Ray.cs" />
     <Compile Include="Scene\Scene.cs" />
-    <Compile Include="Scene\SceneCollection.cs" />
-    <Compile Include="Scene\SceneGrid.cs" />
+    <Compile Include="Scene\ExtraObjects\SceneCollection.cs" />
     <Compile Include="Maths\Vector.cs" />
     <EmbeddedResource Include="DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
