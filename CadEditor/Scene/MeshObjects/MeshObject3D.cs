@@ -126,6 +126,8 @@ namespace CadEditor.MeshObjects
 
 		public void Deselect()
 		{
+            IsSelected = false;
+
 			foreach (Plane facet in Mesh.Facets)
 			{
 				facet.IsSelected = false;
@@ -143,10 +145,12 @@ namespace CadEditor.MeshObjects
 
 		}
 
-        public ISceneObject CheckSelected(Ray ray)
+        public ISceneObject CheckSelected()
         {
             //deselect all facets, edges and vertices before another selecting
             Deselect();
+
+            Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
 
             //check if any vertex is selected
             Point3D selectedVertex = CheckSelectedVertex(ray);

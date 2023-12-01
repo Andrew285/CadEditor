@@ -13,12 +13,10 @@ namespace CadEditor
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
-        public Ray ray;
+		public List<ISceneObject> AttachingPair { get; private set; }
 		//public Ray selectingRay;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
-
-		private readonly double facetTolerance = 0.08;
 
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
@@ -34,6 +32,7 @@ namespace CadEditor
 			Camera = _camera;
 			SceneCollection = _sceneCollection;
 			ObjectCollection = new List<ISceneObject>();
+			AttachingPair = new List<ISceneObject>();
         }
 
 		#region --- Initializing ---
@@ -117,16 +116,15 @@ namespace CadEditor
 
 		#region --- Selection ---
 
-		public void Select(int x, int y)
+		public void Select()
 		{
-			ray = GraphicsGL.InitializeRay(x, y);
 			//selectingRay = new Ray();
 			//selectingRay.Origin = ray.Origin;
 			ISceneObject selectedObject = null;
 
 			foreach (ISceneObject obj in ObjectCollection)
 			{
-                selectedObject = obj.CheckSelected(ray);
+                selectedObject = obj.CheckSelected();
 				if(selectedObject != null)
 				{
 					break;
@@ -165,6 +163,7 @@ namespace CadEditor
             }
 			else
 			{
+				SelectedObject = null;
                 DeleteSelectingCoordAxes();
             }
         }

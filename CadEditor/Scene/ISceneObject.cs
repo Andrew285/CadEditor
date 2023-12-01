@@ -15,6 +15,6 @@ namespace CadEditor
         void Move(Vector v);
         void Select();
         void Deselect();
-        ISceneObject CheckSelected(Ray ray);
+        ISceneObject CheckSelected();
     }
 }

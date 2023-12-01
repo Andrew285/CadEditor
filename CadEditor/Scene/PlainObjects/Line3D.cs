@@ -192,7 +192,7 @@ namespace CadEditor
             return resultEdge;
         }
 
-        public ISceneObject CheckSelected(Ray ray)
+        public ISceneObject CheckSelected()
         {
             throw new NotImplementedException();
         }

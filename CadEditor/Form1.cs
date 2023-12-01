@@ -3,6 +3,7 @@ using CadEditor.MeshObjects;
 using SharpGL;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -11,19 +12,48 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
-        private Scene scene;
+        private static Scene scene;
+        private static ContextMenu contextMenu;
 
-		public Form1()
+        private static MenuItem selectItem = new MenuItem("Select Object", Select_Object_click);
+        private static MenuItem deselctItem = new MenuItem("Deselect Object", Deselect_Object_click);
+        private static MenuItem divideItem = new MenuItem("Divide", Divide_Object_click);
+        private static MenuItem deleteItem = new MenuItem("Delete", Delete_Object_click);
+        private static MenuItem attachItem = new MenuItem("Attach", Attach_Object_click);
+        private static MenuItem detachItem = new MenuItem("Detach", Detach_Object_click);
+        private static MenuItem setTargetItem = new MenuItem("Set as Target", SetTarget_Object_click);
+
+
+
+        public Form1()
         {
             InitializeComponent();
             KeyPreview = true;
 
+            contextMenu = InitContextMenu();
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
 
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
 		}
+
+        public ContextMenu InitContextMenu()
+        {
+            if(contextMenu == null)
+            {
+                openGLControl1.ContextMenu = new ContextMenu();
+
+                openGLControl1.ContextMenu.MenuItems.AddRange(new MenuItem[]
+                {
+                    selectItem, deselctItem, divideItem, deleteItem, attachItem
+                });
+
+                contextMenu = openGLControl1.ContextMenu;
+            }
+
+            return contextMenu;
+        }
 
 		#region ---- OpenGLControl Events ----
 
@@ -123,10 +153,13 @@ namespace CadEditor
 
 		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
         {
+            MouseController.X = e.X;
+            MouseController.Y = e.Y;
+
             if (e.Button == MouseButtons.Left)
             {
                 GraphicsGL.DisableContexMenu();
-                scene.Select(e.X, openGLControl1.Height - e.Y);
+                scene.Select();
 
                 if(scene.SelectedObject == null)
                 {
@@ -136,30 +169,46 @@ namespace CadEditor
             else if (e.Button == MouseButtons.Right)
             {
                 GraphicsGL.DisableContexMenu();
-                scene.Select(e.X, GraphicsGL.GetHeight() - e.Y);
+                scene.Select();
 
                 if (scene.SelectedObject != null)
                 {
-                    InitContextMenu(e.X, e.Y);
+                    InitContextMenu(MouseController.X, MouseController.Y);
                 }
 			}
             else if(e.Button == MouseButtons.Middle)
             {
-				MouseController.X = e.X;
-				MouseController.Y = e.Y;
 				MouseController.IsMiddleButtonPressed = true;
 			}
         }
 
         private void InitContextMenu(int x, int y)
         {
-            openGLControl1.ContextMenu = new ContextMenu();
-            openGLControl1.ContextMenu.MenuItems.Add("Select Object", Select_Object_click);
-            openGLControl1.ContextMenu.MenuItems.Add("Deselect Object", Deselect_Object_click);
-            openGLControl1.ContextMenu.MenuItems.Add("Divide", Divide_Object_click);
-            openGLControl1.ContextMenu.MenuItems.Add("Delete", Delete_Object_click);
+            if (scene.AttachingPair.Count == 0)
+            {
+                contextMenu.MenuItems.Remove(detachItem);
+                contextMenu.MenuItems.Add(attachItem);
+            }
+            else if(scene.AttachingPair.Contains(scene.SelectedObject) && scene.AttachingPair.Count == 1)
+            {
+                contextMenu.MenuItems.Add(detachItem);
+                contextMenu.MenuItems.Remove(attachItem);
 
-            openGLControl1.ContextMenu.Show(openGLControl1, new System.Drawing.Point(x, y));
+            }
+            else if(scene.AttachingPair.Count == 1)
+            {
+                contextMenu.MenuItems.Remove(attachItem);
+                contextMenu.MenuItems.Remove(detachItem);
+                contextMenu.MenuItems.Add(setTargetItem);
+            }
+            else if(scene.AttachingPair.Count == 2)
+            {
+                contextMenu.MenuItems.Remove(detachItem);
+                contextMenu.MenuItems.Remove(setTargetItem);
+                contextMenu.MenuItems.Add(attachItem);
+            }
+
+            contextMenu.Show(openGLControl1, new System.Drawing.Point(x, y));
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
@@ -230,17 +279,17 @@ namespace CadEditor
 
 		#region ---- RightClick ----
 
-		private void Select_Object_click(object sender, EventArgs e)
+		private static void Select_Object_click(object sender, EventArgs e)
 		{
             scene.SelectedObject.Select();
 		}
 
-		private void Deselect_Object_click(object sender, EventArgs e)
+		private static void Deselect_Object_click(object sender, EventArgs e)
 		{
             scene.SelectedObject.Deselect();
 		}
 
-		private void Divide_Object_click(object sender, EventArgs e)
+		private static void Divide_Object_click(object sender, EventArgs e)
 		{
 			if (scene.SelectedObject != null && scene.SelectedObject is MeshObject3D)
 			{
@@ -261,7 +310,33 @@ namespace CadEditor
 			}
 		}
 
-        private DividingCubeForm InitializeDividingForm()
+        private static void Delete_Object_click(object sender, EventArgs e)
+        {
+            scene.DeleteCompletely(scene.SelectedObject);
+        }
+
+        private static void Attach_Object_click(object sender, EventArgs e)
+        {
+            scene.AttachingPair.Add(scene.SelectedObject);
+            ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Green;
+            ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Green;
+        }
+
+        private static void Detach_Object_click(object sender, EventArgs e)
+        {
+            scene.AttachingPair.Remove(scene.SelectedObject);
+            ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Red;
+            ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Black;
+        }
+
+        private static void SetTarget_Object_click(object sender, EventArgs e)
+        {
+            scene.AttachingPair.Add(scene.SelectedObject);
+            ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Blue;
+            ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Blue;
+        }
+
+        private static DividingCubeForm InitializeDividingForm()
         {
             DividingCubeForm form = new DividingCubeForm();
             form.TopMost = true;
@@ -273,14 +348,11 @@ namespace CadEditor
             return form;
         }
 
-		private void Delete_Object_click(object sender, EventArgs e)
-		{
-		    scene.DeleteCompletely(scene.SelectedObject);
-		}
 
-		#endregion
 
-		private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
+        #endregion
+
+        private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
             scene.AddCube();
 		}

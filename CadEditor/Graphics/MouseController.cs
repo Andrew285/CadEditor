@@ -8,8 +8,8 @@ namespace CadEditor.Graphics
 {
     public class MouseController
     {
-        public static double X { get; set; } = 0;
-        public static double Y { get; set; } = 0;
+        public static int X { get; set; } = 0;
+        public static int Y { get; set; } = 0;
 
         public static bool IsMiddleButtonPressed { get; set; } = false;
 

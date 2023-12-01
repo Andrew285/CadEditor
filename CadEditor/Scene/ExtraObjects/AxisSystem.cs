@@ -91,6 +91,11 @@ namespace CadEditor.MeshObjects
             axisCubes = new List<AxisCube> { cubeX, cubeY, cubeZ };
         }
 
+        public void InitAxisCubes()
+        {
+
+        }
+
         public Point3D GetCenterPoint()
         {
             return centerPoint;
@@ -141,9 +146,9 @@ namespace CadEditor.MeshObjects
             }
         }
 
-        public ISceneObject CheckSelected(Ray ray)
+        public ISceneObject CheckSelected()
         {
-
+            Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
             foreach (AxisCube cube in axisCubes)
             {
                 cube.Deselect();
