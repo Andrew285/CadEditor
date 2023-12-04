@@ -13,7 +13,7 @@ namespace CadEditor
     {
 		public static double ZoomSensitivity { get; set; } = 0.01f;
 		public static double MinZoom { get; set; } = 1.0f;
-		public static double MaxZoom { get; set; } = 20.0f;
+		public static double MaxZoom { get; set; } = 40.0f;
         public double rtri { get; set; }
         public double utri { get; set; }
 

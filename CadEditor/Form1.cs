@@ -23,7 +23,9 @@ namespace CadEditor
         private static MenuItem detachItem = new MenuItem("Detach", Detach_Object_click);
         private static MenuItem setTargetItem = new MenuItem("Set as Target", SetTarget_Object_click);
 
-
+        private static int KeyX_Clicks = 0;
+        private static int KeyY_Clicks = 0;
+        private static int KeyZ_Clicks = 0;
 
         public Form1()
         {
@@ -79,14 +81,14 @@ namespace CadEditor
             scene.Draw();
         }
 
-        private void openGLControl1_Resized_1(object sender, EventArgs e)
-        {
-            // Set up the projection matrix
-            GraphicsGL.SetUpProjectionMatrix();
+        //private void openGLControl1_Resized_1(object sender, EventArgs e)
+        //{
+        //    // Set up the projection matrix
+        //    GraphicsGL.SetUpProjectionMatrix();
 
-            // Set up the view matrix
-            GraphicsGL.SetUpViewMatrix(scene.Camera);
-        }
+        //    // Set up the view matrix
+        //    GraphicsGL.SetUpViewMatrix(scene.Camera);
+        //}
 
 		#endregion
 
@@ -94,33 +96,27 @@ namespace CadEditor
 
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            Action<double> updateCamera = null;
-            float value = 0;
 
-            switch(e.KeyCode)
+            switch (e.KeyCode)
             {
-                case Keys.A:
-                    value = -3.0f;
-                    updateCamera = scene.Camera.UpdateAxisY;
+                case Keys.X:
+                    List<Axis> axesX = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.X);
+                    scene.SetAttachingObjectToAxis(axesX[KeyX_Clicks]);
+                    KeyX_Clicks = KeyX_Clicks == 1 ? 0 : 1;
                     break;
 
-                case Keys.D:
-                    value = 3.0f;
-                    updateCamera = scene.Camera.UpdateAxisY;
+                case Keys.Y:
+                    List<Axis> axesY = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.Y);
+                    scene.SetAttachingObjectToAxis(axesY[KeyY_Clicks]);
+                    KeyY_Clicks = KeyY_Clicks == 1 ? 0 : 1;
                     break;
 
-                case Keys.W:
-                    value = -3.0f;
-                    updateCamera = scene.Camera.UpdateAxisX;
-                    break;
-
-                case Keys.S:
-                    value = 3.0f;
-                    updateCamera = scene.Camera.UpdateAxisX;
+                case Keys.Z:
+                    List<Axis> axesZ = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.Z);
+                    scene.SetAttachingObjectToAxis(axesZ[KeyZ_Clicks]);
+                    KeyZ_Clicks = KeyZ_Clicks == 1 ? 0 : 1;
                     break;
             }
-
-            updateCamera(value);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

@@ -14,6 +14,7 @@ namespace CadEditor
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
 		public List<ISceneObject> AttachingPair { get; private set; }
+		public AxisSystem AttachingAxisSystem { get; private set; }
 		//public Ray selectingRay;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
@@ -39,24 +40,30 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube_1");
+			//ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube_1");
+			ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), "Cube_1");
+			ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), "Cube_2");
 			ObjectCollection.Add(cube);
+			ObjectCollection.Add(cube2);
 			SceneCollection.AddCube(cube);
-            Camera.Target = cube.GetCenterPoint();
+			SceneCollection.AddCube(cube2);
+            //Camera.Target = cube.GetCenterPoint();
+            Camera.Target = new Point3D(0, 0, 0);
 			grid = new SceneGrid();
         }
 
 		public void InitializeAttachingAxes(MeshObject3D obj)
 		{
-			AxisSystem axisSystem = new AxisSystem();
+			AttachingAxisSystem = new AxisSystem();
+            AttachingAxisSystem.AxisLength = 5.0f;
             foreach (Plane facet in obj.Mesh.Facets)
             {
                 if (!facet.IsAttached)
                 {
-                    axisSystem.CreateAxis(facet.AxisType, facet.GetCenterPoint());
+                    AttachingAxisSystem.CreateAxis(facet.AxisType, facet.GetCenterPoint());
                 }
             }
-			ObjectCollection.Add(axisSystem);
+			ObjectCollection.Add(AttachingAxisSystem);
         }
 
 
@@ -224,6 +231,15 @@ namespace CadEditor
 			{
 				DeleteSelectingCoordAxes();
 			}
+		}
+
+		public void SetAttachingObjectToAxis(Axis axis)
+		{
+			Point3D pointToMove = axis.P2;
+			MeshObject3D attachingObject = (MeshObject3D)AttachingPair[0];
+
+			Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
+			attachingObject.Move(distanceVector*(-1));
 		}
         
 		#endregion

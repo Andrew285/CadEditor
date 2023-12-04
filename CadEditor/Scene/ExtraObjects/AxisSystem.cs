@@ -261,22 +261,37 @@ namespace CadEditor.MeshObjects
             axes.Add(axisLine);
         }
 
-        private CoordinateAxis ConvertToAxis(CoordinateAxisType type)
+        public List<Axis> GetAxes(CoordinateAxis axis)
         {
-            CoordinateAxis resultAxis = CoordinateAxis.X;
+            List<Axis> resultAxes = new List<Axis>();
 
-            switch (type)
+            foreach(Axis axisLine in axes)
             {
-                case CoordinateAxisType.PlusX:
-                case CoordinateAxisType.MinusX: resultAxis = CoordinateAxis.X; break;
-                case CoordinateAxisType.PlusY:
-                case CoordinateAxisType.MinusY: resultAxis = CoordinateAxis.Y; break;
-                case CoordinateAxisType.PlusZ:
-                case CoordinateAxisType.MinusZ: resultAxis = CoordinateAxis.Z; break;
+                if(axisLine.CoordinateAxis == axis)
+                {
+                    resultAxes.Add(axisLine);
+                }
             }
 
-            return resultAxis;
+            return resultAxes;
         }
+
+        //private CoordinateAxis ConvertToAxis(CoordinateAxisType type)
+        //{
+        //    CoordinateAxis resultAxis = CoordinateAxis.X;
+
+        //    switch (type)
+        //    {
+        //        case CoordinateAxisType.PlusX:
+        //        case CoordinateAxisType.MinusX: resultAxis = CoordinateAxis.X; break;
+        //        case CoordinateAxisType.PlusY:
+        //        case CoordinateAxisType.MinusY: resultAxis = CoordinateAxis.Y; break;
+        //        case CoordinateAxisType.PlusZ:
+        //        case CoordinateAxisType.MinusZ: resultAxis = CoordinateAxis.Z; break;
+        //    }
+
+        //    return resultAxis;
+        //}
 
     }
 }
