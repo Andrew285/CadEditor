@@ -364,6 +364,13 @@ namespace CadEditor
                 plane.ParentObject = this;
             }
 
+            facets[0].AxisType = CoordinateAxisType.PlusZ;
+            facets[1].AxisType = CoordinateAxisType.PlusX;
+            facets[2].AxisType = CoordinateAxisType.MinusZ;
+            facets[3].AxisType = CoordinateAxisType.MinusX;
+            facets[4].AxisType = CoordinateAxisType.PlusY;
+            facets[5].AxisType = CoordinateAxisType.MinusY;
+
             Mesh.Facets = facets;
         }
 

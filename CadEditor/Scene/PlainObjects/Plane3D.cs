@@ -14,9 +14,11 @@ namespace CadEditor
     {
         public List<Point3D> Points { get; set; }
         public bool IsSelected { get; set; }
+        public bool IsAttached { get; set; }
         public Color SelectedColor { get; set; } = Color.Brown;
         public Color NonSelectedColor { get; set; } = Color.LightGray;
         public ISceneObject ParentObject { get; set; }
+        public CoordinateAxisType AxisType { get; set; }
 
         public Plane(List<Point3D> _vertices)
         {

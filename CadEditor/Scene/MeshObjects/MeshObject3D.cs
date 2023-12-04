@@ -1,13 +1,7 @@
 ﻿using CadEditor.Graphics;
 using SharpGL;
-using SharpGL.SceneGraph.Primitives;
-using SharpGL.SceneGraph.Raytracing;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadEditor.MeshObjects
 {

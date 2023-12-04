@@ -334,6 +334,7 @@ namespace CadEditor
             scene.AttachingPair.Add(scene.SelectedObject);
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Blue;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Blue;
+            scene.InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
         }
 
         private static DividingCubeForm InitializeDividingForm()

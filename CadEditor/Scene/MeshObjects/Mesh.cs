@@ -150,14 +150,4 @@ namespace CadEditor
             return cloneMesh;
 		}
 	}
-
-    public class Axis: Line
-	{
-		public CoordinateAxis CoordinateAxis { get; set; }
-
-		public Axis(Point3D v1, Point3D v2, CoordinateAxis axis): base(v1, v2)
-		{
-			CoordinateAxis = axis;
-		}
-	}
 }

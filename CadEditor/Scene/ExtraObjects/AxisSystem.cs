@@ -9,6 +9,19 @@ using System.Threading.Tasks;
 
 namespace CadEditor.MeshObjects
 {
+    public enum CoordinateAxis { X, Y, Z }
+    public enum CoordinateAxisType { PlusX, MinusX, PlusY, MinusY, PlusZ, MinusZ }
+
+    public class Axis : Line
+    {
+        public CoordinateAxis CoordinateAxis { get; set; }
+
+        public Axis(Point3D v1, Point3D v2, CoordinateAxis axis) : base(v1, v2)
+        {
+            CoordinateAxis = axis;
+        }
+    }
+
     public class AxisSystem: ISceneObject
     {
         private List<Axis> axes = new List<Axis>();
@@ -19,6 +32,14 @@ namespace CadEditor.MeshObjects
         private Point3D centerPoint;
         public ISceneObject ParentObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool IsSelected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public bool X;
+        public bool MinusX;
+
+        public AxisSystem() 
+        {
+            axes = new List<Axis>();
+        }
 
         public AxisSystem(ISceneObject obj) 
         {
@@ -37,33 +58,36 @@ namespace CadEditor.MeshObjects
             }
 
 
-            //Create Axis Lines
-            double[] axisXYZLengths = new double[3];   //axisXLength, axisYLength, axisZLength
+            ////Create Axis Lines
+            //double[] axisXYZLengths = new double[3];   //axisXLength, axisYLength, axisZLength
 
-            for (int i = 0; i < axisXYZLengths.Length; i++)
-            {
-                double multiplier = 1;
+            //for (int i = 0; i < axisXYZLengths.Length; i++)
+            //{
+            //    double multiplier = 1;
 
-                if (centerPoint[i] < 0)
-                {
-                    multiplier = -1;
-                }
-                else if (centerPoint[i] > 0)
-                {
-                    multiplier = 1;
-                }
-                else
-                {
-                    axisXYZLengths[i] = AxisLength;
-                }
+            //    if (centerPoint[i] < 0)
+            //    {
+            //        multiplier = -1;
+            //    }
+            //    else if (centerPoint[i] > 0)
+            //    {
+            //        multiplier = 1;
+            //    }
+            //    else
+            //    {
+            //        axisXYZLengths[i] = AxisLength;
+            //    }
 
-                axisXYZLengths[i] = AxisLength * multiplier;
-            }
+            //    axisXYZLengths[i] = AxisLength * multiplier;
+            //}
 
-            Axis axisX = new Axis(centerPoint.Clone(), new Point3D(axisXYZLengths[0] + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
-            Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, axisXYZLengths[1] + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
-            Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, axisXYZLengths[2] + centerPoint.Z), CoordinateAxis.Z);
+            //Axis axisX = new Axis(centerPoint.Clone(), new Point3D(axisXYZLengths[0] + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
+            //Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, axisXYZLengths[1] + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
+            //Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, axisXYZLengths[2] + centerPoint.Z), CoordinateAxis.Z);
 
+            Axis axisX = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
+            Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
+            Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z);
 
             axisX.NonSelectedColor = Color.Red;
             axisY.NonSelectedColor = Color.Green;
@@ -75,9 +99,9 @@ namespace CadEditor.MeshObjects
             axes = new List<Axis> { axisX, axisY, axisZ };
 
             //Create Axis Cubes
-            AxisCube cubeX = new AxisCube(new Point3D(axisXYZLengths[0] + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
-            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, axisXYZLengths[1] + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
-            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, axisXYZLengths[2] + centerPoint.Z), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
+            AxisCube cubeX = new AxisCube(new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
+            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
+            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
 
             //Set colors
             cubeX.FacetSelectedColor = Color.Red;
@@ -167,5 +191,92 @@ namespace CadEditor.MeshObjects
 
             return null;
         }
+
+        //public void CreateAxis(CoordinateAxisType axisType, Point3D centerPoint)
+        //{
+        //    CoordinateAxis coordinateAxis = new CoordinateAxis();
+
+        //    switch(axisType)
+        //    {
+        //        case CoordinateAxisType.PlusX:
+        //        case CoordinateAxisType.MinusX: coordinateAxis = CoordinateAxis.X; break;
+        //        case CoordinateAxisType.PlusY:
+        //        case CoordinateAxisType.MinusY: coordinateAxis = CoordinateAxis.Y; break;
+        //        case CoordinateAxisType.PlusZ:
+        //        case CoordinateAxisType.MinusZ: coordinateAxis = CoordinateAxis.Z; break;
+        //    }
+
+        //    Axis axis = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), coordinateAxis);
+        //    axis.LineWidth = AxisWidth;
+        //    axes.Add(axis);
+        //}
+
+        public void CreateAxis(CoordinateAxisType axis, Point3D centerPoint)
+        {
+            Color nonSelectedColor = new Color();
+            Point3D endPoint = centerPoint.Clone();
+            CoordinateAxis coordinateAxis = new CoordinateAxis();
+
+            if(axis == CoordinateAxisType.PlusX)
+            {
+                nonSelectedColor = Color.Red;
+                endPoint.X += AxisLength;
+                coordinateAxis = CoordinateAxis.X;
+            }
+            else if (axis == CoordinateAxisType.MinusX)
+            {
+                nonSelectedColor = Color.Red;
+                endPoint.X -= AxisLength;
+                coordinateAxis = CoordinateAxis.X;
+            }
+            else if(axis == CoordinateAxisType.PlusY)
+            {
+                nonSelectedColor = Color.Green;
+                endPoint.Y += AxisLength;
+                coordinateAxis = CoordinateAxis.Y;
+            }
+            else if (axis == CoordinateAxisType.MinusY)
+            {
+                nonSelectedColor = Color.Green;
+                endPoint.Y -= AxisLength;
+                coordinateAxis = CoordinateAxis.Y;
+            }
+            else if (axis == CoordinateAxisType.PlusZ)
+            {
+                nonSelectedColor = Color.Blue;
+                endPoint.Z += AxisLength;
+                coordinateAxis = CoordinateAxis.Z;
+            }
+            else if (axis == CoordinateAxisType.MinusZ)
+            {
+                nonSelectedColor = Color.Blue;
+                endPoint.Z -= AxisLength;
+                coordinateAxis = CoordinateAxis.Z;
+            }
+
+
+            Axis axisLine = new Axis(centerPoint.Clone(), endPoint, coordinateAxis);
+            axisLine.LineWidth = AxisWidth;
+            axisLine.NonSelectedColor = nonSelectedColor;
+            axes.Add(axisLine);
+        }
+
+        private CoordinateAxis ConvertToAxis(CoordinateAxisType type)
+        {
+            CoordinateAxis resultAxis = CoordinateAxis.X;
+
+            switch (type)
+            {
+                case CoordinateAxisType.PlusX:
+                case CoordinateAxisType.MinusX: resultAxis = CoordinateAxis.X; break;
+                case CoordinateAxisType.PlusY:
+                case CoordinateAxisType.MinusY: resultAxis = CoordinateAxis.Y; break;
+                case CoordinateAxisType.PlusZ:
+                case CoordinateAxisType.MinusZ: resultAxis = CoordinateAxis.Z; break;
+            }
+
+            return resultAxis;
+        }
+
     }
 }

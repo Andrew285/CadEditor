@@ -46,11 +46,26 @@ namespace CadEditor
 			grid = new SceneGrid();
         }
 
-		#endregion
+		public void InitializeAttachingAxes(MeshObject3D obj)
+		{
+			AxisSystem axisSystem = new AxisSystem();
+            foreach (Plane facet in obj.Mesh.Facets)
+            {
+                if (!facet.IsAttached)
+                {
+                    axisSystem.CreateAxis(facet.AxisType, facet.GetCenterPoint());
+                }
+            }
+			ObjectCollection.Add(axisSystem);
+        }
 
-		#region --- Drawing ---
 
-		public void Draw()
+
+        #endregion
+
+        #region --- Drawing ---
+
+        public void Draw()
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
@@ -301,5 +316,4 @@ namespace CadEditor
 	}
 
 	public enum SceneMode { VIEW, EDIT};
-	public enum CoordinateAxis { X, Y, Z }
 }
