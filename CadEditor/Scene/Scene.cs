@@ -1,5 +1,6 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
+using Microsoft.SqlServer.Server;
 using SharpGL;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,8 @@ namespace CadEditor
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
-		public List<ISceneObject> AttachingPair { get; private set; }
+		public List<ISceneObject> AttachingCubesPair { get; private set; }
+		public List<Plane> AttachingFacetsPair { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
 		//public Ray selectingRay;
 		private AxisSystem axisSystem;
@@ -33,7 +35,7 @@ namespace CadEditor
 			Camera = _camera;
 			SceneCollection = _sceneCollection;
 			ObjectCollection = new List<ISceneObject>();
-			AttachingPair = new List<ISceneObject>();
+			AttachingCubesPair = new List<ISceneObject>();
         }
 
 		#region --- Initializing ---
@@ -236,10 +238,56 @@ namespace CadEditor
 		public void SetAttachingObjectToAxis(Axis axis)
 		{
 			Point3D pointToMove = axis.P2;
-			MeshObject3D attachingObject = (MeshObject3D)AttachingPair[0];
+			MeshObject3D attachingObject = (MeshObject3D)AttachingCubesPair[0];
 
-			Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
+			//Create AttachingFacetsPair
+			AttachingFacetsPair = new List<Plane>();
+			foreach(Plane facet in ((MeshObject3D)AttachingCubesPair[1]).Mesh.Facets)
+			{
+				if(facet.GetCenterPoint() == axis.P1)
+				{
+					AttachingFacetsPair.Add(facet);
+					break;
+				}
+			}
+
+			CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(AttachingFacetsPair[0].AxisType);
+            foreach (Plane facet in ((MeshObject3D)AttachingCubesPair[0]).Mesh.Facets)
+            {
+                if (facet.AxisType == oppositeType)
+                {
+                    AttachingFacetsPair.Add(facet);
+                    break;
+                }
+            }
+
+            Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
 			attachingObject.Move(distanceVector*(-1));
+		}
+
+		public void AttachCubes()
+		{
+			if(AttachingFacetsPair != null && AttachingFacetsPair.Count ==  2)
+			{
+				Plane targetFacet = AttachingFacetsPair[0];
+				Plane attachingFacet = AttachingFacetsPair[1];
+
+
+				var targetMesh = ((MeshObject3D)AttachingCubesPair[1]).Mesh;
+				var attachingMesh = ((MeshObject3D)AttachingCubesPair[0]).Mesh;
+                for (int i = 0; i < attachingFacet.Points.Count; i++)
+				{
+                    int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
+                    Point3D targetPoint = targetMesh.Vertices[index1];
+
+                    int index2 = attachingMesh.GetIndexOfPoint(attachingFacet[i]);
+					Point3D attachingPoint = attachingMesh.Vertices[index2];
+
+					Vector v = attachingPoint - targetPoint;
+					attachingPoint.Move(v * (-1));
+					targetMesh.Vertices[index2] = attachingPoint;
+				}
+			}
 		}
         
 		#endregion

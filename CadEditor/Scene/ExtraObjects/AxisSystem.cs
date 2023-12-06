@@ -19,6 +19,18 @@ namespace CadEditor.MeshObjects
         public Axis(Point3D v1, Point3D v2, CoordinateAxis axis) : base(v1, v2)
         {
             CoordinateAxis = axis;
+            if(CoordinateAxis == CoordinateAxis.X)
+            {
+                NonSelectedColor = Color.Red;
+            }
+            else if (CoordinateAxis == CoordinateAxis.Y)
+            {
+                NonSelectedColor = Color.Green;
+            }
+            else if (CoordinateAxis == CoordinateAxis.Z)
+            {
+                NonSelectedColor = Color.Blue;
+            }
         }
     }
 
@@ -213,43 +225,36 @@ namespace CadEditor.MeshObjects
 
         public void CreateAxis(CoordinateAxisType axis, Point3D centerPoint)
         {
-            Color nonSelectedColor = new Color();
             Point3D endPoint = centerPoint.Clone();
             CoordinateAxis coordinateAxis = new CoordinateAxis();
 
             if(axis == CoordinateAxisType.PlusX)
             {
-                nonSelectedColor = Color.Red;
                 endPoint.X += AxisLength;
                 coordinateAxis = CoordinateAxis.X;
             }
             else if (axis == CoordinateAxisType.MinusX)
             {
-                nonSelectedColor = Color.Red;
                 endPoint.X -= AxisLength;
                 coordinateAxis = CoordinateAxis.X;
             }
             else if(axis == CoordinateAxisType.PlusY)
             {
-                nonSelectedColor = Color.Green;
                 endPoint.Y += AxisLength;
                 coordinateAxis = CoordinateAxis.Y;
             }
             else if (axis == CoordinateAxisType.MinusY)
             {
-                nonSelectedColor = Color.Green;
                 endPoint.Y -= AxisLength;
                 coordinateAxis = CoordinateAxis.Y;
             }
             else if (axis == CoordinateAxisType.PlusZ)
             {
-                nonSelectedColor = Color.Blue;
                 endPoint.Z += AxisLength;
                 coordinateAxis = CoordinateAxis.Z;
             }
             else if (axis == CoordinateAxisType.MinusZ)
             {
-                nonSelectedColor = Color.Blue;
                 endPoint.Z -= AxisLength;
                 coordinateAxis = CoordinateAxis.Z;
             }
@@ -257,7 +262,6 @@ namespace CadEditor.MeshObjects
 
             Axis axisLine = new Axis(centerPoint.Clone(), endPoint, coordinateAxis);
             axisLine.LineWidth = AxisWidth;
-            axisLine.NonSelectedColor = nonSelectedColor;
             axes.Add(axisLine);
         }
 
@@ -274,6 +278,20 @@ namespace CadEditor.MeshObjects
             }
 
             return resultAxes;
+        }
+
+        public static CoordinateAxisType GetOppositeAxisType(CoordinateAxisType type)
+        {
+            switch(type)
+            {
+                case CoordinateAxisType.PlusX: return CoordinateAxisType.MinusX;
+                case CoordinateAxisType.MinusX: return CoordinateAxisType.PlusX;
+                case CoordinateAxisType.PlusY: return CoordinateAxisType.MinusY;
+                case CoordinateAxisType.MinusY: return CoordinateAxisType.PlusY;
+                case CoordinateAxisType.PlusZ: return CoordinateAxisType.MinusZ;
+                case CoordinateAxisType.MinusZ: return CoordinateAxisType.PlusZ;
+                default: return CoordinateAxisType.PlusX;
+            }
         }
 
         //private CoordinateAxis ConvertToAxis(CoordinateAxisType type)

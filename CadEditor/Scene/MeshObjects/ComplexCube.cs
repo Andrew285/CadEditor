@@ -309,27 +309,27 @@ namespace CadEditor
 				//BACK
 				new Plane(new List<Point3D>
                 {
-                    mesh.Vertices[2],
-                    mesh.Vertices[10],
                     mesh.Vertices[3],
-                    mesh.Vertices[15],
-                    mesh.Vertices[7],
-                    mesh.Vertices[18],
+                    mesh.Vertices[10],
+                    mesh.Vertices[2],
+                    mesh.Vertices[14],
                     mesh.Vertices[6],
-                    mesh.Vertices[14]
+                    mesh.Vertices[18],
+                    mesh.Vertices[7],
+                    mesh.Vertices[15]
                 }),
 
 				//LEFT
 				new Plane(new List<Point3D>
                 {
-                    mesh.Vertices[3],
-                    mesh.Vertices[11],
                     mesh.Vertices[0],
-                    mesh.Vertices[12],
-                    mesh.Vertices[4],
-                    mesh.Vertices[19],
+                    mesh.Vertices[11],
+                    mesh.Vertices[3],
+                    mesh.Vertices[15],
                     mesh.Vertices[7],
-                    mesh.Vertices[15]
+                    mesh.Vertices[19],
+                    mesh.Vertices[4],
+                    mesh.Vertices[12]
                 }),
 
 				//TOP
@@ -348,14 +348,14 @@ namespace CadEditor
 				//BOTTOM
 				new Plane(new List<Point3D>
                 {
-                    mesh.Vertices[1],
-                    mesh.Vertices[8],
                     mesh.Vertices[0],
-                    mesh.Vertices[11],
-                    mesh.Vertices[3],
-                    mesh.Vertices[10],
+                    mesh.Vertices[8],
+                    mesh.Vertices[1],
+                    mesh.Vertices[9],
                     mesh.Vertices[2],
-                    mesh.Vertices[9]
+                    mesh.Vertices[10],
+                    mesh.Vertices[3],
+                    mesh.Vertices[11]
                 })
             };
 

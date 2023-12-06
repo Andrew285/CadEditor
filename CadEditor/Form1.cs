@@ -116,6 +116,11 @@ namespace CadEditor
                     scene.SetAttachingObjectToAxis(axesZ[KeyZ_Clicks]);
                     KeyZ_Clicks = KeyZ_Clicks == 1 ? 0 : 1;
                     break;
+
+                case Keys.Space:
+                    scene.AttachCubes();
+
+                    break;
             }
         }
 
@@ -180,24 +185,24 @@ namespace CadEditor
 
         private void InitContextMenu(int x, int y)
         {
-            if (scene.AttachingPair.Count == 0)
+            if (scene.AttachingCubesPair.Count == 0)
             {
                 contextMenu.MenuItems.Remove(detachItem);
                 contextMenu.MenuItems.Add(attachItem);
             }
-            else if(scene.AttachingPair.Contains(scene.SelectedObject) && scene.AttachingPair.Count == 1)
+            else if(scene.AttachingCubesPair.Contains(scene.SelectedObject) && scene.AttachingCubesPair.Count == 1)
             {
                 contextMenu.MenuItems.Add(detachItem);
                 contextMenu.MenuItems.Remove(attachItem);
 
             }
-            else if(scene.AttachingPair.Count == 1)
+            else if(scene.AttachingCubesPair.Count == 1)
             {
                 contextMenu.MenuItems.Remove(attachItem);
                 contextMenu.MenuItems.Remove(detachItem);
                 contextMenu.MenuItems.Add(setTargetItem);
             }
-            else if(scene.AttachingPair.Count == 2)
+            else if(scene.AttachingCubesPair.Count == 2)
             {
                 contextMenu.MenuItems.Remove(detachItem);
                 contextMenu.MenuItems.Remove(setTargetItem);
@@ -313,21 +318,21 @@ namespace CadEditor
 
         private static void Attach_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingPair.Add(scene.SelectedObject);
+            scene.AttachingCubesPair.Add(scene.SelectedObject);
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Green;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Green;
         }
 
         private static void Detach_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingPair.Remove(scene.SelectedObject);
+            scene.AttachingCubesPair.Remove(scene.SelectedObject);
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Red;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Black;
         }
 
         private static void SetTarget_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingPair.Add(scene.SelectedObject);
+            scene.AttachingCubesPair.Add(scene.SelectedObject);
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Blue;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Blue;
             scene.InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
