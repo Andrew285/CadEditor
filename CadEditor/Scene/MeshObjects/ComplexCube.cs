@@ -498,6 +498,12 @@ namespace CadEditor
             localSystem.OuterVertices[index][2] += Scene.MovingVector[2];
         }
 
+        public void UpdateMesh()
+        {
+            InitFacets(Mesh);
+            InitEdges(Mesh);
+        }
+
         //Main method to transform points after cube was divided into finite elements
         public void Transform()
         {

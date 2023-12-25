@@ -272,20 +272,51 @@ namespace CadEditor
 				Plane targetFacet = AttachingFacetsPair[0];
 				Plane attachingFacet = AttachingFacetsPair[1];
 
+                Mesh targetMesh = ((MeshObject3D)AttachingCubesPair[1]).Mesh;
+                Mesh attachingMesh = ((MeshObject3D)AttachingCubesPair[0]).Mesh;
 
-				var targetMesh = ((MeshObject3D)AttachingCubesPair[1]).Mesh;
-				var attachingMesh = ((MeshObject3D)AttachingCubesPair[0]).Mesh;
-                for (int i = 0; i < attachingFacet.Points.Count; i++)
+				//find closest point to attaching cube
+				double minDistance = 0;
+				Vector minVector = null;
+				int indexOfMinPoint = 0;
+				for(int i = 0; i < targetFacet.Points.Count; i++)
 				{
-                    int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
-                    Point3D targetPoint = targetMesh.Vertices[index1];
+					Point3D p = targetFacet.Points[i];
+					Vector distanceVector = attachingFacet.GetCenterPoint() - p;
+                    double distance = distanceVector.Length();
 
-                    int index2 = attachingMesh.GetIndexOfPoint(attachingFacet[i]);
+					if (minDistance == 0 || distance < minDistance)
+					{
+						minDistance = distance;
+						minVector = distanceVector;
+						indexOfMinPoint = i;
+					}
+				}
+
+				//move to target cube
+				Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
+                Vector centerToPoint = minVector - pointToPoint;
+				Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
+				Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
+
+                for (int i = 0; i < attachingMesh.Vertices.Count; i++)
+				{
+					attachingMesh.Vertices[i].Move(resultVector * (-1));
+                }
+
+				//attach facet
+				for (int i = 0; i < attachingFacet.Points.Count; i++)
+				{
+					int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
+					Point3D targetPoint = targetMesh.Vertices[index1];
+
+					int index2 = attachingMesh.GetIndexOfPoint(attachingFacet[i]);
 					Point3D attachingPoint = attachingMesh.Vertices[index2];
 
 					Vector v = attachingPoint - targetPoint;
 					attachingPoint.Move(v * (-1));
-					targetMesh.Vertices[index2] = attachingPoint;
+					targetMesh.Vertices[index1] = attachingPoint;
+					((ComplexCube)AttachingCubesPair[1]).UpdateMesh();
 				}
 			}
 		}

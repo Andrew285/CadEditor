@@ -52,6 +52,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComplexCubeTest.cs" />
     <Compile Include="MeshTest.cs" />
     <Compile Include="RayPointTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

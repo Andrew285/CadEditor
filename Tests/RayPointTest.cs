@@ -14,7 +14,7 @@ namespace Tests
         {
             Point3D firstVertex = new Point3D(-1, -1, 1);
             Point3D secondVertex = new Point3D(1, -1, 1);
-            Line3D edge = new Line3D(firstVertex, secondVertex);
+            Line edge = new Line(firstVertex, secondVertex);
 
             Assert.IsTrue(edge.Contains(new Point3D(-0.9, -1, 1)));
             Assert.IsTrue(edge.Contains(new Point3D(0, -1, 1)));
@@ -28,7 +28,7 @@ namespace Tests
         {
             Point3D firstVertex = new Point3D(-1, -1, 1);
             Point3D secondVertex = new Point3D(1, -1, 1);
-            Line3D edge = new Line3D(firstVertex, secondVertex);
+            Line edge = new Line(firstVertex, secondVertex);
 
             Assert.IsFalse(edge.Contains(new Point3D(1.9, -1, 1)));
             Assert.IsFalse(edge.Contains(new Point3D(2, -1, 1)));

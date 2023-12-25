@@ -119,7 +119,6 @@ namespace CadEditor
 
                 case Keys.Space:
                     scene.AttachCubes();
-
                     break;
             }
         }
