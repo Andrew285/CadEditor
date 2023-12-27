@@ -15,6 +15,8 @@ namespace CadEditor
         public Point3D[] bigCubePoints;
         public LocalSystem localSystem;
         public bool IsDivided { get; private set; } = false;
+        public bool IsAttachable { get; set; } = false;
+        public bool IsTarget { get; set; } = false;
 
         public class LocalSystem
         {
@@ -227,6 +229,7 @@ namespace CadEditor
 
             localSystem = new LocalSystem();
             localSystem.InitLocalOuterVertices(Mesh);
+
         }
 
         public ComplexCube(Mesh mesh) : base(mesh) 
@@ -364,6 +367,7 @@ namespace CadEditor
                 plane.ParentObject = this;
             }
 
+
             facets[0].AxisType = CoordinateAxisType.PlusZ;
             facets[1].AxisType = CoordinateAxisType.PlusX;
             facets[2].AxisType = CoordinateAxisType.MinusZ;
@@ -498,10 +502,32 @@ namespace CadEditor
             localSystem.OuterVertices[index][2] += Scene.MovingVector[2];
         }
 
-        public void UpdateMesh()
+        public void UpdateObject()
         {
+            Mesh cloneMesh = Mesh.Clone();
+
             InitFacets(Mesh);
             InitEdges(Mesh);
+
+            UpdateMesh(Mesh, cloneMesh);
+        }
+
+        public void UpdateMesh(Mesh original, Mesh clone)
+        {
+            for (int i = 0; i < clone.Facets.Count; i++)
+            {
+                original.Facets[i].IsSelected = clone.Facets[i].IsSelected;
+                
+                foreach(int index in clone.attachedFacets)
+                {
+                    original.attachedFacets.Add(index);
+                }
+            }
+
+            for (int i = 0; i < clone.Edges.Count; i++)
+            {
+                original.Edges[i].IsSelected = clone.Edges[i].IsSelected;
+            }
         }
 
         //Main method to transform points after cube was divided into finite elements
@@ -610,7 +636,6 @@ namespace CadEditor
 
 			return exportString;
         }
-
 
     }
 }

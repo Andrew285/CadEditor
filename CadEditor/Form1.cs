@@ -22,6 +22,7 @@ namespace CadEditor
         private static MenuItem attachItem = new MenuItem("Attach", Attach_Object_click);
         private static MenuItem detachItem = new MenuItem("Detach", Detach_Object_click);
         private static MenuItem setTargetItem = new MenuItem("Set as Target", SetTarget_Object_click);
+        private static MenuItem notSetTargetItem = new MenuItem("Deselect Target", NotSetTarget_Object_click);
 
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
@@ -184,28 +185,91 @@ namespace CadEditor
 
         private void InitContextMenu(int x, int y)
         {
-            if (scene.AttachingCubesPair.Count == 0)
-            {
-                contextMenu.MenuItems.Remove(detachItem);
-                contextMenu.MenuItems.Add(attachItem);
-            }
-            else if(scene.AttachingCubesPair.Contains(scene.SelectedObject) && scene.AttachingCubesPair.Count == 1)
-            {
-                contextMenu.MenuItems.Add(detachItem);
-                contextMenu.MenuItems.Remove(attachItem);
+            //if (scene.AttachingCubesPair[0] == null && scene.AttachingCubesPair[1] == null)
+            //{
+            //    contextMenu.MenuItems.Remove(detachItem);
+            //    contextMenu.MenuItems.Remove(notSetTargetItem);
+            //    contextMenu.MenuItems.Add(attachItem);
+            //    contextMenu.MenuItems.Add(setTargetItem);
+            //}
+            //else if (scene.AttachingCubesPair[0] == null || scene.AttachingCubesPair[1] == null)
+            //{
+            //    if (scene.AttachingCubesPair[0] == scene.SelectedObject)
+            //    {
+            //        contextMenu.MenuItems.Add(detachItem);
+            //        contextMenu.MenuItems.Remove(notSetTargetItem);
+            //        contextMenu.MenuItems.Remove(setTargetItem);
+            //    }
+            //    else if (scene.AttachingCubesPair[1] == scene.SelectedObject)
+            //    {
+            //        contextMenu.MenuItems.Add(attachItem);
+            //        contextMenu.MenuItems.Remove(detachItem);
+            //    }
 
-            }
-            else if(scene.AttachingCubesPair.Count == 1)
+            //    contextMenu.MenuItems.Remove(attachItem);
+            //}
+            //else if (scene.AttachingCubesPair[0] != null && scene.AttachingCubesPair[1] != null)
+            //{
+            //    if (scene.AttachingCubesPair[1] == scene.SelectedObject)
+            //    {
+            //        contextMenu.MenuItems.Add(notSetTargetItem);
+            //        contextMenu.MenuItems.Remove(setTargetItem);
+            //        contextMenu.MenuItems.Remove(detachItem);
+            //        contextMenu.MenuItems.Remove(attachItem);
+            //    }
+            //    else if (scene.AttachingCubesPair[0] == scene.SelectedObject)
+            //    {
+            //        contextMenu.MenuItems.Add(detachItem);
+            //        contextMenu.MenuItems.Remove(setTargetItem);
+            //        contextMenu.MenuItems.Remove(notSetTargetItem);
+            //    }
+            //    else
+            //    { 
+            //        contextMenu.MenuItems.Add(detachItem);
+            //        contextMenu.MenuItems.Remove(setTargetItem);
+            //        contextMenu.MenuItems.Remove(notSetTargetItem);
+            //    }
+            //}
+
+            if (scene.SelectedObject != null) 
             {
-                contextMenu.MenuItems.Remove(attachItem);
-                contextMenu.MenuItems.Remove(detachItem);
-                contextMenu.MenuItems.Add(setTargetItem);
-            }
-            else if(scene.AttachingCubesPair.Count == 2)
-            {
-                contextMenu.MenuItems.Remove(detachItem);
-                contextMenu.MenuItems.Remove(setTargetItem);
-                contextMenu.MenuItems.Add(attachItem);
+                if(scene.AttachingController.IsAttaching(scene.SelectedObject))
+                {
+                    contextMenu.MenuItems.Add(detachItem);
+                    contextMenu.MenuItems.Remove(attachItem);
+                    contextMenu.MenuItems.Remove(setTargetItem);
+                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                }
+                else if (scene.AttachingController.IsEmpty())
+                {
+                    contextMenu.MenuItems.Add(attachItem);
+                    contextMenu.MenuItems.Add(setTargetItem);
+                    contextMenu.MenuItems.Remove(detachItem);
+                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                }
+                else if(scene.AttachingController.IsTarget(scene.SelectedObject))
+                {
+                    contextMenu.MenuItems.Add(notSetTargetItem);
+                    contextMenu.MenuItems.Remove(setTargetItem);
+                    contextMenu.MenuItems.Remove(attachItem);
+                    contextMenu.MenuItems.Remove(detachItem);
+                }
+                else if (!scene.AttachingController.IsTarget(scene.SelectedObject) &&
+                         scene.AttachingController.attachingObjects[1] == null)
+                {
+                    contextMenu.MenuItems.Add(setTargetItem);
+                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                    contextMenu.MenuItems.Remove(attachItem);
+                    contextMenu.MenuItems.Remove(detachItem);
+                }
+                else if (!scene.AttachingController.IsAttaching(scene.SelectedObject) &&
+                         scene.AttachingController.attachingObjects[0] == null)
+                {
+                    contextMenu.MenuItems.Add(attachItem);
+                    contextMenu.MenuItems.Remove(detachItem);
+                    contextMenu.MenuItems.Remove(setTargetItem);
+                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                }
             }
 
             contextMenu.Show(openGLControl1, new System.Drawing.Point(x, y));
@@ -317,24 +381,33 @@ namespace CadEditor
 
         private static void Attach_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingCubesPair.Add(scene.SelectedObject);
+            //scene.AttachingCubesPair[0] = scene.SelectedObject;
+            scene.AttachingController.DoAttach(((ComplexCube)scene.SelectedObject));
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Green;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Green;
         }
 
         private static void Detach_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingCubesPair.Remove(scene.SelectedObject);
+            scene.AttachingController.DoDetach();
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Red;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Black;
         }
 
         private static void SetTarget_Object_click(object sender, EventArgs e)
         {
-            scene.AttachingCubesPair.Add(scene.SelectedObject);
+            scene.AttachingController.DoSetTarget(((ComplexCube)scene.SelectedObject));
             ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Blue;
             ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Blue;
             scene.InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
+        }
+
+        private static void NotSetTarget_Object_click(object sender, EventArgs e)
+        {
+            scene.AttachingController.DoNotSetTarget();
+            ((MeshObject3D)scene.SelectedObject).EdgeSelectedColor = Color.Red;
+            ((MeshObject3D)scene.SelectedObject).EdgeNonSelectedColor = Color.Black;
+            scene.ObjectCollection.Remove(scene.AttachingAxisSystem);
         }
 
         private static DividingCubeForm InitializeDividingForm()

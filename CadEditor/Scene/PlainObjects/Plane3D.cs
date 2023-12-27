@@ -52,23 +52,23 @@ namespace CadEditor
             }
         }
 
-        public bool Equals(Plane plane)
-        {
-            if (plane != null)
-            {
-                for (int i = 0; i < plane.Points.Count; i++)
-                {
-                    if (!this.Points[i].Equals(plane.Points[i]))
-                    {
-                        return false;
-                    }
-                }
+        //public bool Equals(Plane plane)
+        //{
+        //    if (plane != null)
+        //    {
+        //        for (int i = 0; i < plane.Points.Count; i++)
+        //        {
+        //            if (!this.Points[i].Equals(plane.Points[i]))
+        //            {
+        //                return false;
+        //            }
+        //        }
 
-                return true;
-            }
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         public bool Contains(Point3D point)
         {
@@ -215,6 +215,67 @@ namespace CadEditor
         public ISceneObject CheckSelected()
         {
             throw new NotImplementedException();
+        }
+
+        //public static bool operator ==(Plane a, Plane b)
+        //{
+        //    if(a == null && b == null)
+        //    {
+        //        return true;
+        //    }
+        //    else if ((a == null && b != null) || (a != null && b == null))
+        //    {
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        for (int i = 0; i < a.Points.Count; i++)
+        //        {
+        //            if (a[i] != b[i])
+        //            {
+        //                return false;
+        //            }
+        //        }
+
+        //        return true;
+        //    }
+        //}
+
+        //public static bool operator !=(Plane a, Plane b)
+        //{
+        //    return !(a == b);
+        //}
+
+        public bool Equals(Plane b)
+        {
+            if (b == null)
+                return false;
+
+            for (int i = 0; i < this.Points.Count; i++)
+            {
+                if (this[i] != b[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(Plane a, Plane b)
+        {
+            if (ReferenceEquals(a, b))
+                return true;
+
+            if (a is null || b is null)
+                return false;
+
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(Plane a, Plane b)
+        {
+            return !(a == b);
         }
     }
 }

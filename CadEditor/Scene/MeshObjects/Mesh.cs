@@ -11,8 +11,9 @@ namespace CadEditor
 		private List<Plane> facets;
 		private List<Point3D> vertices;
 		private List<Line> edges;
+        public List<int> attachedFacets;
 
-		public List<Point3D> Vertices 
+        public List<Point3D> Vertices 
 		{
 			get { return vertices; }
 			set { vertices = value; }
@@ -35,6 +36,7 @@ namespace CadEditor
             facets = new List<Plane>();
             vertices = new List<Point3D>();
             edges = new List<Line>();
+            attachedFacets = new List<int>();
         }
 
         //public Mesh(List<Point3D> vertices, List<Line> edges, List<Plane> facets)
@@ -90,6 +92,19 @@ namespace CadEditor
             for(int i = 0; i < Vertices.Count; i++)
             {
                 if (Vertices[i] == point)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public int GetIndexOfFacet(Plane plane)
+        {
+            for (int i = 0; i < Facets.Count; i++)
+            {
+                if (Facets[i] == plane)
                 {
                     return i;
                 }

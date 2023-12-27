@@ -14,7 +14,6 @@ namespace CadEditor
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
-		public List<ISceneObject> AttachingCubesPair { get; private set; }
 		public List<Plane> AttachingFacetsPair { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
 		//public Ray selectingRay;
@@ -30,12 +29,14 @@ namespace CadEditor
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
+		public AttachingController AttachingController { get; private set; }
+
 		public Scene(Camera _camera, SceneCollection _sceneCollection)
         {
 			Camera = _camera;
 			SceneCollection = _sceneCollection;
 			ObjectCollection = new List<ISceneObject>();
-			AttachingCubesPair = new List<ISceneObject>();
+			AttachingController = new AttachingController();
         }
 
 		#region --- Initializing ---
@@ -58,11 +59,11 @@ namespace CadEditor
 		{
 			AttachingAxisSystem = new AxisSystem();
             AttachingAxisSystem.AxisLength = 5.0f;
-            foreach (Plane facet in obj.Mesh.Facets)
+            for (int i = 0; i < obj.Mesh.Facets.Count; i++)
             {
-                if (!facet.IsAttached)
+                if (!obj.Mesh.attachedFacets.Contains(i))
                 {
-                    AttachingAxisSystem.CreateAxis(facet.AxisType, facet.GetCenterPoint());
+					AttachingAxisSystem.CreateAxis(obj.Mesh.Facets[i].AxisType, obj.Mesh.Facets[i].GetCenterPoint());
                 }
             }
 			ObjectCollection.Add(AttachingAxisSystem);
@@ -238,24 +239,26 @@ namespace CadEditor
 		public void SetAttachingObjectToAxis(Axis axis)
 		{
 			Point3D pointToMove = axis.P2;
-			MeshObject3D attachingObject = (MeshObject3D)AttachingCubesPair[0];
+			MeshObject3D attachingObject = (MeshObject3D)AttachingController.GetAttachingObject();
 
 			//Create AttachingFacetsPair
 			AttachingFacetsPair = new List<Plane>();
-			foreach(Plane facet in ((MeshObject3D)AttachingCubesPair[1]).Mesh.Facets)
+			foreach(Plane facet in ((MeshObject3D)AttachingController.GetTargetObject()).Mesh.Facets)
 			{
 				if(facet.GetCenterPoint() == axis.P1)
 				{
+					facet.IsAttached = true;
 					AttachingFacetsPair.Add(facet);
 					break;
 				}
 			}
 
 			CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(AttachingFacetsPair[0].AxisType);
-            foreach (Plane facet in ((MeshObject3D)AttachingCubesPair[0]).Mesh.Facets)
+            foreach (Plane facet in ((MeshObject3D)AttachingController.GetAttachingObject()).Mesh.Facets)
             {
                 if (facet.AxisType == oppositeType)
                 {
+                    facet.IsAttached = true;
                     AttachingFacetsPair.Add(facet);
                     break;
                 }
@@ -272,8 +275,8 @@ namespace CadEditor
 				Plane targetFacet = AttachingFacetsPair[0];
 				Plane attachingFacet = AttachingFacetsPair[1];
 
-                Mesh targetMesh = ((MeshObject3D)AttachingCubesPair[1]).Mesh;
-                Mesh attachingMesh = ((MeshObject3D)AttachingCubesPair[0]).Mesh;
+                Mesh targetMesh = ((MeshObject3D)AttachingController.GetTargetObject()).Mesh;
+                Mesh attachingMesh = ((MeshObject3D)AttachingController.GetAttachingObject()).Mesh;
 
 				//find closest point to attaching cube
 				double minDistance = 0;
@@ -316,10 +319,18 @@ namespace CadEditor
 					Vector v = attachingPoint - targetPoint;
 					attachingPoint.Move(v * (-1));
 					targetMesh.Vertices[index1] = attachingPoint;
-					((ComplexCube)AttachingCubesPair[1]).UpdateMesh();
 				}
-			}
-		}
+
+                ((ComplexCube)AttachingController.GetTargetObject()).UpdateObject();
+
+				int targetFacetIndex = ((ComplexCube)AttachingController.GetTargetObject()).Mesh.GetIndexOfFacet(targetFacet);
+                ((ComplexCube)AttachingController.GetTargetObject()).Mesh.attachedFacets.Add(targetFacetIndex);
+
+                int attachingFacetIndex = ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.GetIndexOfFacet(attachingFacet);
+                ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.attachedFacets.Add(attachingFacetIndex);
+
+            }
+        }
         
 		#endregion
 

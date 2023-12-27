@@ -19,7 +19,7 @@ namespace Tests
             ComplexCube c2 = new ComplexCube(new Point3D(5, 0, 0), new Vector(1, 1, 1), "cube2");
 
             c2.Mesh.Vertices[0] = c1.Mesh.Vertices[1];
-            c2.UpdateMesh();
+            c2.UpdateObject();
 
             Assert.AreEqual(c2.Mesh.Edges[0].P1, c1.Mesh.Vertices[1]);
         }
