@@ -324,7 +324,6 @@ namespace CadEditor.MeshObjects
             return false;
         }
 
-
         public Plane CheckSelectedFacet(Ray ray)
         {
             var result = GetIntersectionPoint(ray);
@@ -336,7 +335,6 @@ namespace CadEditor.MeshObjects
 
             return (Plane)result.Item1;
         }
-
 
         private double GetDistance(Point3D v1, Point3D v2)
         {

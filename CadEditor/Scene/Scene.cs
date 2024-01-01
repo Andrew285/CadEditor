@@ -306,8 +306,9 @@ namespace CadEditor
 				{
 					attachingMesh.Vertices[i].Move(resultVector * (-1));
                 }
+                ((ComplexCube)AttachingController.GetAttachingObject()).GetCenterPoint().Move(resultVector * (-1));
 
-				//attach facet
+                //attach facet
 				for (int i = 0; i < attachingFacet.Points.Count; i++)
 				{
 					int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
@@ -328,7 +329,10 @@ namespace CadEditor
 
                 int attachingFacetIndex = ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.GetIndexOfFacet(attachingFacet);
                 ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.attachedFacets.Add(attachingFacetIndex);
+				//axisSystem.Move(v * (-1));
 
+				ObjectCollection.Remove(AttachingAxisSystem);
+				InitializeAttachingAxes((MeshObject3D)AttachingController.GetTargetObject());
             }
         }
         
