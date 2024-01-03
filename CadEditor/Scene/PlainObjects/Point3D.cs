@@ -188,5 +188,10 @@ namespace CadEditor
         {
             throw new NotImplementedException();
         }
+
+        object ISceneObject.Clone()
+        {
+            return new Point3D(X, Y, Z);
+        }
     }
 }

@@ -217,35 +217,6 @@ namespace CadEditor
             throw new NotImplementedException();
         }
 
-        //public static bool operator ==(Plane a, Plane b)
-        //{
-        //    if(a == null && b == null)
-        //    {
-        //        return true;
-        //    }
-        //    else if ((a == null && b != null) || (a != null && b == null))
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        for (int i = 0; i < a.Points.Count; i++)
-        //        {
-        //            if (a[i] != b[i])
-        //            {
-        //                return false;
-        //            }
-        //        }
-
-        //        return true;
-        //    }
-        //}
-
-        //public static bool operator !=(Plane a, Plane b)
-        //{
-        //    return !(a == b);
-        //}
-
         public bool Equals(Plane b)
         {
             if (b == null)
@@ -260,6 +231,18 @@ namespace CadEditor
             }
 
             return true;
+        }
+
+        object ISceneObject.Clone()
+        {
+            List<Point3D> points = new List<Point3D>();
+
+            foreach (Point3D p in Points)
+            {
+                points.Add(p.Clone());
+            }
+
+            return new Plane(points);
         }
 
         public static bool operator ==(Plane a, Plane b)

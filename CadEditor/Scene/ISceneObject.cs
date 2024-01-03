@@ -6,6 +6,7 @@ namespace CadEditor
         void Draw();
     }
 
+
     public interface ISceneObject: IDrawable
     {
         ISceneObject ParentObject { get; set; }
@@ -15,6 +16,7 @@ namespace CadEditor
         void Move(Vector v);
         void Select();
         void Deselect();
+        object Clone();
         ISceneObject CheckSelected();
     }
 }

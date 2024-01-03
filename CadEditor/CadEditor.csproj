@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttachingController.cs" />
+    <Compile Include="ComplexStructureController.cs" />
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\GraphicsGL.cs" />
     <Compile Include="Graphics\MouseController.cs" />
@@ -90,6 +91,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Maths\Matrix.cs" />
+    <Compile Include="Scene\MeshObjects\ComplexStructure.cs" />
     <Compile Include="Scene\MeshObjects\MeshObject3D.cs" />
     <Compile Include="Scene\MeshObjects\Mesh.cs" />
     <Compile Include="Scene\ISceneObject.cs" />

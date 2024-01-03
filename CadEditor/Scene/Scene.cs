@@ -1,10 +1,8 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
-using Microsoft.SqlServer.Server;
 using SharpGL;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace CadEditor
@@ -23,6 +21,7 @@ namespace CadEditor
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
 		public ISceneObject SelectedObject { get; set; }
+		public ISceneObject PreviousSelectedObject { get; set; }
 		public AxisCube SelectedAxisCube { get; set; }
 
 		public bool DrawFacets { get; set; }
@@ -30,6 +29,7 @@ namespace CadEditor
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
 		public AttachingController AttachingController { get; private set; }
+		public ComplexStructureController StructureController { get; private set; }
 
 		public Scene(Camera _camera, SceneCollection _sceneCollection)
         {
@@ -37,6 +37,7 @@ namespace CadEditor
 			SceneCollection = _sceneCollection;
 			ObjectCollection = new List<ISceneObject>();
 			AttachingController = new AttachingController();
+			StructureController = ComplexStructureController.GetInstance();
         }
 
 		#region --- Initializing ---
@@ -145,7 +146,12 @@ namespace CadEditor
 		{
 			//selectingRay = new Ray();
 			//selectingRay.Origin = ray.Origin;
-			ISceneObject selectedObject = null;
+			if (SelectedObject != null)
+			{
+                PreviousSelectedObject = (ISceneObject)SelectedObject.Clone();
+            }
+
+            ISceneObject selectedObject = null;
 
 			foreach (ISceneObject obj in ObjectCollection)
 			{
@@ -167,9 +173,20 @@ namespace CadEditor
 
                     if (SceneMode == SceneMode.VIEW)
                     {
+
                         if (selectedObject.ParentObject != null)
                         {
                             SelectedObject = SelectedObject.ParentObject;
+
+							if (SelectedObject != null && PreviousSelectedObject != (ComplexCube)SelectedObject)
+							{
+                                ComplexStructure structure = StructureController.GetStructureOf((ComplexCube)SelectedObject);
+
+                                if (structure != null)
+                                {
+                                    SelectedObject = structure;
+                                }
+                            }
                         }
                     }
 
@@ -278,8 +295,11 @@ namespace CadEditor
                 Mesh targetMesh = ((MeshObject3D)AttachingController.GetTargetObject()).Mesh;
                 Mesh attachingMesh = ((MeshObject3D)AttachingController.GetAttachingObject()).Mesh;
 
-				//find closest point to attaching cube
-				double minDistance = 0;
+                ComplexCube targetCube = ((ComplexCube)AttachingController.GetTargetObject());
+                ComplexCube attachingCube = ((ComplexCube)AttachingController.GetAttachingObject());
+
+                //find closest point to attaching cube
+                double minDistance = 0;
 				Vector minVector = null;
 				int indexOfMinPoint = 0;
 				for(int i = 0; i < targetFacet.Points.Count; i++)
@@ -322,18 +342,28 @@ namespace CadEditor
 					targetMesh.Vertices[index1] = attachingPoint;
 				}
 
-                ((ComplexCube)AttachingController.GetTargetObject()).UpdateObject();
+                targetCube.UpdateObject();
 
-				int targetFacetIndex = ((ComplexCube)AttachingController.GetTargetObject()).Mesh.GetIndexOfFacet(targetFacet);
-                ((ComplexCube)AttachingController.GetTargetObject()).Mesh.attachedFacets.Add(targetFacetIndex);
+				int targetFacetIndex = targetMesh.GetIndexOfFacet(targetFacet);
+                targetMesh.attachedFacets.Add(targetFacetIndex);
 
-                int attachingFacetIndex = ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.GetIndexOfFacet(attachingFacet);
-                ((ComplexCube)AttachingController.GetAttachingObject()).Mesh.attachedFacets.Add(attachingFacetIndex);
-				//axisSystem.Move(v * (-1));
+                int attachingFacetIndex = attachingCube.Mesh.GetIndexOfFacet(attachingFacet);
+                attachingMesh.attachedFacets.Add(attachingFacetIndex);
 
 				ObjectCollection.Remove(AttachingAxisSystem);
 				InitializeAttachingAxes((MeshObject3D)AttachingController.GetTargetObject());
-            }
+
+
+				//Creating complex structure or adding cube to it
+				ComplexStructure structure = StructureController.Add(attachingCube, targetCube);
+				ObjectCollection.Remove(targetCube);
+				ObjectCollection.Remove(attachingCube);
+				
+				if (structure != null && !ObjectCollection.Contains(structure))
+				{
+					ObjectCollection.Add(structure);
+				}
+			}
         }
         
 		#endregion

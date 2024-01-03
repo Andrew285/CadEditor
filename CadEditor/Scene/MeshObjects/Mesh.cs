@@ -8,7 +8,9 @@ namespace CadEditor
 {
 	public class Mesh
 	{
-		private List<Plane> facets;
+        public const int FACET_VERTICES = 8;
+
+        private List<Plane> facets;
 		private List<Point3D> vertices;
 		private List<Line> edges;
         public List<int> attachedFacets;

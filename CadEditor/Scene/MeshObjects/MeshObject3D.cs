@@ -345,5 +345,10 @@ namespace CadEditor.MeshObjects
         {
             return centerPoint;
         }
+
+        public object Clone()
+        {
+            return new MeshObject3D(Mesh.Clone());
+        }
     }
 }

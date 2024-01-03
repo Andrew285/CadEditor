@@ -69,34 +69,6 @@ namespace CadEditor.MeshObjects
                 AxisLength += 1.0f;
             }
 
-
-            ////Create Axis Lines
-            //double[] axisXYZLengths = new double[3];   //axisXLength, axisYLength, axisZLength
-
-            //for (int i = 0; i < axisXYZLengths.Length; i++)
-            //{
-            //    double multiplier = 1;
-
-            //    if (centerPoint[i] < 0)
-            //    {
-            //        multiplier = -1;
-            //    }
-            //    else if (centerPoint[i] > 0)
-            //    {
-            //        multiplier = 1;
-            //    }
-            //    else
-            //    {
-            //        axisXYZLengths[i] = AxisLength;
-            //    }
-
-            //    axisXYZLengths[i] = AxisLength * multiplier;
-            //}
-
-            //Axis axisX = new Axis(centerPoint.Clone(), new Point3D(axisXYZLengths[0] + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
-            //Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, axisXYZLengths[1] + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
-            //Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, axisXYZLengths[2] + centerPoint.Z), CoordinateAxis.Z);
-
             Axis axisX = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
             Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
             Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z);
@@ -125,11 +97,6 @@ namespace CadEditor.MeshObjects
             cubeZ.FacetNonSelectedColor = Color.Blue;
 
             axisCubes = new List<AxisCube> { cubeX, cubeY, cubeZ };
-        }
-
-        public void InitAxisCubes()
-        {
-
         }
 
         public Point3D GetCenterPoint()
@@ -204,25 +171,6 @@ namespace CadEditor.MeshObjects
             return null;
         }
 
-        //public void CreateAxis(CoordinateAxisType axisType, Point3D centerPoint)
-        //{
-        //    CoordinateAxis coordinateAxis = new CoordinateAxis();
-
-        //    switch(axisType)
-        //    {
-        //        case CoordinateAxisType.PlusX:
-        //        case CoordinateAxisType.MinusX: coordinateAxis = CoordinateAxis.X; break;
-        //        case CoordinateAxisType.PlusY:
-        //        case CoordinateAxisType.MinusY: coordinateAxis = CoordinateAxis.Y; break;
-        //        case CoordinateAxisType.PlusZ:
-        //        case CoordinateAxisType.MinusZ: coordinateAxis = CoordinateAxis.Z; break;
-        //    }
-
-        //    Axis axis = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), coordinateAxis);
-        //    axis.LineWidth = AxisWidth;
-        //    axes.Add(axis);
-        //}
-
         public void CreateAxis(CoordinateAxisType axis, Point3D centerPoint)
         {
             Point3D endPoint = centerPoint.Clone();
@@ -292,6 +240,23 @@ namespace CadEditor.MeshObjects
                 case CoordinateAxisType.MinusZ: return CoordinateAxisType.PlusZ;
                 default: return CoordinateAxisType.PlusX;
             }
+        }
+
+        public object Clone()
+        {
+            List<Axis> axes = new List<Axis>();
+            List<AxisCube> axisCubes = new List<AxisCube>();
+
+            for (int i = 0; i < this.axes.Count; i++)
+            {
+                axes.Add(this.axes[i]);
+                axisCubes.Add(this.axisCubes[i]);
+            }
+
+            AxisSystem axisSystem = new AxisSystem();
+            axisSystem.axes = axes;
+            axisSystem.axisCubes = axisCubes;
+            return axisSystem;
         }
 
         //private CoordinateAxis ConvertToAxis(CoordinateAxisType type)

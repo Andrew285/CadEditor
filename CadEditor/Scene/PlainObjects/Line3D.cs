@@ -196,5 +196,10 @@ namespace CadEditor
         {
             throw new NotImplementedException();
         }
+
+        object ISceneObject.Clone()
+        {
+            return new Line(P1.Clone(), P2.Clone());
+        }
     }
 }
