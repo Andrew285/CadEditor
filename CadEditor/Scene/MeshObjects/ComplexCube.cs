@@ -8,7 +8,7 @@ using CadEditor.Graphics;
 
 namespace CadEditor
 {
-    public class ComplexCube: MeshObject3D
+    public class ComplexCube: MeshObject3D, IDivideable
     {
         private const int OUTER_VERTICES_AMOUNT = 20;
         private Point3D[] OuterVertices = new Point3D[20];

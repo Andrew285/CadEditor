@@ -72,6 +72,7 @@
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\GraphicsGL.cs" />
     <Compile Include="Graphics\MouseController.cs" />
+    <Compile Include="IDivideable.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
     <Compile Include="Maths\Triangulation.cs" />
     <Compile Include="Scene\ExtraObjects\SceneGrid.cs" />

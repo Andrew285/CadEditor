@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace CadEditor
 {
-    public class ComplexStructure: ISceneObject
+    public class ComplexStructure: ISceneObject, IDivideable
     {
         private List<ComplexCube> cubes;
 
         public ISceneObject ParentObject { get; set; }
         public bool IsSelected { get; set; }
+        public bool IsDivided { get; set; }
 
         public ComplexStructure()
         {
@@ -108,6 +109,14 @@ namespace CadEditor
             }
 
             return cloneStructure;
+        }
+
+        public void Divide(Vector v)
+        {
+            foreach (ComplexCube cube in cubes)
+            {
+                cube.Divide(v);
+            }
         }
     }
 }

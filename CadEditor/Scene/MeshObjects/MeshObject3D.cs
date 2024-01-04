@@ -1,5 +1,6 @@
 ﻿using CadEditor.Graphics;
 using SharpGL;
+using SharpGL.SceneGraph;
 using System;
 using System.Drawing;
 
@@ -349,6 +350,12 @@ namespace CadEditor.MeshObjects
         public object Clone()
         {
             return new MeshObject3D(Mesh.Clone());
+        }
+
+        public void SetDefaultColors()
+        {
+            EdgeSelectedColor = Color.Red;
+            EdgeNonSelectedColor = Color.Black;
         }
     }
 }

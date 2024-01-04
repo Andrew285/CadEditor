@@ -12,7 +12,6 @@ namespace CadEditor
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
-		public List<Plane> AttachingFacetsPair { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
 		//public Ray selectingRay;
 		private AxisSystem axisSystem;
@@ -44,13 +43,6 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-			//ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube_1");
-			ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), "Cube_1");
-			ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), "Cube_2");
-			ObjectCollection.Add(cube);
-			ObjectCollection.Add(cube2);
-			SceneCollection.AddCube(cube);
-			SceneCollection.AddCube(cube2);
             //Camera.Target = cube.GetCenterPoint();
             Camera.Target = new Point3D(0, 0, 0);
 			grid = new SceneGrid();
@@ -256,27 +248,26 @@ namespace CadEditor
 		public void SetAttachingObjectToAxis(Axis axis)
 		{
 			Point3D pointToMove = axis.P2;
-			MeshObject3D attachingObject = (MeshObject3D)AttachingController.GetAttachingObject();
+			MeshObject3D attachingObject = AttachingController.GetAttachingObject();
 
 			//Create AttachingFacetsPair
-			AttachingFacetsPair = new List<Plane>();
-			foreach(Plane facet in ((MeshObject3D)AttachingController.GetTargetObject()).Mesh.Facets)
+			foreach(Plane facet in AttachingController.GetTargetObject().Mesh.Facets)
 			{
 				if(facet.GetCenterPoint() == axis.P1)
 				{
 					facet.IsAttached = true;
-					AttachingFacetsPair.Add(facet);
+					AttachingController.AddTargetFacet(facet);
 					break;
 				}
 			}
 
-			CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(AttachingFacetsPair[0].AxisType);
-            foreach (Plane facet in ((MeshObject3D)AttachingController.GetAttachingObject()).Mesh.Facets)
+			CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(AttachingController.GetTargetFacet().AxisType);
+            foreach (Plane facet in AttachingController.GetAttachingObject().Mesh.Facets)
             {
                 if (facet.AxisType == oppositeType)
                 {
                     facet.IsAttached = true;
-                    AttachingFacetsPair.Add(facet);
+					AttachingController.AddAttachingFacet(facet);
                     break;
                 }
             }
@@ -287,75 +278,35 @@ namespace CadEditor
 
 		public void AttachCubes()
 		{
-			if(AttachingFacetsPair != null && AttachingFacetsPair.Count ==  2)
+			if(AttachingController.IsFacetsInitialized())
 			{
-				Plane targetFacet = AttachingFacetsPair[0];
-				Plane attachingFacet = AttachingFacetsPair[1];
-
-                Mesh targetMesh = ((MeshObject3D)AttachingController.GetTargetObject()).Mesh;
-                Mesh attachingMesh = ((MeshObject3D)AttachingController.GetAttachingObject()).Mesh;
+				Plane targetFacet = AttachingController.GetTargetFacet();
+				Plane attachingFacet = AttachingController.GetAttachingFacet();
 
                 ComplexCube targetCube = ((ComplexCube)AttachingController.GetTargetObject());
                 ComplexCube attachingCube = ((ComplexCube)AttachingController.GetAttachingObject());
 
-                //find closest point to attaching cube
-                double minDistance = 0;
-				Vector minVector = null;
-				int indexOfMinPoint = 0;
-				for(int i = 0; i < targetFacet.Points.Count; i++)
-				{
-					Point3D p = targetFacet.Points[i];
-					Vector distanceVector = attachingFacet.GetCenterPoint() - p;
-                    double distance = distanceVector.Length();
-
-					if (minDistance == 0 || distance < minDistance)
-					{
-						minDistance = distance;
-						minVector = distanceVector;
-						indexOfMinPoint = i;
-					}
-				}
+				//find closest point to attaching cube
+				(int, Vector) closestDistance = AttachingController.GetClosestDistanceToAttach();
+				int indexOfMinPoint = closestDistance.Item1;
+				Vector minVector = closestDistance.Item2;
 
 				//move to target cube
 				Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
                 Vector centerToPoint = minVector - pointToPoint;
 				Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
 				Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
+				AttachingController.GetAttachingObject().Move(resultVector * (-1));
 
-                for (int i = 0; i < attachingMesh.Vertices.Count; i++)
-				{
-					attachingMesh.Vertices[i].Move(resultVector * (-1));
-                }
-                ((ComplexCube)AttachingController.GetAttachingObject()).GetCenterPoint().Move(resultVector * (-1));
+				//attach facet
+				AttachingController.AttachFacets();
+				AttachingController.UpdateObjects();
+                AttachingController.Clear();
 
-                //attach facet
-				for (int i = 0; i < attachingFacet.Points.Count; i++)
-				{
-					int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
-					Point3D targetPoint = targetMesh.Vertices[index1];
+                ObjectCollection.Remove(AttachingAxisSystem);
 
-					int index2 = attachingMesh.GetIndexOfPoint(attachingFacet[i]);
-					Point3D attachingPoint = attachingMesh.Vertices[index2];
-
-					Vector v = attachingPoint - targetPoint;
-					attachingPoint.Move(v * (-1));
-					targetMesh.Vertices[index1] = attachingPoint;
-				}
-
-                targetCube.UpdateObject();
-
-				int targetFacetIndex = targetMesh.GetIndexOfFacet(targetFacet);
-                targetMesh.attachedFacets.Add(targetFacetIndex);
-
-                int attachingFacetIndex = attachingCube.Mesh.GetIndexOfFacet(attachingFacet);
-                attachingMesh.attachedFacets.Add(attachingFacetIndex);
-
-				ObjectCollection.Remove(AttachingAxisSystem);
-				InitializeAttachingAxes((MeshObject3D)AttachingController.GetTargetObject());
-
-
-				//Creating complex structure or adding cube to it
-				ComplexStructure structure = StructureController.Add(attachingCube, targetCube);
+                //Creating complex structure or adding cube to it
+                ComplexStructure structure = StructureController.Add(attachingCube, targetCube);
 				ObjectCollection.Remove(targetCube);
 				ObjectCollection.Remove(attachingCube);
 				
@@ -363,6 +314,7 @@ namespace CadEditor
 				{
 					ObjectCollection.Add(structure);
 				}
+
 			}
         }
         

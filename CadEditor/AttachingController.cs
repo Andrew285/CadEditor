@@ -1,37 +1,51 @@
-﻿using System;
+﻿using CadEditor.MeshObjects;
+using SharpGL.SceneGraph;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CadEditor
 {
     public class AttachingController
     {
-        public ISceneObject[] attachingObjects;
+        private MeshObject3D[] attachingObjects;
+        private Plane[] attachingFacets;
+        public Color AttachingObjectColor { get; set; } = Color.Green;
+        public Color TargetObjectColor { get; set; } = Color.Blue;
 
         public AttachingController()
         {
-            attachingObjects = new ISceneObject[2];
+            attachingObjects = new MeshObject3D[2];
+            attachingFacets = new Plane[2];
         }
 
         public void DoAttach(ISceneObject obj)
         {
-            attachingObjects[0] = obj;
+            attachingObjects[0] = (MeshObject3D)obj;
+            attachingObjects[0].EdgeSelectedColor = AttachingObjectColor;
+            attachingObjects[0].EdgeNonSelectedColor = AttachingObjectColor;
         }
 
         public void DoDetach()
         {
+            attachingObjects[0].SetDefaultColors();
             attachingObjects[0] = null;
         }
 
         public void DoSetTarget(ISceneObject obj)
         {
-            attachingObjects[1] = obj;
+            attachingObjects[1] = (MeshObject3D)obj;
+            attachingObjects[1].EdgeSelectedColor = TargetObjectColor;
+            attachingObjects[1].EdgeNonSelectedColor = TargetObjectColor;
         }
 
         public void DoNotSetTarget()
         {
+            attachingObjects[1].SetDefaultColors();
             attachingObjects[1] = null;
         }
 
@@ -50,14 +64,95 @@ namespace CadEditor
             return attachingObjects[0] == null && attachingObjects[1] == null;
         }
 
-        public ISceneObject GetAttachingObject()
+        public MeshObject3D GetAttachingObject()
         {
             return attachingObjects[0];
         }
 
-        public ISceneObject GetTargetObject()
+        public MeshObject3D GetTargetObject()
         {
             return attachingObjects[1];
+        }
+
+        public void Clear()
+        {
+            DoDetach();
+            DoNotSetTarget();
+        }
+
+        public void AddAttachingFacet(Plane facet)
+        {
+            attachingFacets[0] = facet;
+        }
+
+        public void AddTargetFacet(Plane facet)
+        {
+            attachingFacets[1] = facet;
+        }
+
+        public Plane GetAttachingFacet()
+        {
+            return attachingFacets[0];
+        }
+
+        public Plane GetTargetFacet()
+        {
+            return attachingFacets[1];
+        }
+
+        public bool IsFacetsInitialized()
+        {
+            return attachingFacets[0] != null && attachingFacets[1] != null;
+        }
+
+        public (int, Vector) GetClosestDistanceToAttach()
+        {
+            double minDistance = 0;
+            Vector minVector = null;
+            int indexOfMinPoint = -1;
+            for (int i = 0; i < GetTargetFacet().Points.Count; i++)
+            {
+                Point3D p = GetTargetFacet().Points[i];
+                Vector distanceVector = GetAttachingFacet().GetCenterPoint() - p;
+                double distance = distanceVector.Length();
+
+                if (minDistance == 0 || distance < minDistance)
+                {
+                    minDistance = distance;
+                    minVector = distanceVector;
+                    indexOfMinPoint = i;
+                }
+            }
+
+            return (indexOfMinPoint, minVector);
+        }
+
+        public void AttachFacets()
+        {
+            for (int i = 0; i < GetAttachingFacet().Points.Count; i++)
+            {
+                int index1 = GetTargetObject().Mesh.GetIndexOfPoint(GetTargetFacet()[i]);
+                Point3D targetPoint = GetTargetObject().Mesh.Vertices[index1];
+
+                int index2 = GetAttachingObject().Mesh.GetIndexOfPoint(GetAttachingFacet()[i]);
+                Point3D attachingPoint = GetAttachingObject().Mesh.Vertices[index2];
+
+                Vector v = attachingPoint - targetPoint;
+                attachingPoint.Move(v * (-1));
+                GetTargetObject().Mesh.Vertices[index1] = attachingPoint;
+            }
+        }
+
+        public void UpdateObjects()
+        {
+            ((ComplexCube)GetTargetObject()).UpdateObject();
+            ((ComplexCube)GetAttachingObject()).UpdateObject();
+
+            int targetFacetIndex = GetTargetObject().Mesh.GetIndexOfFacet(GetTargetFacet());
+            GetTargetObject().Mesh.attachedFacets.Add(targetFacetIndex);
+
+            int attachingFacetIndex = GetAttachingObject().Mesh.GetIndexOfFacet(GetAttachingFacet());
+            GetAttachingObject().Mesh.attachedFacets.Add(attachingFacetIndex);
         }
     }
 }

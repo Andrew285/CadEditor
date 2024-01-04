@@ -29,10 +29,6 @@ namespace Tests
         {
             ComplexCube c1 = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "cube1");
             bool d1_1 = ((ComplexCube)c1.Mesh.Vertices[0].ParentCube).IsDivided;
-            //c1.IsDivided = true;
-            //bool d1_2 = ((ComplexCube)c1.Mesh.Vertices[0].ParentCube).IsDivided;
-
-            //Assert.AreNotEqual(d1_1, d1_2);
 
             c1.Divide(new Vector(4, 4, 4));
             bool d2 = ((ComplexCube)c1.Mesh.Vertices[0].ParentCube).IsDivided;
