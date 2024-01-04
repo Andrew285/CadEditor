@@ -111,27 +111,40 @@ namespace CadEditor
             switch (e.KeyCode)
             {
                 case Keys.X:
-                    List<Axis> axesX = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.X);
-                    scene.SetAttachingObjectToAxis(axesX[KeyX_Clicks]);
-                    KeyX_Clicks = KeyX_Clicks == 1 ? 0 : 1;
+                    if (scene.AttachingAxisSystem != null)
+                    {
+                        KeyX_Clicks = ClickKeyAxes(CoordinateAxis.X, KeyX_Clicks);
+                    }
                     break;
 
                 case Keys.Y:
-                    List<Axis> axesY = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.Y);
-                    scene.SetAttachingObjectToAxis(axesY[KeyY_Clicks]);
-                    KeyY_Clicks = KeyY_Clicks == 1 ? 0 : 1;
+                    if (scene.AttachingAxisSystem != null)
+                    {
+                        KeyY_Clicks = ClickKeyAxes(CoordinateAxis.Y, KeyY_Clicks);
+                    }
+
                     break;
 
                 case Keys.Z:
-                    List<Axis> axesZ = scene.AttachingAxisSystem.GetAxes(CoordinateAxis.Z);
-                    scene.SetAttachingObjectToAxis(axesZ[KeyZ_Clicks]);
-                    KeyZ_Clicks = KeyZ_Clicks == 1 ? 0 : 1;
+                    if (scene.AttachingAxisSystem != null)
+                    {
+                        KeyZ_Clicks = ClickKeyAxes(CoordinateAxis.Z, KeyZ_Clicks);
+                    }
+
                     break;
 
                 case Keys.Space:
                     scene.AttachCubes();
                     break;
             }
+        }
+
+        private int ClickKeyAxes(CoordinateAxis axis, int clicks)
+        {
+            List<Axis> axes = scene.AttachingAxisSystem.GetAxes(axis);
+            scene.SetAttachingObjectToAxis(axes[clicks]);
+            clicks = clicks == 1 ? 0 : 1;
+            return clicks;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
