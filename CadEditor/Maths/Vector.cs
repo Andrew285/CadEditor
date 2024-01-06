@@ -76,7 +76,13 @@ namespace CadEditor
 			return a[0] / b[0] + a[1] / b[1] + a[2] / b[2];
 		}
 
-		public static Vector operator *(double a, Vector v)
+        public static Vector operator /(Vector a, int b)
+        {
+            return new Vector(a[0] / b, a[1] / b, a[2] / b);
+        }
+
+
+        public static Vector operator *(double a, Vector v)
 		{
 			double[] result = new double[v.Size];
 			for (int i = 0; i < v.Size; i++)

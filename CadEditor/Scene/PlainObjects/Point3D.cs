@@ -24,6 +24,7 @@ namespace CadEditor
         public Color SelectedColor { get; set; } = Color.Pink;
         public Color NonSelectedColor { get; set; } = Color.Black;
         public ISceneObject ParentObject { get; set; }
+        public int Coefficient { get; set; } = 1;
 
         public Point3D(double _x, double _y, double _z)
         {
@@ -156,22 +157,15 @@ namespace CadEditor
 
         public void Move(Vector vector)
         {
-            X += vector[0];
-            Y += vector[1];
-            Z += vector[2];
+            X += vector[0] / Coefficient;
+            Y += vector[1] / Coefficient;
+            Z += vector[2] / Coefficient;
 
             if (ParentCube != null && ParentCube is ComplexCube && ((ComplexCube)ParentCube).IsDivided)
             {
                 ((ComplexCube)ParentCube).Update(this);
                 ((ComplexCube)ParentCube).Transform();
             }
-
-            //if(ParentCube != null && ParentCube is ComplexCube)
-            //{
-            //    ParentCube.CenterPoint.X += vector[0];
-            //    ParentCube.CenterPoint.Y += vector[1];
-            //    ParentCube.CenterPoint.Z += vector[2];
-            //}
         }
 
         public void Select()
@@ -192,6 +186,17 @@ namespace CadEditor
         object ISceneObject.Clone()
         {
             return new Point3D(X, Y, Z);
+        }
+
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj != null && obj is Point3D)
+            {
+                Point3D p = (Point3D)obj;
+                return this.X == p.X && this.Y == p.Y && this.Z == p.Z;
+            }
+
+            return false;
         }
     }
 }

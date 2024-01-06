@@ -245,6 +245,26 @@ namespace CadEditor
             return new Plane(points);
         }
 
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj != null && obj is Plane)
+            {
+                Plane plane = (Plane)obj;
+                
+                for (int i = 0; i < plane.Points.Count; i++)
+                {
+                    if (!plane[i].IsEqual(this[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool operator ==(Plane a, Plane b)
         {
             if (ReferenceEquals(a, b))

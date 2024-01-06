@@ -129,17 +129,21 @@ namespace CadEditor
 
         public void AttachFacets()
         {
+            Mesh targetMesh = GetTargetObject().Mesh;
+            Mesh attachingMesh = GetAttachingObject().Mesh;
+
             for (int i = 0; i < GetAttachingFacet().Points.Count; i++)
             {
-                int index1 = GetTargetObject().Mesh.GetIndexOfPoint(GetTargetFacet()[i]);
-                Point3D targetPoint = GetTargetObject().Mesh.Vertices[index1];
+                int index1 = targetMesh.GetIndexOfPoint(GetTargetFacet()[i]);
+                Point3D targetPoint = targetMesh.Vertices[index1];
 
-                int index2 = GetAttachingObject().Mesh.GetIndexOfPoint(GetAttachingFacet()[i]);
-                Point3D attachingPoint = GetAttachingObject().Mesh.Vertices[index2];
+                int index2 = attachingMesh.GetIndexOfPoint(GetAttachingFacet()[i]);
+                Point3D attachingPoint = attachingMesh.Vertices[index2];
 
                 Vector v = attachingPoint - targetPoint;
                 attachingPoint.Move(v * (-1));
-                GetTargetObject().Mesh.Vertices[index1] = attachingPoint;
+                targetMesh.Vertices[index1] = attachingPoint;
+                targetMesh.Vertices[index1].Coefficient += 1;
             }
         }
 

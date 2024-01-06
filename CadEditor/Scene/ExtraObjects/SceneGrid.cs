@@ -11,32 +11,40 @@ namespace CadEditor
     public class SceneGrid : IDrawable
     {
         private List<Line> grid;
-        public int LineAmount { get; set; } = 200;
-        public int LineLength { get; set; } = 50;
+        private int lineAmount;
+        private int lineLength;
+        private float lineWidth;
 
 
-        public SceneGrid()
+        public SceneGrid(int _lineAmount, int _lineLength, float _lineWidth)
+        {
+            lineAmount = _lineAmount;
+            lineLength = _lineLength;
+            lineWidth = _lineWidth;
+
+            InitLines();
+        }
+
+        private void InitLines()
         {
             grid = new List<Line>();
-            for (int i = 0; i < LineAmount; i++)
+            for (int i = 0; i < lineAmount; i++)
             {
-                grid.Add(new Line(new Point3D(LineLength, 0, 1 * i), new Point3D(-LineLength, 0, 1 * i)));
-                grid.Add(new Line(new Point3D(LineLength, 0, -1 * i), new Point3D(-LineLength, 0, -1 * i)));
-                grid.Add(new Line(new Point3D(1 * i, 0, LineLength), new Point3D(1 * i, 0, -LineLength)));
-                grid.Add(new Line(new Point3D(-1 * i, 0, LineLength), new Point3D(-1 * i, 0, -LineLength)));
+                grid.Add(new Line(new Point3D(lineLength, 0, 1 * i), new Point3D(-lineLength, 0, 1 * i)));
+                grid.Add(new Line(new Point3D(lineLength, 0, -1 * i), new Point3D(-lineLength, 0, -1 * i)));
+                grid.Add(new Line(new Point3D(1 * i, 0, lineLength), new Point3D(1 * i, 0, -lineLength)));
+                grid.Add(new Line(new Point3D(-1 * i, 0, lineLength), new Point3D(-1 * i, 0, -lineLength)));
             }
 
-            foreach(Line line in grid)
+            foreach (Line line in grid)
             {
-                line.LineWidth = 0.1f;
+                line.LineWidth = lineWidth;
             }
         }
 
         public void Draw()
         {
-            OpenGL gl = GraphicsGL.GL;
-
-            for (int i = 0; i < LineAmount; i++)
+            for (int i = 0; i < lineAmount; i++)
             {
                 grid[i].Draw();
             }

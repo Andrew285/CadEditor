@@ -259,6 +259,26 @@ namespace CadEditor.MeshObjects
             return axisSystem;
         }
 
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj != null && obj is AxisSystem)
+            {
+                AxisSystem axisSystem = obj as AxisSystem;
+
+                for (int i = 0; i < axisCubes.Count; i++)
+                {
+                    if (!this.axisCubes[i].IsEqual(axisSystem.axisCubes[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         //private CoordinateAxis ConvertToAxis(CoordinateAxisType type)
         //{
         //    CoordinateAxis resultAxis = CoordinateAxis.X;

@@ -201,5 +201,16 @@ namespace CadEditor
         {
             return new Line(P1.Clone(), P2.Clone());
         }
+
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj != null && obj is Line)
+            {
+                Line l = (Line)obj;
+                return this.P1.IsEqual(l.P1) && this.P2.IsEqual(l.P2);
+            }
+
+            return false;
+        }
     }
 }

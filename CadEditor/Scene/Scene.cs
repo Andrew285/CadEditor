@@ -1,6 +1,7 @@
 ﻿using CadEditor.Graphics;
 using CadEditor.MeshObjects;
 using SharpGL;
+using SharpGL.SceneGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,9 @@ namespace CadEditor
 {
     public class Scene
     {
+		private const int SCENE_GRID_SIZE = 20;
+		private const int SCENE_GRID_DENSITY = SCENE_GRID_SIZE * 4;
+		private const float SCENE_GRID_LINE_WIDTH = 0.1f;
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
@@ -20,7 +24,8 @@ namespace CadEditor
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
 		public ISceneObject SelectedObject { get; set; }
-		public ISceneObject PreviousSelectedObject { get; set; }
+		private ISceneObject previousRealSelectedObject;
+		private ISceneObject realSelectedObject;
 		public AxisCube SelectedAxisCube { get; set; }
 
 		public bool DrawFacets { get; set; }
@@ -43,9 +48,15 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-            //Camera.Target = cube.GetCenterPoint();
+            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), "Cube_1");
+            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), "Cube_2");
+            ObjectCollection.Add(cube);
+            ObjectCollection.Add(cube2);
+            SceneCollection.AddCube(cube);
+            SceneCollection.AddCube(cube2);
+
             Camera.Target = new Point3D(0, 0, 0);
-			grid = new SceneGrid();
+			grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
         }
 
 		public void InitializeAttachingAxes(MeshObject3D obj)
@@ -82,7 +93,7 @@ namespace CadEditor
 			Camera.Rotate();
 
 			//Draw Scene Grid
-			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, 20);
+			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
 			grid.Draw();
 
    //         //Draw ray when user clicks with left button
@@ -138,45 +149,46 @@ namespace CadEditor
 		{
 			//selectingRay = new Ray();
 			//selectingRay.Origin = ray.Origin;
-			if (SelectedObject != null)
-			{
-                PreviousSelectedObject = (ISceneObject)SelectedObject.Clone();
-            }
 
-            ISceneObject selectedObject = null;
+            ISceneObject realSelectedObject = null;
 
 			foreach (ISceneObject obj in ObjectCollection)
 			{
-                selectedObject = obj.CheckSelected();
-				if(selectedObject != null)
+				obj.Deselect();
+                realSelectedObject = obj.CheckSelected();
+				if(realSelectedObject != null)
 				{
 					break;
 				}
 			}
 
-			if(selectedObject != null)
+			if(realSelectedObject != null)
 			{
 
-				if(!(selectedObject is AxisCube))
+				if(!(realSelectedObject is AxisCube))
 				{
                     DeleteSelectingCoordAxes();
 
-                    SelectedObject = selectedObject;
+                    SelectedObject = realSelectedObject;
 
                     if (SceneMode == SceneMode.VIEW)
                     {
 
-                        if (selectedObject.ParentObject != null)
+                        if (realSelectedObject.ParentObject != null)
                         {
                             SelectedObject = SelectedObject.ParentObject;
 
-							if (SelectedObject != null && PreviousSelectedObject != (ComplexCube)SelectedObject)
+							if (SelectedObject != null)
 							{
-                                ComplexStructure structure = StructureController.GetStructureOf((ComplexCube)SelectedObject);
+								if (previousRealSelectedObject == null ||
+									!previousRealSelectedObject.IsEqual(realSelectedObject))
+								{
+                                    ComplexStructure structure = StructureController.GetStructureOf((ComplexCube)SelectedObject);
 
-                                if (structure != null)
-                                {
-                                    SelectedObject = structure;
+                                    if (structure != null)
+                                    {
+                                        SelectedObject = structure;
+                                    }
                                 }
                             }
                         }
@@ -190,7 +202,7 @@ namespace CadEditor
                 }
 				else
 				{
-					SelectedAxisCube = (AxisCube)selectedObject;
+					SelectedAxisCube = (AxisCube)realSelectedObject;
 					SelectedAxisCube.Select();
 					SelectedAxisCube.IsSelected = true;
 				}
@@ -200,9 +212,11 @@ namespace CadEditor
 				SelectedObject = null;
                 DeleteSelectingCoordAxes();
             }
+
+            previousRealSelectedObject = realSelectedObject != null ? (ISceneObject)realSelectedObject.Clone() : null;
         }
 
-		public void DeselectAll()
+        public void DeselectAll()
 		{
 			foreach (ISceneObject c in ObjectCollection)
 			{

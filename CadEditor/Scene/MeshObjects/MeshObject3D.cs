@@ -357,5 +357,42 @@ namespace CadEditor.MeshObjects
             EdgeSelectedColor = Color.Red;
             EdgeNonSelectedColor = Color.Black;
         }
+
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj == null && obj is MeshObject3D)
+            {
+                MeshObject3D meshObject = (MeshObject3D)obj;
+
+                for (int i = 0; i < meshObject.Mesh.Vertices.Count; i++)
+                {
+                    if (!this.Mesh.Vertices[i].IsEqual(meshObject.Mesh.Vertices[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                for (int i = 0; i < meshObject.Mesh.Edges.Count; i++)
+                {
+                    if (!this.Mesh.Edges[i].IsEqual(meshObject.Mesh.Edges[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                for (int i = 0; i < meshObject.Mesh.Facets.Count; i++)
+                {
+                    if (!this.Mesh.Facets[i].IsEqual(meshObject.Mesh.Facets[i]))
+                    {
+                        return false;
+                    }
+
+                }
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }

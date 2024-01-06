@@ -75,31 +75,12 @@ namespace CadEditor
 
             //Initializing objects by default
             scene.InitializeObjects();
-
-
-            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), "Cube_1");
-            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), "Cube_2");
-            scene.ObjectCollection.Add(cube);
-            scene.ObjectCollection.Add(cube2);
-            sceneCollection.AddCube(cube);
-            sceneCollection.AddCube(cube2);
-
-
         }
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
             scene.Draw();
         }
-
-        //private void openGLControl1_Resized_1(object sender, EventArgs e)
-        //{
-        //    // Set up the projection matrix
-        //    GraphicsGL.SetUpProjectionMatrix();
-
-        //    // Set up the view matrix
-        //    GraphicsGL.SetUpViewMatrix(scene.Camera);
-        //}
 
 		#endregion
 

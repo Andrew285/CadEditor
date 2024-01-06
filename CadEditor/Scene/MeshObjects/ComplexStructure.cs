@@ -23,6 +23,7 @@ namespace CadEditor
 
         public void AddCube(ComplexCube cube)
         {
+            cube.ParentObject = this;
             cubes.Add(cube);
         }
 
@@ -117,6 +118,26 @@ namespace CadEditor
             {
                 cube.Divide(v);
             }
+        }
+
+        public bool IsEqual(ISceneObject obj)
+        {
+            if (obj != null && obj is ComplexStructure)
+            {
+                ComplexStructure complexStructure = (ComplexStructure)obj;
+
+                for (int i = 0; i < complexStructure.cubes.Count; i++)
+                {
+                    if (!this.cubes[i].IsEqual(complexStructure.cubes[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
     }
 }
