@@ -30,14 +30,12 @@
         {
             this.components = new System.ComponentModel.Container();
             this.openGLControl1 = new SharpGL.OpenGLControl();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.selectObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sceneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cubeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,6 +45,14 @@
             this.viewByXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewZToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.captureSceneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cameraToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.setViewXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setViewYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setViewZToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generalSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.mode_comboBox = new System.Windows.Forms.ComboBox();
@@ -56,9 +62,9 @@
             this.generalTab = new System.Windows.Forms.TabPage();
             this.generalTab_checkBoxDrawRay = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.button1 = new System.Windows.Forms.Button();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
-            this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -82,27 +88,6 @@
             this.openGLControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseMove);
             this.openGLControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseUp);
             // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectObjectToolStripMenuItem,
-            this.deleteToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(144, 48);
-            // 
-            // selectObjectToolStripMenuItem
-            // 
-            this.selectObjectToolStripMenuItem.Name = "selectObjectToolStripMenuItem";
-            this.selectObjectToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.selectObjectToolStripMenuItem.Text = "Select Object";
-            // 
-            // deleteToolStripMenuItem
-            // 
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.deleteToolStripMenuItem.Text = "Delete";
-            // 
             // treeView1
             // 
             this.treeView1.Location = new System.Drawing.Point(5, 18);
@@ -114,13 +99,18 @@
             // menuStrip1
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.menuStrip1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.sceneToolStripMenuItem});
+            this.sceneToolStripMenuItem,
+            this.cameraToolStripMenuItem1,
+            this.settingsToolStripMenuItem,
+            this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1094, 24);
+            this.menuStrip1.ShowItemToolTips = true;
+            this.menuStrip1.Size = new System.Drawing.Size(1094, 32);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -128,24 +118,37 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importToolStripMenuItem,
-            this.exportToolStripMenuItem});
+            this.exportToolStripMenuItem,
+            this.openLibraryToolStripMenuItem,
+            this.saveToolStripMenuItem});
+            this.fileToolStripMenuItem.Image = global::CadEditor.Properties.Resources.document;
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(61, 28);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // importToolStripMenuItem
             // 
+            this.importToolStripMenuItem.Image = global::CadEditor.Properties.Resources.install;
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
+            this.exportToolStripMenuItem.Image = global::CadEditor.Properties.Resources.download2;
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // openLibraryToolStripMenuItem
+            // 
+            this.openLibraryToolStripMenuItem.Image = global::CadEditor.Properties.Resources.library;
+            this.openLibraryToolStripMenuItem.Name = "openLibraryToolStripMenuItem";
+            this.openLibraryToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            this.openLibraryToolStripMenuItem.Text = "Open Library";
+            this.openLibraryToolStripMenuItem.Click += new System.EventHandler(this.openLibraryToolStripMenuItem_Click);
             // 
             // sceneToolStripMenuItem
             // 
@@ -153,17 +156,20 @@
             this.addToolStripMenuItem,
             this.selectAllToolStripMenuItem,
             this.deselectAllToolStripMenuItem,
-            this.cameraToolStripMenuItem});
+            this.cameraToolStripMenuItem,
+            this.captureSceneToolStripMenuItem});
+            this.sceneToolStripMenuItem.Image = global::CadEditor.Properties.Resources.accelerometer;
             this.sceneToolStripMenuItem.Name = "sceneToolStripMenuItem";
-            this.sceneToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.sceneToolStripMenuItem.Size = new System.Drawing.Size(74, 28);
             this.sceneToolStripMenuItem.Text = "Scene";
             // 
             // addToolStripMenuItem
             // 
             this.addToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cubeToolStripMenuItem});
+            this.addToolStripMenuItem.Image = global::CadEditor.Properties.Resources.add;
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.addToolStripMenuItem.Text = "Add";
             // 
             // cubeToolStripMenuItem
@@ -175,14 +181,16 @@
             // 
             // selectAllToolStripMenuItem
             // 
+            this.selectAllToolStripMenuItem.Image = global::CadEditor.Properties.Resources.select_object;
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.selectAllToolStripMenuItem.Text = "Select All";
             // 
             // deselectAllToolStripMenuItem
             // 
+            this.deselectAllToolStripMenuItem.Image = global::CadEditor.Properties.Resources.deselect_object;
             this.deselectAllToolStripMenuItem.Name = "deselectAllToolStripMenuItem";
-            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.deselectAllToolStripMenuItem.Text = "Deselect All";
             // 
             // cameraToolStripMenuItem
@@ -191,8 +199,9 @@
             this.viewByXToolStripMenuItem,
             this.viewYToolStripMenuItem,
             this.viewZToolStripMenuItem});
+            this.cameraToolStripMenuItem.Image = global::CadEditor.Properties.Resources.video_camera1;
             this.cameraToolStripMenuItem.Name = "cameraToolStripMenuItem";
-            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.cameraToolStripMenuItem.Text = "Camera";
             // 
             // viewByXToolStripMenuItem
@@ -216,6 +225,66 @@
             this.viewZToolStripMenuItem.Text = "View Z";
             this.viewZToolStripMenuItem.Click += new System.EventHandler(this.viewZToolStripMenuItem_Click);
             // 
+            // captureSceneToolStripMenuItem
+            // 
+            this.captureSceneToolStripMenuItem.Image = global::CadEditor.Properties.Resources.camera;
+            this.captureSceneToolStripMenuItem.Name = "captureSceneToolStripMenuItem";
+            this.captureSceneToolStripMenuItem.ShortcutKeyDisplayString = "F2";
+            this.captureSceneToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.captureSceneToolStripMenuItem.Text = "Capture scene";
+            this.captureSceneToolStripMenuItem.Click += new System.EventHandler(this.captureSceneToolStripMenuItem_Click);
+            // 
+            // cameraToolStripMenuItem1
+            // 
+            this.cameraToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.setViewXToolStripMenuItem,
+            this.setViewYToolStripMenuItem,
+            this.setViewZToolStripMenuItem});
+            this.cameraToolStripMenuItem1.Image = global::CadEditor.Properties.Resources.video_camera;
+            this.cameraToolStripMenuItem1.Name = "cameraToolStripMenuItem1";
+            this.cameraToolStripMenuItem1.Size = new System.Drawing.Size(84, 28);
+            this.cameraToolStripMenuItem1.Text = "Camera";
+            // 
+            // setViewXToolStripMenuItem
+            // 
+            this.setViewXToolStripMenuItem.Name = "setViewXToolStripMenuItem";
+            this.setViewXToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.setViewXToolStripMenuItem.Text = "Set View X";
+            // 
+            // setViewYToolStripMenuItem
+            // 
+            this.setViewYToolStripMenuItem.Name = "setViewYToolStripMenuItem";
+            this.setViewYToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.setViewYToolStripMenuItem.Text = "Set View Y";
+            // 
+            // setViewZToolStripMenuItem
+            // 
+            this.setViewZToolStripMenuItem.Name = "setViewZToolStripMenuItem";
+            this.setViewZToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.setViewZToolStripMenuItem.Text = "Set View Z";
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.generalSettingsToolStripMenuItem});
+            this.settingsToolStripMenuItem.Image = global::CadEditor.Properties.Resources.tools2;
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(85, 28);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // generalSettingsToolStripMenuItem
+            // 
+            this.generalSettingsToolStripMenuItem.Name = "generalSettingsToolStripMenuItem";
+            this.generalSettingsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.generalSettingsToolStripMenuItem.Text = "General Settings";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Image = global::CadEditor.Properties.Resources.help;
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(68, 28);
+            this.aboutToolStripMenuItem.Text = "Help";
+            // 
             // groupBox1
             // 
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -230,7 +299,7 @@
             // 
             this.mode_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.mode_comboBox.FormattingEnabled = true;
-            this.mode_comboBox.Location = new System.Drawing.Point(12, 28);
+            this.mode_comboBox.Location = new System.Drawing.Point(12, 30);
             this.mode_comboBox.Name = "mode_comboBox";
             this.mode_comboBox.Size = new System.Drawing.Size(121, 21);
             this.mode_comboBox.TabIndex = 7;
@@ -303,22 +372,23 @@
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // contextMenuStrip1
             // 
-            this.button1.Location = new System.Drawing.Point(326, 28);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 11;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1094, 648);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.mode_comboBox);
             this.Controls.Add(this.openGLControl1);
@@ -331,7 +401,6 @@
             this.Text = "CadEditor";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -351,16 +420,12 @@
 		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem sceneToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem cubeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem deselectAllToolStripMenuItem;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.ColorDialog colorDialog1;
-		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-		private System.Windows.Forms.ToolStripMenuItem selectObjectToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
 		private System.Windows.Forms.ComboBox mode_comboBox;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox checkBox_DrawFacets;
@@ -372,7 +437,18 @@
         private System.Windows.Forms.ToolStripMenuItem viewByXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewYToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewZToolStripMenuItem;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ToolStripMenuItem captureSceneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cameraToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setViewXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setViewYToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setViewZToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generalSettingsToolStripMenuItem;
+        public System.Windows.Forms.ToolStripMenuItem sceneToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem openLibraryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
     }
 }
 

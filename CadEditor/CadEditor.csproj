@@ -69,6 +69,19 @@
   <ItemGroup>
     <Compile Include="AttachingController.cs" />
     <Compile Include="ComplexStructureController.cs" />
+    <Compile Include="Library.cs" />
+    <Compile Include="LibraryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LibraryForm.Designer.cs">
+      <DependentUpon>LibraryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SaveForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveForm.Designer.cs">
+      <DependentUpon>SaveForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SceneGraphics\Camera.cs" />
     <Compile Include="SceneGraphics\GraphicsGL.cs" />
     <Compile Include="SceneGraphics\MouseController.cs" />
@@ -112,6 +125,9 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="LibraryForm.resx">
+      <DependentUpon>LibraryForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -120,7 +136,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SaveForm.resx">
+      <DependentUpon>SaveForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -136,6 +156,30 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\icons8-file.gif" />
+    <None Include="Resources\baseline_description_black_24dp.png" />
+    <None Include="Resources\scene_1.png" />
+    <None Include="Resources\Screenshot_1.png" />
+    <None Include="Resources\icons8-camera-48.png" />
+    <None Include="Resources\tools2.png" />
+    <None Include="Resources\accelerometer.png" />
+    <None Include="Resources\download2.png" />
+    <None Include="Resources\install.png" />
+    <None Include="Resources\add.png" />
+    <None Include="Resources\document.png" />
+    <None Include="Resources\video_camera.png" />
+    <None Include="Resources\help.png" />
+    <None Include="Resources\select_object.png" />
+    <Content Include="Resources\camera.png" />
+    <Content Include="Resources\deselect_object.png" />
+    <None Include="Resources\library.png" />
+    <Content Include="Resources\merge_face.png" />
+    <None Include="Resources\remove.png" />
+    <Content Include="Resources\select_object %281%29.png" />
+    <Content Include="Resources\show_wireframe %281%29.png" />
+    <Content Include="Resources\show_wireframe.png" />
+    <Content Include="Resources\subdivide_mesh %281%29.png" />
+    <Content Include="Resources\subdivide_mesh.png" />
     <Content Include="SharpGL.ico" />
     <Content Include="SharpGL.png" />
   </ItemGroup>
