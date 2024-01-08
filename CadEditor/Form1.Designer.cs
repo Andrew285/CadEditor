@@ -43,6 +43,10 @@
             this.cubeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deselectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewByXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewZToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.mode_comboBox = new System.Windows.Forms.ComboBox();
@@ -50,8 +54,8 @@
             this.checkBox_DrawFacets = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.generalTab = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.generalTab_checkBoxDrawRay = new System.Windows.Forms.CheckBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -73,7 +77,7 @@
             this.openGLControl1.TabIndex = 0;
             this.openGLControl1.OpenGLInitialized += new System.EventHandler(this.openGLControl1_OpenGLInitialized_1);
             this.openGLControl1.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl1_OpenGLDraw_1);
-            this.openGLControl1.Resized += new System.EventHandler(this.openGLControl1_Resized_1);
+            //this.openGLControl1.Resized += new System.EventHandler(this.openGLControl1_Resized_1);
             this.openGLControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseDown);
             this.openGLControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseMove);
             this.openGLControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseUp);
@@ -148,7 +152,8 @@
             this.sceneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addToolStripMenuItem,
             this.selectAllToolStripMenuItem,
-            this.deselectAllToolStripMenuItem});
+            this.deselectAllToolStripMenuItem,
+            this.cameraToolStripMenuItem});
             this.sceneToolStripMenuItem.Name = "sceneToolStripMenuItem";
             this.sceneToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.sceneToolStripMenuItem.Text = "Scene";
@@ -158,7 +163,7 @@
             this.addToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cubeToolStripMenuItem});
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.addToolStripMenuItem.Text = "Add";
             // 
             // cubeToolStripMenuItem
@@ -171,14 +176,45 @@
             // selectAllToolStripMenuItem
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.selectAllToolStripMenuItem.Text = "Select All";
             // 
             // deselectAllToolStripMenuItem
             // 
             this.deselectAllToolStripMenuItem.Name = "deselectAllToolStripMenuItem";
-            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deselectAllToolStripMenuItem.Text = "Deselect All";
+            // 
+            // cameraToolStripMenuItem
+            // 
+            this.cameraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewByXToolStripMenuItem,
+            this.viewYToolStripMenuItem,
+            this.viewZToolStripMenuItem});
+            this.cameraToolStripMenuItem.Name = "cameraToolStripMenuItem";
+            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cameraToolStripMenuItem.Text = "Camera";
+            // 
+            // viewByXToolStripMenuItem
+            // 
+            this.viewByXToolStripMenuItem.Name = "viewByXToolStripMenuItem";
+            this.viewByXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewByXToolStripMenuItem.Text = "View X";
+            this.viewByXToolStripMenuItem.Click += new System.EventHandler(this.viewByXToolStripMenuItem_Click);
+            // 
+            // viewYToolStripMenuItem
+            // 
+            this.viewYToolStripMenuItem.Name = "viewYToolStripMenuItem";
+            this.viewYToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewYToolStripMenuItem.Text = "View Y";
+            this.viewYToolStripMenuItem.Click += new System.EventHandler(this.viewYToolStripMenuItem_Click);
+            // 
+            // viewZToolStripMenuItem
+            // 
+            this.viewZToolStripMenuItem.Name = "viewZToolStripMenuItem";
+            this.viewZToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewZToolStripMenuItem.Text = "View Z";
+            this.viewZToolStripMenuItem.Click += new System.EventHandler(this.viewZToolStripMenuItem_Click);
             // 
             // groupBox1
             // 
@@ -204,9 +240,9 @@
             // 
             this.groupBox2.Controls.Add(this.treeView1);
             this.groupBox2.Location = new System.Drawing.Point(854, 54);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(242, 313);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
@@ -216,7 +252,7 @@
             // 
             this.checkBox_DrawFacets.AutoSize = true;
             this.checkBox_DrawFacets.Location = new System.Drawing.Point(5, 5);
-            this.checkBox_DrawFacets.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.checkBox_DrawFacets.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_DrawFacets.Name = "checkBox_DrawFacets";
             this.checkBox_DrawFacets.Size = new System.Drawing.Size(86, 17);
             this.checkBox_DrawFacets.TabIndex = 9;
@@ -246,16 +282,6 @@
             this.generalTab.Text = "General";
             this.generalTab.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(222, 231);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
             // generalTab_checkBoxDrawRay
             // 
             this.generalTab_checkBoxDrawRay.AutoSize = true;
@@ -266,6 +292,16 @@
             this.generalTab_checkBoxDrawRay.TabIndex = 10;
             this.generalTab_checkBoxDrawRay.Text = "Draw Selecting Ray";
             this.generalTab_checkBoxDrawRay.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(222, 231);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -279,7 +315,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox2);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "CadEditor";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
@@ -321,6 +357,10 @@
         private System.Windows.Forms.TabPage generalTab;
         private System.Windows.Forms.CheckBox generalTab_checkBoxDrawRay;
         private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.ToolStripMenuItem cameraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewByXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewYToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewZToolStripMenuItem;
     }
 }
 

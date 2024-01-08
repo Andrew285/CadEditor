@@ -58,5 +58,29 @@ namespace CadEditor.Graphics
             Control.Invalidate();
         }
 
+        public static void SetUpViewMatrix(Camera camera)
+        {
+            GL.MatrixMode(OpenGL.GL_MODELVIEW);
+            GL.LoadIdentity();
+
+            Vector eye = camera.Position;
+            //Point3D center = camera.Target;
+            //Vector up = camera.RotationAxis;
+            //GL.LookAt(eye[0], eye[1], eye[2],
+            //          center[0], 0, center[2],
+            //          up[0], up[1], up[2]);
+
+            GL.LookAt(eye[0], eye[1], eye[2],
+                      0, 0, 0,
+                      0, 1, 0);
+        }
+
+        public static void SetUpProjectionMatrix()
+        {
+            GL.MatrixMode(OpenGL.GL_PROJECTION);
+            GL.LoadIdentity();
+            GL.Perspective(45.0, (double)GetWidth() / GetHeight(), 0.1, 100.0);
+        }
+
     }
 }

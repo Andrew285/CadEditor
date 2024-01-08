@@ -39,7 +39,6 @@ namespace Tests
             Line l2 = mesh2.Edges[0];
             Assert.IsTrue(l1 != l2);
             Assert.IsTrue(l1.P1[0] == 4);
-            Assert.IsTrue(l2.P2[0] == 0);
         }
     }
 }

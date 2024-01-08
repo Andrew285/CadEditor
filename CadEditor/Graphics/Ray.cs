@@ -20,7 +20,7 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public Point3D Intersects(Object3D obj)
+		public Point3D Intersects(ISceneObject obj)
 		{
 			if (obj != null)
 			{
@@ -124,5 +124,7 @@ namespace CadEditor
 				return null;
 			}
 		}
+
+
 	}
 }
