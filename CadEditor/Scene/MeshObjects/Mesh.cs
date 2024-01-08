@@ -157,11 +157,13 @@ namespace CadEditor
 
 			for (int i = 0; i < this.Facets.Count; i++)
 			{
-                Point3D p1 = cloneMesh.ContainsPoint(this.Facets[i][0]);
-                Point3D p2 = cloneMesh.ContainsPoint(this.Facets[i][1]);
-                Point3D p3 = cloneMesh.ContainsPoint(this.Facets[i][2]);
-                Point3D p4 = cloneMesh.ContainsPoint(this.Facets[i][3]);
-                cloneMesh.Facets.Add(new Plane(new List<Point3D> {p1, p2, p3, p4 }));
+                //Point3D p1 = cloneMesh.ContainsPoint(this.Facets[i][0]);
+                //Point3D p2 = cloneMesh.ContainsPoint(this.Facets[i][1]);
+                //Point3D p3 = cloneMesh.ContainsPoint(this.Facets[i][2]);
+                //Point3D p4 = cloneMesh.ContainsPoint(this.Facets[i][3]);
+                //cloneMesh.Facets.Add(new Plane(new List<Point3D> {p1, p2, p3, p4 }));
+
+                cloneMesh.Facets.Add((Plane)Facets[i].Clone());
             }
 
             return cloneMesh;

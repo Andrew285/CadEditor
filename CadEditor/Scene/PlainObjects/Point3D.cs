@@ -134,6 +134,7 @@ namespace CadEditor
             Point3D clonePoint = new Point3D(X, Y, Z);
             clonePoint.ParentCube = ParentCube;
             clonePoint.PositionInCube = PositionInCube;
+            clonePoint.Coefficient = Coefficient;
             return clonePoint;
         }
 
@@ -185,7 +186,7 @@ namespace CadEditor
 
         object ISceneObject.Clone()
         {
-            return new Point3D(X, Y, Z);
+            return Clone();
         }
 
         public bool IsEqual(ISceneObject obj)

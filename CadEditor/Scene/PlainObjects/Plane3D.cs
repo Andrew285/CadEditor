@@ -185,21 +185,21 @@ namespace CadEditor
             IsSelected = false;
         }
 
-        public Plane Clone()
-        {
-            List<Point3D> newPoints = new List<Point3D>();
+        //public Plane Clone()
+        //{
+        //    List<Point3D> newPoints = new List<Point3D>();
 
-            for (int i = 0; i < this.Points.Count; i++)
-            {
-                newPoints.Add(this.Points[i].Clone());
-            }
+        //    for (int i = 0; i < this.Points.Count; i++)
+        //    {
+        //        newPoints.Add(this.Points[i].Clone());
+        //    }
 
-            return new Plane(newPoints);
-        }
+        //    return new Plane(newPoints);
+        //}
 
         public Plane GetClickableArea(double tolerance)
         {
-            Plane resultFacet = this.Clone();
+            Plane resultFacet = (Plane)this.Clone();
 
             for (int i = 0; i < resultFacet.Points.Count; i++)
             {
@@ -233,7 +233,7 @@ namespace CadEditor
             return true;
         }
 
-        object ISceneObject.Clone()
+        public object Clone()
         {
             List<Point3D> points = new List<Point3D>();
 
@@ -242,7 +242,11 @@ namespace CadEditor
                 points.Add(p.Clone());
             }
 
-            return new Plane(points);
+            Plane resultPlane = new Plane(points);
+            resultPlane.IsAttached = this.IsAttached;
+            resultPlane.IsSelected = this.IsSelected;
+
+            return (Plane)resultPlane;
         }
 
         public bool IsEqual(ISceneObject obj)

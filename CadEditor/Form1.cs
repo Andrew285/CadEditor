@@ -123,7 +123,7 @@ namespace CadEditor
         private int ClickKeyAxes(CoordinateAxis axis, int clicks)
         {
             List<Axis> axes = scene.AttachingAxisSystem.GetAxes(axis);
-            scene.SetAttachingObjectToAxis(axes[clicks]);
+            scene.SetAttachingObjectToAxis(axes[clicks%axes.Count]);
             clicks = clicks == 1 ? 0 : 1;
             return clicks;
         }
