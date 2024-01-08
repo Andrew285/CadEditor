@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using SharpGL;
+﻿using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

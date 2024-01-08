@@ -1,5 +1,4 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
+﻿using CadEditor.MeshObjects;
 using SharpGL;
 using SharpGL.SceneGraph;
 using System;

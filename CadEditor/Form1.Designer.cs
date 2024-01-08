@@ -56,6 +56,7 @@
             this.generalTab = new System.Windows.Forms.TabPage();
             this.generalTab_checkBoxDrawRay = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -77,7 +78,6 @@
             this.openGLControl1.TabIndex = 0;
             this.openGLControl1.OpenGLInitialized += new System.EventHandler(this.openGLControl1_OpenGLInitialized_1);
             this.openGLControl1.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl1_OpenGLDraw_1);
-            //this.openGLControl1.Resized += new System.EventHandler(this.openGLControl1_Resized_1);
             this.openGLControl1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseDown);
             this.openGLControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseMove);
             this.openGLControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.openGLControl1_MouseUp);
@@ -163,7 +163,7 @@
             this.addToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cubeToolStripMenuItem});
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.addToolStripMenuItem.Text = "Add";
             // 
             // cubeToolStripMenuItem
@@ -176,13 +176,13 @@
             // selectAllToolStripMenuItem
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.selectAllToolStripMenuItem.Text = "Select All";
             // 
             // deselectAllToolStripMenuItem
             // 
             this.deselectAllToolStripMenuItem.Name = "deselectAllToolStripMenuItem";
-            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.deselectAllToolStripMenuItem.Text = "Deselect All";
             // 
             // cameraToolStripMenuItem
@@ -192,27 +192,27 @@
             this.viewYToolStripMenuItem,
             this.viewZToolStripMenuItem});
             this.cameraToolStripMenuItem.Name = "cameraToolStripMenuItem";
-            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.cameraToolStripMenuItem.Text = "Camera";
             // 
             // viewByXToolStripMenuItem
             // 
             this.viewByXToolStripMenuItem.Name = "viewByXToolStripMenuItem";
-            this.viewByXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewByXToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
             this.viewByXToolStripMenuItem.Text = "View X";
             this.viewByXToolStripMenuItem.Click += new System.EventHandler(this.viewByXToolStripMenuItem_Click);
             // 
             // viewYToolStripMenuItem
             // 
             this.viewYToolStripMenuItem.Name = "viewYToolStripMenuItem";
-            this.viewYToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewYToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
             this.viewYToolStripMenuItem.Text = "View Y";
             this.viewYToolStripMenuItem.Click += new System.EventHandler(this.viewYToolStripMenuItem_Click);
             // 
             // viewZToolStripMenuItem
             // 
             this.viewZToolStripMenuItem.Name = "viewZToolStripMenuItem";
-            this.viewZToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewZToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
             this.viewZToolStripMenuItem.Text = "View Z";
             this.viewZToolStripMenuItem.Click += new System.EventHandler(this.viewZToolStripMenuItem_Click);
             // 
@@ -303,11 +303,22 @@
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(326, 28);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1094, 648);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.mode_comboBox);
             this.Controls.Add(this.openGLControl1);
@@ -361,6 +372,7 @@
         private System.Windows.Forms.ToolStripMenuItem viewByXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewYToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewZToolStripMenuItem;
+        private System.Windows.Forms.Button button1;
     }
 }
 

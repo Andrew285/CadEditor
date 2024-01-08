@@ -1,6 +1,6 @@
 ﻿using SharpGL;
 
-namespace CadEditor.Graphics
+namespace CadEditor
 {
     public class GraphicsGL
     {

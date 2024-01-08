@@ -4,7 +4,6 @@ using System.Drawing;
 using SharpGL;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
-using CadEditor.Graphics;
 
 namespace CadEditor
 {

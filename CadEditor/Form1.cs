@@ -1,9 +1,9 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
+﻿using CadEditor.MeshObjects;
 using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
 
@@ -509,5 +509,17 @@ namespace CadEditor
             scene.Camera.SetViewByAxis(CoordinateAxis.Z);
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CaptureMyScreen();
+        }
+
+        private void CaptureMyScreen()
+        {
+            Control c = openGLControl1;
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
+            c.DrawToBitmap(bmp, c.ClientRectangle);
+            bmp.Save(@"D:\test.jpg", ImageFormat.Jpeg);
+        }
     }
 }

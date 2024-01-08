@@ -69,9 +69,9 @@
   <ItemGroup>
     <Compile Include="AttachingController.cs" />
     <Compile Include="ComplexStructureController.cs" />
-    <Compile Include="Graphics\Camera.cs" />
-    <Compile Include="Graphics\GraphicsGL.cs" />
-    <Compile Include="Graphics\MouseController.cs" />
+    <Compile Include="SceneGraphics\Camera.cs" />
+    <Compile Include="SceneGraphics\GraphicsGL.cs" />
+    <Compile Include="SceneGraphics\MouseController.cs" />
     <Compile Include="IDivideable.cs" />
     <Compile Include="Maths\TransformMesh.cs" />
     <Compile Include="Maths\Triangulation.cs" />
@@ -102,7 +102,7 @@
     <Compile Include="Tools\Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Graphics\Ray.cs" />
+    <Compile Include="SceneGraphics\Ray.cs" />
     <Compile Include="Scene\Scene.cs" />
     <Compile Include="Scene\ExtraObjects\SceneCollection.cs" />
     <Compile Include="Maths\Vector.cs" />

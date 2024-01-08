@@ -1,8 +1,4 @@
-﻿using CadEditor.Graphics;
-using CadEditor.MeshObjects;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 
 namespace CadEditor
 {
