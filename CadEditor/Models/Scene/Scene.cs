@@ -1,8 +1,13 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
+using CadEditor.Models.Scene.MeshObjects;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using Microsoft.SqlServer.Server;
 using SharpGL;
 using SharpGL.SceneGraph;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace CadEditor
@@ -47,8 +52,8 @@ namespace CadEditor
 
 		public void InitializeObjects()
 		{
-            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), "Cube_1");
-            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), "Cube_2");
+            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
+            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
             ObjectCollection.Add(cube);
             ObjectCollection.Add(cube2);
             SceneCollection.AddCube(cube);
@@ -235,7 +240,7 @@ namespace CadEditor
 
 		public void AddCube()
 		{
-			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "Cube2");
+			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
 			ObjectCollection.Add(cube);
 			SceneCollection.AddCube(cube);
 		}
@@ -319,7 +324,14 @@ namespace CadEditor
                 ObjectCollection.Remove(AttachingAxisSystem);
 
                 //Creating complex structure or adding cube to it
-                ComplexStructure structure = StructureController.Add(attachingCube, targetCube);
+                ComplexStructure structure = StructureController.AddCubes(attachingCube, targetCube);
+				structure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails()
+				{
+					attachingCube = attachingCube,
+					targetCube = targetCube,
+					attachingFacet = attachingFacet,
+					targetFacet = targetFacet,
+				});
 				ObjectCollection.Remove(targetCube);
 				ObjectCollection.Remove(attachingCube);
 				
@@ -339,7 +351,7 @@ namespace CadEditor
 		{
 			string exportString = "";
 
-			foreach (ComplexCube cube in ObjectCollection)
+			foreach (IExportable cube in ObjectCollection)
 			{
 				exportString += cube.Export();
 			}
@@ -350,52 +362,164 @@ namespace CadEditor
 		public void Import(string[] importStrings)
 		{
 			List<ISceneObject> cubes = new List<ISceneObject>();
+			List<ISceneObject> tempCubes = new List<ISceneObject>();
 			List<Point3D> currentPoints = new List<Point3D>();
 			List<Line> currentLines = new List<Line>();
+			List<Plane> currentPlanes = new List<Plane>();
+			ComplexStructure currentComplexStructure = null;
 			string name = "";
 
 			for (int i = 0; i < importStrings.Length; i++)
 			{
-				if (importStrings[i].Contains("Cube"))
+				if (importStrings[i].Contains("End of Structure"))
 				{
-					if(currentLines.Count > 0 && currentPoints.Count > 0)
+                    StructureController.AddStructure(currentComplexStructure);
+                    currentComplexStructure = null;
+                }
+				else if (importStrings[i].Contains("Attaching"))
+				{
+                    if (currentLines.Count > 0 && currentPoints.Count > 0)
+                    {
+                        Mesh currentMesh = new Mesh();
+                        currentMesh.Vertices = currentPoints;
+                        currentMesh.Edges = currentLines;
+                        currentMesh.Facets = currentPlanes;
+                        ComplexCube newCube = new ComplexCube(currentMesh);
+                        newCube.DrawFacets = true;
+                        newCube.Name = name;
+                        if (currentComplexStructure != null)
+                        {
+                            currentComplexStructure.AddCube(newCube);
+                        }
+                        else
+                        {
+                            cubes.Add(newCube);
+                        }
+
+                        currentPoints = new List<Point3D>();
+                        currentLines = new List<Line>();
+                        currentPlanes = new List<Plane>();
+
+
+                    }
+
+					if (currentComplexStructure != null)
+					{
+                        cubes.Add(currentComplexStructure);
+                    }
+
+                    //Attach cubes
+                    string[] splitted = importStrings[i].Split(' ');
+					ComplexCube targetCube1 = (ComplexCube)currentComplexStructure.GetObjectByName(splitted[1]);
+                    AttachingController.AddTargetCube(targetCube1);
+					AttachingController.AddTargetFacet(targetCube1.Mesh.Facets[Int32.Parse(splitted[2])]);
+
+                    ComplexCube attachingCube1 = (ComplexCube)currentComplexStructure.GetObjectByName(splitted[3]);
+                    AttachingController.AddAttachingCube(attachingCube1);
+                    AttachingController.AddAttachingFacet(attachingCube1.Mesh.Facets[Int32.Parse(splitted[4])]);
+
+                    Plane targetFacet = AttachingController.GetTargetFacet();
+                    Plane attachingFacet = AttachingController.GetAttachingFacet();
+
+                    ComplexCube targetCube = ((ComplexCube)AttachingController.GetTargetObject());
+                    ComplexCube attachingCube = ((ComplexCube)AttachingController.GetAttachingObject());
+
+                    //find closest point to attaching cube
+                    (int, Vector) closestDistance = AttachingController.GetClosestDistanceToAttach();
+                    int indexOfMinPoint = closestDistance.Item1;
+                    Vector minVector = closestDistance.Item2;
+
+                    //move to target cube
+                    Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
+                    Vector centerToPoint = minVector - pointToPoint;
+                    Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
+                    Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
+                    AttachingController.GetAttachingObject().Move(resultVector * (-1));
+
+                    //attach facet
+                    AttachingController.AttachFacets();
+                    AttachingController.UpdateObjects();
+
+                    currentComplexStructure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails()
+                    {
+                        attachingCube = attachingCube,
+                        targetCube = targetCube,
+                        attachingFacet = attachingFacet,
+                        targetFacet = targetFacet,
+                    });
+
+					AttachingController = new AttachingController();
+                }
+				else if (importStrings[i].Contains("ComplexStructure"))
+				{
+					currentComplexStructure = new ComplexStructure();
+				}
+                else if (importStrings[i].Contains("Facet"))
+                {
+                    string trimmedString = importStrings[i].Substring("Facet".Length + 1);
+                    string[] splitted = trimmedString.Split(' ');
+
+                    List<Point3D> points = new List<Point3D>();
+                    for (int j = 0; j < 8; j++)
+                    {
+                        Point3D p = currentPoints[Int32.Parse(splitted[j])];
+                        points.Add(p);
+                    }
+
+                    Plane plane = new Plane(points);
+                    plane.AxisType = (CoordinateAxisType)Enum.Parse(typeof(CoordinateAxisType), splitted[8]);
+                    currentPlanes.Add(plane);
+                }
+                else if (importStrings[i].Contains("Cube"))
+				{
+					if (currentLines.Count > 0 && currentPoints.Count > 0)
 					{
 						Mesh currentMesh = new Mesh();
 						currentMesh.Vertices = currentPoints;
 						currentMesh.Edges = currentLines;
+						currentMesh.Facets = currentPlanes;
 						ComplexCube newCube = new ComplexCube(currentMesh);
-						newCube.Name = name;
-						cubes.Add(newCube);
-						currentPoints = new List<Point3D>();
+                        newCube.DrawFacets = true;
+                        newCube.Name = name;
+
+						if (currentComplexStructure != null)
+						{
+							currentComplexStructure.AddCube(newCube);
+						}
+						else
+						{
+                            cubes.Add(newCube);
+                        }
+                        currentPoints = new List<Point3D>();
 						currentLines = new List<Line>();
+						currentPlanes = new List<Plane>();
 					}
-					else
-					{
-						name = importStrings[i];
-					}
+
+					name = importStrings[i];
 				}
 				else if (importStrings[i].Contains("("))
 				{
-					string trimmedString = importStrings[i].Substring(1, importStrings[i].Length-2);
+					string trimmedString = importStrings[i].Substring(1, importStrings[i].Length - 2);
 					string[] splited = trimmedString.Split(' ');
 					double[] coords = new double[splited.Length];
 
-					for(int j = 0; j < splited.Length; j++)
+					for (int j = 0; j < splited.Length; j++)
 					{
 						coords[j] = double.Parse(splited[j]);
 					}
 
 					currentPoints.Add(new Point3D(coords));
 				}
-				else if (importStrings[i].Contains('L'))
+				else if (importStrings[i].Contains("Edge"))
 				{
-					string trimmedString = importStrings[i].Substring(2);
+					string trimmedString = importStrings[i].Substring("Edge".Length + 1);
 					string[] splited = trimmedString.Split(' ');
 					Point3D p1 = currentPoints[Int32.Parse(splited[0])];
 					Point3D p2 = currentPoints[Int32.Parse(splited[1])];
 
 					currentLines.Add(new Line(p1, p2));
 				}
+				
 			}
 
 			if (currentLines.Count > 0 && currentPoints.Count > 0)
@@ -403,18 +527,32 @@ namespace CadEditor
 				Mesh currentMesh = new Mesh();
 				currentMesh.Vertices = currentPoints;
 				currentMesh.Edges = currentLines;
+				currentMesh.Facets = currentPlanes;
 				ComplexCube newCube = new ComplexCube(currentMesh);
+				newCube.DrawFacets = true;
 				newCube.Name = name;
-				cubes.Add(newCube);
-				currentPoints = new List<Point3D>();
-				currentLines = new List<Line>();
-			}
+				if (currentComplexStructure != null)
+				{
+					currentComplexStructure.AddCube(newCube);
+				}
+				else
+				{
+					cubes.Add(newCube);
+				}
+
+                currentPoints = new List<Point3D>();
+                currentLines = new List<Line>();
+                currentPlanes = new List<Plane>();
+            }
 
 			ObjectCollection = cubes;
-			foreach(ComplexCube cube in cubes)
+			foreach (ISceneObject cube in cubes)
 			{
-				SceneCollection.AddCube(cube);
-			}
+				if (cube is ComplexCube)
+				{
+                    SceneCollection.AddCube((ComplexCube)cube);
+                }
+            }
 		}
 
 		#endregion

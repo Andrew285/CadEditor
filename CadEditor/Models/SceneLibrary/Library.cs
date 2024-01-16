@@ -20,6 +20,8 @@ namespace CadEditor
 
         public List<SaveData> GetAllSaves()
         {
+            saves.Clear();
+
             string[] saveFiles = Directory.GetFiles(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Scene");
             string[] screensFiles = Directory.GetFiles(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots");
 

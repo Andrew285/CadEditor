@@ -43,6 +43,23 @@ namespace CadEditor.MeshObjects
 		{
 			Name = "CubeName";
 			Mesh = mesh;
+
+            //center point
+            double allX = 0;
+            double allY = 0;
+            double allZ = 0;
+            int verticesCount = mesh.Vertices.Count;
+
+            for (int i = 0; i < verticesCount; i++)
+            {
+                allX += mesh.Vertices[i].X;
+                allY += mesh.Vertices[i].Y;
+                allZ += mesh.Vertices[i].Z;
+            }
+
+            centerPoint = new Point3D(allX / verticesCount,
+                                      allY / verticesCount,
+                                      allZ / verticesCount);
 		}
 
 		public void Draw()

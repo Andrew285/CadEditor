@@ -23,7 +23,7 @@ namespace CadEditor
             return Instance;
         }
 
-        public ComplexStructure Add(ComplexCube attachingCube, ComplexCube targetCube)
+        public ComplexStructure AddCubes(ComplexCube attachingCube, ComplexCube targetCube)
         {
             ComplexStructure targetStructure = GetStructureOf(targetCube);
 
@@ -40,6 +40,11 @@ namespace CadEditor
                 newStructure.AddCube(attachingCube);
                 return newStructure;
             }
+        }
+
+        public void AddStructure(ComplexStructure complexStructure)
+        {
+            structures.Add(complexStructure);
         }
 
         public ComplexStructure GetStructureOf(ComplexCube cube)

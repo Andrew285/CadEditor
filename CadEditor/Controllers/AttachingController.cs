@@ -89,6 +89,15 @@ namespace CadEditor
         {
             attachingFacets[1] = facet;
         }
+        public void AddAttachingCube(MeshObject3D cube)
+        {
+            attachingObjects[0] = cube;
+        }
+
+        public void AddTargetCube(MeshObject3D cube)
+        {
+            attachingObjects[1] = cube;
+        }
 
         public Plane GetAttachingFacet()
         {
