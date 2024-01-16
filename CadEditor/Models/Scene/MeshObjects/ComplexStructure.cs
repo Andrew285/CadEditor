@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace CadEditor
 {
-    public class ComplexStructure: ISceneObject, IDivideable, IExportable
+    public class ComplexStructure: ISceneObject, IDivideable, IExportable, IUniqueable
     {
         private List<ComplexCube> cubes;
         public List<AttachingDetails> AttachingDetailsList { get; set; }
+        public string Name { get; set; }
 
         public struct AttachingDetails: IExportable
         {
@@ -47,6 +48,12 @@ namespace CadEditor
             AttachingDetailsList = new List<AttachingDetails>();
             ParentObject = null;
             IsSelected = false;
+            Name = NameController.GetNextStructureName();
+        }
+
+        public List<ComplexCube> GetCubes()
+        {
+            return cubes;
         }
 
         public void AddCube(ComplexCube cube)

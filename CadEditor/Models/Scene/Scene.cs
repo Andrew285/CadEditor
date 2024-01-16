@@ -340,6 +340,7 @@ namespace CadEditor
 					ObjectCollection.Add(structure);
 				}
 
+				SceneCollection.AddComplexStructure(structure);
 			}
         }
         
@@ -545,6 +546,8 @@ namespace CadEditor
                 currentPlanes = new List<Plane>();
             }
 
+
+			// ------------ ??? ---------------------
 			ObjectCollection = cubes;
 			foreach (ISceneObject cube in cubes)
 			{

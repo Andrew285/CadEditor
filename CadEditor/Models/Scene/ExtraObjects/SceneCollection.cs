@@ -1,4 +1,6 @@
 ﻿using CadEditor.MeshObjects;
+using CadEditor.Models.Scene.MeshObjects;
+using SharpGL.SceneGraph.Primitives;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,12 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace CadEditor
 {
 	public class SceneCollection
 	{
 		private TreeView sceneCollection;
+		private TreeNode currentNode;
 		
 		public SceneCollection(TreeView treeView, string collectionName)
 		{
@@ -19,47 +23,62 @@ namespace CadEditor
 			TreeNode mainNode = new TreeNode(collectionName);
 			sceneCollection.Nodes.Add(mainNode);
 			sceneCollection.ExpandAll();
-		}
+            currentNode = sceneCollection.Nodes[0];
+        }
 
-		public void AddCube(ComplexCube cube)
+        public void AddCube(ComplexCube cube)
 		{
 			TreeNode newCube = new TreeNode(cube.Name);
-			sceneCollection.Nodes[0].Nodes.Add(newCube);
-			int indexOfNode = sceneCollection.Nodes[0].Nodes.IndexOf(newCube);
+            currentNode.Nodes.Add(newCube);
+			int indexOfNode = currentNode.Nodes.IndexOf(newCube);
 
-			sceneCollection.Nodes[0].Nodes[indexOfNode].Nodes.Add(new TreeNode("Mesh"));
-			sceneCollection.Nodes[0].Nodes[indexOfNode].Nodes[0].Nodes.Add(new TreeNode("Vertices"));
+            currentNode.Nodes[indexOfNode].Nodes.Add(new TreeNode("Mesh"));
+            currentNode.Nodes[indexOfNode].Nodes[0].Nodes.Add(new TreeNode("Vertices"));
 			for(int i = 1; i <= cube.Mesh.Vertices.Count; i++)
 			{
-				sceneCollection.Nodes[0].Nodes[indexOfNode].Nodes[0].Nodes[0].Nodes.Add(new TreeNode(String.Format("P_{0}", i-1)));
+				currentNode.Nodes[indexOfNode].Nodes[0].Nodes[0].Nodes.Add(new TreeNode(String.Format("P_{0}", i-1)));
 			}
 
 			sceneCollection.Update();
 		}
 
-		public void RemoveCube(ComplexCube cube)
+		public bool AddCube(ComplexCube cube, IUniqueable structure)
 		{
-			for(int i = 0; i < sceneCollection.Nodes.Count; i++)
+			currentNode = GetNodeOf(structure);
+			if (currentNode != null)
 			{
-				if (sceneCollection.Nodes[i].Nodes.Count > 0)
+                AddCube(cube);
+                currentNode = sceneCollection.Nodes[0];
+				return true;
+            }
+
+			return false;
+        }
+
+		public bool AddComplexStructure(ComplexStructure structure)
+		{
+            TreeNode newStructure = new TreeNode(structure.Name);
+            currentNode.Nodes.Add(newStructure);
+
+            foreach (ComplexCube cube in structure.GetCubes())
+			{
+				RemoveCube(cube);
+				if (!AddCube(cube, structure))
 				{
-					for(int j = 0; j < sceneCollection.Nodes[i].Nodes.Count; j++)
-					{
-						if (sceneCollection.Nodes[i].Nodes[j].Text == cube.Name)
-						{
-							sceneCollection.Nodes[i].Nodes.RemoveAt(j);
-						}
-					}
-				}
-				else
-				{
-					if (sceneCollection.Nodes[i].Text == cube.Name)
-					{
-						sceneCollection.Nodes.RemoveAt(i);
-					}
+					return false;
 				}
 			}
-			sceneCollection.Update();
+
+			return true;
+		}
+
+		public void RemoveCube(IUniqueable obj)
+		{
+			TreeNode nodeToRemove = GetNodeOf(obj);
+			if (nodeToRemove != null)
+			{
+				currentNode.Nodes.Remove(nodeToRemove);
+			}
 		}
 
 		public TreeNode CheckSelectedNode()
@@ -110,6 +129,47 @@ namespace CadEditor
 				int indexOfPoint = Int32.Parse(nodeString.Substring(2));
 				int indexOfCube = sceneCollection.Nodes[0].Nodes.IndexOf(cubeNode);
 				return new List<ISceneObject>() { ((MeshObject3D)scene.ObjectCollection[indexOfCube]).Mesh.Vertices[indexOfPoint] };
+			}
+
+			return null;
+        }
+
+		public TreeNode GetNodeOf(IUniqueable obj)
+		{
+            for (int i = 0; i < currentNode.Nodes.Count; i++)
+            {
+                if (currentNode.Nodes[i].Text == obj.Name)
+                {
+                    return currentNode.Nodes[i];
+                }
+            }
+
+			return null;
+        }
+
+		public TreeNode GetSelectedNode()
+		{
+			return sceneCollection.SelectedNode;
+		}
+
+		public ISceneObject GetObjectByNode(TreeNode node, List<ISceneObject> objects)
+		{
+			if (sceneCollection.Nodes[0] == node)
+			{
+				foreach (ISceneObject obj in objects)
+				{
+					obj.Select();
+				}
+
+				return null;
+			}
+
+			foreach (ISceneObject obj in objects)
+			{
+				if (obj is IUniqueable && ((IUniqueable)obj).Name == node.Text)
+				{
+					return obj;
+				}
 			}
 
 			return null;

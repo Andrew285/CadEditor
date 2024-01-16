@@ -36,6 +36,7 @@
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sceneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cubeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +64,6 @@
             this.generalTab_checkBoxDrawRay = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -130,7 +130,7 @@
             // 
             this.importToolStripMenuItem.Image = global::CadEditor.Properties.Resources.install;
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
@@ -138,7 +138,7 @@
             // 
             this.exportToolStripMenuItem.Image = global::CadEditor.Properties.Resources.download2;
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
@@ -146,9 +146,16 @@
             // 
             this.openLibraryToolStripMenuItem.Image = global::CadEditor.Properties.Resources.library;
             this.openLibraryToolStripMenuItem.Name = "openLibraryToolStripMenuItem";
-            this.openLibraryToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            this.openLibraryToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.openLibraryToolStripMenuItem.Text = "Open Library";
             this.openLibraryToolStripMenuItem.Click += new System.EventHandler(this.openLibraryToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // sceneToolStripMenuItem
             // 
@@ -376,13 +383,6 @@
             // 
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // saveToolStripMenuItem
-            // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
-            this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // Form1
             // 

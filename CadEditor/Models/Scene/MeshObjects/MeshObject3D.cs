@@ -1,10 +1,11 @@
-﻿using SharpGL;
+﻿using CadEditor.Models.Scene.MeshObjects;
+using SharpGL;
 using System;
 using System.Drawing;
 
 namespace CadEditor.MeshObjects
 {
-	public class MeshObject3D : ISceneObject
+	public class MeshObject3D : ISceneObject, IUniqueable
 	{
 		public string Name { get; set; }
 		public Mesh Mesh { get; set; }

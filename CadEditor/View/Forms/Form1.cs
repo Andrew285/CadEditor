@@ -421,27 +421,17 @@ namespace CadEditor
 		{
             scene.DeselectAll();
 
-            TreeNode selectedTreeNode = treeView1.SelectedNode;
+            TreeNode selectedTreeNode = scene.SceneCollection.GetSelectedNode();
             if(selectedTreeNode != null)
             {
-                List<ISceneObject> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
-                if(nodeObjects != null)
+                ISceneObject obj = scene.SceneCollection.GetObjectByNode(selectedTreeNode, scene.ObjectCollection);
+                if(obj != null)
                 {
-                    if(nodeObjects.Count > 1)
-                    {
-						foreach (ISceneObject graphicsObject in nodeObjects)
-						{
-							graphicsObject.Select();
-						}
-					}
-                    else
-                    {
-                        scene.SelectedObject = nodeObjects[0];
-						nodeObjects[0].Select();
-                        //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
-                        AxisSystem axisSystem = new AxisSystem(nodeObjects[0]);
-                        scene.ObjectCollection.Insert(0, axisSystem);
-					}
+                    scene.SelectedObject = obj;
+                    obj.Select();
+                    //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+                    AxisSystem axisSystem = new AxisSystem(obj);
+                    scene.ObjectCollection.Insert(0, axisSystem);
 				}
             }
 		}
