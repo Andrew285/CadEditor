@@ -4,10 +4,12 @@ using System.Drawing;
 using SharpGL;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
+using System.Text;
+using CadEditor.Models.Scene.MeshObjects;
 
 namespace CadEditor
 {
-    public class ComplexCube: MeshObject3D, IDivideable
+    public class ComplexCube: MeshObject3D, IDivideable, IExportable
     {
         private const int OUTER_VERTICES_AMOUNT = 20;
         private Point3D[] OuterVertices = new Point3D[20];
@@ -187,6 +189,11 @@ namespace CadEditor
             }
         }
 
+        public ComplexCube(): this(new Point3D(0, 0, 0), new Vector(1, 1, 1))
+        {
+
+        }
+
         public ComplexCube(Point3D _centerPoint, Vector _size, string _cubeName = null):
             base(_centerPoint, _size, _cubeName)
 		{
@@ -200,7 +207,23 @@ namespace CadEditor
 
         }
 
-        public ComplexCube(Mesh mesh) : base(mesh) {}
+        public ComplexCube(Mesh mesh) : base(mesh) 
+        {
+            foreach(Point3D p in mesh.Vertices)
+            {
+                p.ParentObject = this;
+            }
+
+            foreach (Line l in mesh.Edges)
+            {
+                l.ParentObject = this;
+            }
+
+            foreach (Plane plane in mesh.Facets)
+            {
+                plane.ParentObject = this;
+            }
+        }
 
         private void InitPoints(Point3D CenterPoint, Vector size)
         {
@@ -502,11 +525,6 @@ namespace CadEditor
             this.Mesh = currentMesh;
         }
         
-        //public ComplexCube Clone()
-        //{
-        //    return new ComplexCube(Mesh.Clone());
-        //}
-
 		public bool Equals(ComplexCube cube)
 		{
 			if (cube != null)
@@ -531,16 +549,35 @@ namespace CadEditor
             }
 
             exportString += "\n";
-			exportString += "Edges:\n";
+			//exportString += "Edges:\n";
 			for (int i = 0; i < Mesh.Edges.Count; i++)
 			{
                 int indexOfPoint1 = this.Mesh.GetIndexOfPoint(Mesh.Edges[i].P1);
                 int indexOfPoint2 = this.Mesh.GetIndexOfPoint(Mesh.Edges[i].P2);
-				exportString += String.Format("L_{0} {1}", indexOfPoint1, indexOfPoint2);
+				exportString += String.Format("Edge_{0} {1}", indexOfPoint1, indexOfPoint2);
 				exportString += "\n";
 			}
 
-			return exportString;
+            exportString += "\n";
+            //exportString += "Facets:\n";
+
+            for (int i = 0; i < Mesh.Facets.Count; i++)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("Facet_");
+                for (int j = 0; j < Mesh.Facets[i].Points.Count; j++)
+                {
+                    int indexOfPoint = this.Mesh.GetIndexOfPoint(Mesh.Facets[i][j]);
+                    sb.Append(indexOfPoint + " ");
+                }
+
+                sb.Append(Mesh.Facets[i].AxisType + " ");
+                sb.Append(this.Name);
+                exportString += sb.ToString();
+                exportString += "\n";
+            }
+
+            return exportString;
         }
 
     }

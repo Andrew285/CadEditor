@@ -37,13 +37,6 @@ namespace CadEditor
             attachedFacets = new List<int>();
         }
 
-        //public Mesh(List<Point3D> vertices, List<Line> edges, List<Plane> facets)
-        //{
-        //    Facets = (facets != null) ? facets : new List<Plane>();
-        //    Edges = (edges != null) ? edges : new List<Line>();
-        //    Vertices = (vertices != null) ? vertices : new List<Point3D>();
-        //}
-
         public bool Equals(Mesh mesh)
         {
 			for (int i = 0; i < this.Vertices.Count; i++)

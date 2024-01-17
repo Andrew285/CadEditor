@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
+using CadEditor.Models.Scene.MeshObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +9,34 @@ using System.Threading.Tasks;
 
 namespace CadEditor
 {
-    public class ComplexStructure: ISceneObject, IDivideable
+    public class ComplexStructure: ISceneObject, IDivideable, IExportable, IUniqueable
     {
         private List<ComplexCube> cubes;
+        public List<AttachingDetails> AttachingDetailsList { get; set; }
+        public string Name { get; set; }
+
+        public class AttachingDetails: IExportable
+        {
+            public ComplexCube attachingCube;
+            public ComplexCube targetCube;
+
+            public Plane attachingFacet;
+            public Plane targetFacet;
+
+            public AttachingDetails(ComplexCube tC, Plane tF, ComplexCube aC, Plane aF)
+            {
+                attachingCube = aC;
+                attachingFacet = aF;
+                targetCube = tC;
+                targetFacet = tF;
+            }
+
+            public string Export()
+            {
+                return targetCube.Name + " " + targetCube.Mesh.GetIndexOfFacet(targetFacet) + " " +
+                       attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
+            }
+        }
 
         public ISceneObject ParentObject { get; set; }
         public bool IsSelected { get; set; }
@@ -17,8 +45,15 @@ namespace CadEditor
         public ComplexStructure()
         {
             cubes = new List<ComplexCube>();
+            AttachingDetailsList = new List<AttachingDetails>();
             ParentObject = null;
             IsSelected = false;
+            Name = NameController.GetNextStructureName();
+        }
+
+        public List<ComplexCube> GetCubes()
+        {
+            return cubes;
         }
 
         public void AddCube(ComplexCube cube)
@@ -138,6 +173,41 @@ namespace CadEditor
             }
 
             return false;
+        }
+
+        public ISceneObject GetObjectByName(string name)
+        {
+            foreach (ISceneObject obj in cubes)
+            {
+                if (((MeshObject3D)obj).Name == name)
+                {
+                    return obj;
+                }
+            }
+
+            return null;
+        }
+
+        public string Export()
+        {
+            string stringToExport = "";
+
+            stringToExport += NameController.GetNextStructureName() + "\n";
+            foreach (ComplexCube cube in cubes)
+            {
+                stringToExport += cube.Export();
+            }
+
+            //Export Attaching Details
+            foreach (AttachingDetails details in AttachingDetailsList)
+            {
+                stringToExport += "Attaching ";
+                stringToExport += details.Export();
+            }
+
+            stringToExport += "End of Structure\n";
+
+            return stringToExport;
         }
     }
 }

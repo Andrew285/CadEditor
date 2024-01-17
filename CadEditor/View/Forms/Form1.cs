@@ -1,4 +1,5 @@
 ﻿using CadEditor.MeshObjects;
+using CadEditor.Properties;
 using SharpGL;
 using System;
 using System.Collections.Generic;
@@ -12,18 +13,19 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
+        private Library library;
         private static Scene scene;
-        private static ContextMenu contextMenu;
+        private ContextMenuStrip contextMenuStrip;
 
-        private static MenuItem selectItem = new MenuItem("Select Object", Select_Object_click);
-        private static MenuItem deselctItem = new MenuItem("Deselect Object", Deselect_Object_click);
-        private static MenuItem divideItem = new MenuItem("Divide", Divide_Object_click);
-        private static MenuItem deleteItem = new MenuItem("Delete", Delete_Object_click);
-        private static MenuItem attachItem = new MenuItem("Attach", Attach_Object_click);
-        private static MenuItem detachItem = new MenuItem("Detach", Detach_Object_click);
-        private static MenuItem setTargetItem = new MenuItem("Set as Target", SetTarget_Object_click);
-        private static MenuItem notSetTargetItem = new MenuItem("Deselect Target", NotSetTarget_Object_click);
-
+        private static ToolStripMenuItem selectItem = new ToolStripMenuItem("Select Object");
+        private static ToolStripMenuItem deselectItem = new ToolStripMenuItem("Deselect Object");
+        private static ToolStripMenuItem deleteItem = new ToolStripMenuItem("Delete Object");
+        private static ToolStripMenuItem attachItem = new ToolStripMenuItem("Attach Object");
+        private static ToolStripMenuItem detachItem = new ToolStripMenuItem("Detach Object");
+        private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Set as Target");
+        private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Deselect Target");
+        private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
+        
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
@@ -33,29 +35,34 @@ namespace CadEditor
             InitializeComponent();
             KeyPreview = true;
 
-            contextMenu = InitContextMenu();
+            contextMenuStrip = openGLControl1.ContextMenuStrip;
+            contextMenuStrip = new ContextMenuStrip();
+            contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
+            {
+                selectItem, deselectItem, deleteItem, attachItem, detachItem, setTargetItem, notSetTargetItem
+            });
+
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
 
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
-		}
 
-        public ContextMenu InitContextMenu()
-        {
-            if(contextMenu == null)
-            {
-                openGLControl1.ContextMenu = new ContextMenu();
 
-                openGLControl1.ContextMenu.MenuItems.AddRange(new MenuItem[]
-                {
-                    selectItem, deselctItem, divideItem, deleteItem, attachItem
-                });
+            selectItem.Click += Select_Object_click;
+            selectItem.Image = Resources.select_object;
 
-                contextMenu = openGLControl1.ContextMenu;
-            }
+            deselectItem.Click += Deselect_Object_click;
+            deselectItem.Image = Resources.deselect_object;
 
-            return contextMenu;
+            deleteItem.Click += Delete_Object_click;
+            deleteItem.Image = Resources.remove;
+
+            attachItem.Click += Attach_Object_click;
+            detachItem.Click += Detach_Object_click;
+            setTargetItem.Click += SetTarget_Object_click;
+            notSetTargetItem.Click += NotSetTarget_Object_click;
+            divideItem.Click += Divide_Object_click;
         }
 
 		#region ---- OpenGLControl Events ----
@@ -75,6 +82,8 @@ namespace CadEditor
 
             //Initializing objects by default
             scene.InitializeObjects();
+
+            library = new Library();
         }
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
@@ -191,56 +200,56 @@ namespace CadEditor
         {
             if (scene.SelectedObject != null) 
             {
-                if(scene.SelectedObject is IDivideable)
+                if (scene.SelectedObject is IDivideable)
                 {
-                    contextMenu.MenuItems.Add(divideItem);
+                    divideItem.Visible = true;
                 }
                 else
                 {
-                    contextMenu.MenuItems.Remove(divideItem);
+                    divideItem.Visible = false;
                 }
 
 
-                if(scene.AttachingController.IsAttaching(scene.SelectedObject))
+                if (scene.AttachingController.IsAttaching(scene.SelectedObject))
                 {
-                    contextMenu.MenuItems.Add(detachItem);
-                    contextMenu.MenuItems.Remove(attachItem);
-                    contextMenu.MenuItems.Remove(setTargetItem);
-                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                    detachItem.Visible = true;
+                    attachItem.Visible = false;
+                    setTargetItem.Visible = false;
+                    notSetTargetItem.Visible = false;
                 }
                 else if (scene.AttachingController.IsEmpty())
                 {
-                    contextMenu.MenuItems.Add(attachItem);
-                    contextMenu.MenuItems.Add(setTargetItem);
-                    contextMenu.MenuItems.Remove(detachItem);
-                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                    attachItem.Visible = true;
+                    setTargetItem.Visible = true;
+                    detachItem.Visible = false;
+                    notSetTargetItem.Visible = false;
                 }
-                else if(scene.AttachingController.IsTarget(scene.SelectedObject))
+                else if (scene.AttachingController.IsTarget(scene.SelectedObject))
                 {
-                    contextMenu.MenuItems.Add(notSetTargetItem);
-                    contextMenu.MenuItems.Remove(setTargetItem);
-                    contextMenu.MenuItems.Remove(attachItem);
-                    contextMenu.MenuItems.Remove(detachItem);
+                    notSetTargetItem.Visible = true;
+                    setTargetItem.Visible = false;
+                    attachItem.Visible = false;
+                    detachItem.Visible = false;
                 }
                 else if (!scene.AttachingController.IsTarget(scene.SelectedObject) &&
                          scene.AttachingController.GetTargetObject() == null)
                 {
-                    contextMenu.MenuItems.Add(setTargetItem);
-                    contextMenu.MenuItems.Remove(notSetTargetItem);
-                    contextMenu.MenuItems.Remove(attachItem);
-                    contextMenu.MenuItems.Remove(detachItem);
+                    setTargetItem.Visible = true;
+                    notSetTargetItem.Visible = false;
+                    attachItem.Visible = false;
+                    detachItem.Visible = false;
                 }
                 else if (!scene.AttachingController.IsAttaching(scene.SelectedObject) &&
                          scene.AttachingController.GetAttachingObject() == null)
                 {
-                    contextMenu.MenuItems.Add(attachItem);
-                    contextMenu.MenuItems.Remove(detachItem);
-                    contextMenu.MenuItems.Remove(setTargetItem);
-                    contextMenu.MenuItems.Remove(notSetTargetItem);
+                    attachItem.Visible = true;
+                    detachItem.Visible = false;
+                    notSetTargetItem.Visible = false;
+                    setTargetItem.Visible= false;
                 }
             }
 
-            contextMenu.Show(openGLControl1, new System.Drawing.Point(x, y));
+            contextMenuStrip.Show(openGLControl1, new System.Drawing.Point(x, y));
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
@@ -412,27 +421,17 @@ namespace CadEditor
 		{
             scene.DeselectAll();
 
-            TreeNode selectedTreeNode = treeView1.SelectedNode;
+            TreeNode selectedTreeNode = scene.SceneCollection.GetSelectedNode();
             if(selectedTreeNode != null)
             {
-                List<ISceneObject> nodeObjects = scene.SceneCollection.FindObjectByTreeNode(selectedTreeNode, scene);
-                if(nodeObjects != null)
+                ISceneObject obj = scene.SceneCollection.GetObjectByNode(selectedTreeNode, scene.ObjectCollection);
+                if(obj != null)
                 {
-                    if(nodeObjects.Count > 1)
-                    {
-						foreach (ISceneObject graphicsObject in nodeObjects)
-						{
-							graphicsObject.Select();
-						}
-					}
-                    else
-                    {
-                        scene.SelectedObject = nodeObjects[0];
-						nodeObjects[0].Select();
-                        //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
-                        AxisSystem axisSystem = new AxisSystem(nodeObjects[0]);
-                        scene.ObjectCollection.Insert(0, axisSystem);
-					}
+                    scene.SelectedObject = obj;
+                    obj.Select();
+                    //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+                    AxisSystem axisSystem = new AxisSystem(obj);
+                    scene.ObjectCollection.Insert(0, axisSystem);
 				}
             }
 		}
@@ -509,17 +508,55 @@ namespace CadEditor
             scene.Camera.SetViewByAxis(CoordinateAxis.Z);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void captureSceneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CaptureMyScreen();
+            Bitmap bmp = CaptureScreen();
+            bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\", ImageFormat.Jpeg);
         }
 
-        private void CaptureMyScreen()
+        private Bitmap CaptureScreen()
         {
             Control c = openGLControl1;
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
             c.DrawToBitmap(bmp, c.ClientRectangle);
-            bmp.Save(@"D:\test.jpg", ImageFormat.Jpeg);
+            return bmp;
+        }
+
+        private void openLibraryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LibraryForm libraryForm = new LibraryForm(library.GetAllSaves());
+            DialogResult result = libraryForm.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                SaveData saveData = libraryForm.SelectedSave;
+                string[] lines = File.ReadAllLines(saveData.GetFilePath());
+                scene.Import(lines);
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Bitmap bmp = CaptureScreen();
+
+            SaveForm form = new SaveForm(bmp);
+            DialogResult result = form.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                string nameOfSave = form.SaveData.GetTitle();
+                string exportString = scene.Export();
+
+                bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\" + nameOfSave + ".jpeg", ImageFormat.Jpeg);
+                string filePath = @"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Scene\" + nameOfSave + ".txt";
+
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    writer.WriteLine(exportString);
+                    writer.Close(); // Close the writer to flush and release resources
+                }
+                library.AddSave(bmp, filePath, nameOfSave);
+            }
         }
     }
 }
