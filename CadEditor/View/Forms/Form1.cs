@@ -39,7 +39,7 @@ namespace CadEditor
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
-                selectItem, deselectItem, deleteItem, attachItem, setTargetItem, notSetTargetItem
+                selectItem, deselectItem, deleteItem, attachItem, detachItem, setTargetItem, notSetTargetItem
             });
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });

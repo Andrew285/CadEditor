@@ -325,22 +325,26 @@ namespace CadEditor
 
                 //Creating complex structure or adding cube to it
                 ComplexStructure structure = StructureController.AddCubes(attachingCube, targetCube);
-				structure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails()
-				{
-					attachingCube = attachingCube,
-					targetCube = targetCube,
-					attachingFacet = attachingFacet,
-					targetFacet = targetFacet,
-				});
+				structure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails(
+
+					targetCube,
+					targetFacet,
+					attachingCube,
+					attachingFacet
+				));
 				ObjectCollection.Remove(targetCube);
 				ObjectCollection.Remove(attachingCube);
 				
 				if (structure != null && !ObjectCollection.Contains(structure))
 				{
 					ObjectCollection.Add(structure);
-				}
-
-				SceneCollection.AddComplexStructure(structure);
+                    SceneCollection.AddComplexStructure(structure);
+                }
+				else
+				{
+                    SceneCollection.RemoveCube(attachingCube);
+                    SceneCollection.AddCube(attachingCube, structure);
+                }
 			}
         }
         
@@ -374,6 +378,7 @@ namespace CadEditor
 			{
 				if (importStrings[i].Contains("End of Structure"))
 				{
+                    cubes.Add(currentComplexStructure);
                     StructureController.AddStructure(currentComplexStructure);
                     currentComplexStructure = null;
                 }
@@ -402,11 +407,6 @@ namespace CadEditor
                         currentPlanes = new List<Plane>();
 
 
-                    }
-
-					if (currentComplexStructure != null)
-					{
-                        cubes.Add(currentComplexStructure);
                     }
 
                     //Attach cubes
@@ -441,15 +441,15 @@ namespace CadEditor
                     AttachingController.AttachFacets();
                     AttachingController.UpdateObjects();
 
-                    currentComplexStructure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails()
-                    {
-                        attachingCube = attachingCube,
-                        targetCube = targetCube,
-                        attachingFacet = attachingFacet,
-                        targetFacet = targetFacet,
-                    });
+                    currentComplexStructure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails(
 
-					AttachingController = new AttachingController();
+						targetCube,
+						targetFacet,
+						attachingCube,
+						attachingFacet
+					));
+
+                    AttachingController = new AttachingController();
                 }
 				else if (importStrings[i].Contains("ComplexStructure"))
 				{
@@ -547,7 +547,6 @@ namespace CadEditor
             }
 
 
-			// ------------ ??? ---------------------
 			ObjectCollection = cubes;
 			foreach (ISceneObject cube in cubes)
 			{
@@ -555,7 +554,12 @@ namespace CadEditor
 				{
                     SceneCollection.AddCube((ComplexCube)cube);
                 }
+				else if (cube is ComplexStructure)
+				{
+                    SceneCollection.AddComplexStructure((ComplexStructure)cube);
+                }
             }
+			NameController.GetValuesOf(ObjectCollection);
 		}
 
 		#endregion

@@ -15,7 +15,7 @@ namespace CadEditor
         public List<AttachingDetails> AttachingDetailsList { get; set; }
         public string Name { get; set; }
 
-        public struct AttachingDetails: IExportable
+        public class AttachingDetails: IExportable
         {
             public ComplexCube attachingCube;
             public ComplexCube targetCube;
@@ -34,7 +34,7 @@ namespace CadEditor
             public string Export()
             {
                 return targetCube.Name + " " + targetCube.Mesh.GetIndexOfFacet(targetFacet) + " " +
-                       attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(attachingFacet) + "\n";
+                       attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
             }
         }
 
