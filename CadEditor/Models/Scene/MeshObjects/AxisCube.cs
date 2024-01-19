@@ -1,4 +1,5 @@
-﻿using SharpGL;
+﻿using CadEditor.Settings;
+using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,9 @@ namespace CadEditor.MeshObjects
 						Vector _size, string _cubeName = null) : base(_centerPoint, _size, _cubeName)
 		{
 			Axis = _axis;
-			DrawFacets = true;
+			DrawFacets = SceneSettings.AxisCubeDrawFacets;
+			DrawEdges = SceneSettings.AxisCubeDrawEdges;
+			DrawVertices = SceneSettings.AxisCubeDrawVertices;
             double sizeX = Size[0];
             double sizeY = Size[1];
             double sizeZ = Size[2];

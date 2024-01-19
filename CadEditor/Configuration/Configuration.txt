@@ -1,0 +1,9 @@
+SceneSettings
+AxisCubeDrawFacets True
+AxisCubeDrawEdges True
+AxisCubeDrawVertices False
+End
+ThemeSettings
+MainThemeColor 255_255_128_255
+End
+

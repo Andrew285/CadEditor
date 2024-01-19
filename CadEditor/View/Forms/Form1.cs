@@ -1,11 +1,15 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
 using CadEditor.Properties;
+using CadEditor.Settings;
+using CadEditor.View.Forms;
 using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace CadEditor
@@ -13,6 +17,7 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
+        private static Form1 instance;
         private Library library;
         private static Scene scene;
         private ContextMenuStrip contextMenuStrip;
@@ -30,9 +35,20 @@ namespace CadEditor
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
 
+        public static Form1 GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = new Form1();
+            }
+
+            return instance;
+        }
+
         public Form1()
         {
             InitializeComponent();
+            instance = this;
             KeyPreview = true;
 
             contextMenuStrip = openGLControl1.ContextMenuStrip;
@@ -47,7 +63,7 @@ namespace CadEditor
             checkBox_DrawFacets.Checked = true;
 
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
-
+            SettingsController.GetInstance().LoadData(MainSettings.FilePath);
 
             selectItem.Click += Select_Object_click;
             selectItem.Image = Resources.select_object;
@@ -491,27 +507,36 @@ namespace CadEditor
 			}
 		}
 
-
-        //Set view by axis
-        private void viewByXToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.X);
-        }
-
-        private void viewYToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
-        }
-
-        private void viewZToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
-        }
-
+        //Scene Tab
         private void captureSceneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Bitmap bmp = CaptureScreen();
             bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\", ImageFormat.Jpeg);
+        }
+
+
+        //Camera Tab
+        private void setViewXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.X);
+        }
+
+        private void setViewYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
+        }
+
+        private void setViewZToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
+        }
+
+
+        //Settings Tab
+        private void generalSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm settingsForm = new SettingsForm();
+            DialogResult result = settingsForm.ShowDialog();
         }
 
         private Bitmap CaptureScreen()
@@ -558,5 +583,12 @@ namespace CadEditor
                 library.AddSave(bmp, filePath, nameOfSave);
             }
         }
+
+
+        public void UpdateFormColor(Color color)
+        {
+            this.BackColor = color;
+        }
+
     }
 }

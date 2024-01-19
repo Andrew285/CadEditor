@@ -42,10 +42,6 @@
             this.cubeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deselectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewByXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewZToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.captureSceneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cameraToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.setViewXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -164,7 +160,6 @@
             this.addToolStripMenuItem,
             this.selectAllToolStripMenuItem,
             this.deselectAllToolStripMenuItem,
-            this.cameraToolStripMenuItem,
             this.captureSceneToolStripMenuItem});
             this.sceneToolStripMenuItem.Image = global::CadEditor.Properties.Resources.accelerometer;
             this.sceneToolStripMenuItem.Name = "sceneToolStripMenuItem";
@@ -201,38 +196,6 @@
             this.deselectAllToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.deselectAllToolStripMenuItem.Text = "Deselect All";
             // 
-            // cameraToolStripMenuItem
-            // 
-            this.cameraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.viewByXToolStripMenuItem,
-            this.viewYToolStripMenuItem,
-            this.viewZToolStripMenuItem});
-            this.cameraToolStripMenuItem.Image = global::CadEditor.Properties.Resources.video_camera1;
-            this.cameraToolStripMenuItem.Name = "cameraToolStripMenuItem";
-            this.cameraToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.cameraToolStripMenuItem.Text = "Camera";
-            // 
-            // viewByXToolStripMenuItem
-            // 
-            this.viewByXToolStripMenuItem.Name = "viewByXToolStripMenuItem";
-            this.viewByXToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
-            this.viewByXToolStripMenuItem.Text = "View X";
-            this.viewByXToolStripMenuItem.Click += new System.EventHandler(this.viewByXToolStripMenuItem_Click);
-            // 
-            // viewYToolStripMenuItem
-            // 
-            this.viewYToolStripMenuItem.Name = "viewYToolStripMenuItem";
-            this.viewYToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
-            this.viewYToolStripMenuItem.Text = "View Y";
-            this.viewYToolStripMenuItem.Click += new System.EventHandler(this.viewYToolStripMenuItem_Click);
-            // 
-            // viewZToolStripMenuItem
-            // 
-            this.viewZToolStripMenuItem.Name = "viewZToolStripMenuItem";
-            this.viewZToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
-            this.viewZToolStripMenuItem.Text = "View Z";
-            this.viewZToolStripMenuItem.Click += new System.EventHandler(this.viewZToolStripMenuItem_Click);
-            // 
             // captureSceneToolStripMenuItem
             // 
             this.captureSceneToolStripMenuItem.Image = global::CadEditor.Properties.Resources.camera;
@@ -258,18 +221,21 @@
             this.setViewXToolStripMenuItem.Name = "setViewXToolStripMenuItem";
             this.setViewXToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.setViewXToolStripMenuItem.Text = "Set View X";
+            this.setViewXToolStripMenuItem.Click += new System.EventHandler(this.setViewXToolStripMenuItem_Click);
             // 
             // setViewYToolStripMenuItem
             // 
             this.setViewYToolStripMenuItem.Name = "setViewYToolStripMenuItem";
             this.setViewYToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.setViewYToolStripMenuItem.Text = "Set View Y";
+            this.setViewYToolStripMenuItem.Click += new System.EventHandler(this.setViewYToolStripMenuItem_Click);
             // 
             // setViewZToolStripMenuItem
             // 
             this.setViewZToolStripMenuItem.Name = "setViewZToolStripMenuItem";
             this.setViewZToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.setViewZToolStripMenuItem.Text = "Set View Z";
+            this.setViewZToolStripMenuItem.Click += new System.EventHandler(this.setViewZToolStripMenuItem_Click);
             // 
             // settingsToolStripMenuItem
             // 
@@ -285,6 +251,7 @@
             this.generalSettingsToolStripMenuItem.Name = "generalSettingsToolStripMenuItem";
             this.generalSettingsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.generalSettingsToolStripMenuItem.Text = "General Settings";
+            this.generalSettingsToolStripMenuItem.Click += new System.EventHandler(this.generalSettingsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
@@ -389,7 +356,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.BackColor = System.Drawing.Color.Red;
             this.ClientSize = new System.Drawing.Size(1094, 648);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.mode_comboBox);
@@ -435,10 +402,6 @@
         private System.Windows.Forms.TabPage generalTab;
         private System.Windows.Forms.CheckBox generalTab_checkBoxDrawRay;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.ToolStripMenuItem cameraToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem viewByXToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem viewYToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem viewZToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem captureSceneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cameraToolStripMenuItem1;

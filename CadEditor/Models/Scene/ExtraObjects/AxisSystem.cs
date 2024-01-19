@@ -37,7 +37,7 @@ namespace CadEditor.MeshObjects
     {
         private List<Axis> axes = new List<Axis>();
         private List<AxisCube> axisCubes = new List<AxisCube>();
-        public double AxisLength = 1.0f;
+        public double AxisLength = 3.0f;
         public float AxisWidth = 2.8f;
 
         private Point3D centerPoint;
@@ -277,23 +277,5 @@ namespace CadEditor.MeshObjects
 
             return false;
         }
-
-        //private CoordinateAxis ConvertToAxis(CoordinateAxisType type)
-        //{
-        //    CoordinateAxis resultAxis = CoordinateAxis.X;
-
-        //    switch (type)
-        //    {
-        //        case CoordinateAxisType.PlusX:
-        //        case CoordinateAxisType.MinusX: resultAxis = CoordinateAxis.X; break;
-        //        case CoordinateAxisType.PlusY:
-        //        case CoordinateAxisType.MinusY: resultAxis = CoordinateAxis.Y; break;
-        //        case CoordinateAxisType.PlusZ:
-        //        case CoordinateAxisType.MinusZ: resultAxis = CoordinateAxis.Z; break;
-        //    }
-
-        //    return resultAxis;
-        //}
-
     }
 }
