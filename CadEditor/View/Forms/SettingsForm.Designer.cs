@@ -45,6 +45,8 @@
             this.tabPageKeymap = new System.Windows.Forms.TabPage();
             this.tabPageFilePaths = new System.Windows.Forms.TabPage();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.label3 = new System.Windows.Forms.Label();
+            this.panelMenuBackColor = new System.Windows.Forms.Panel();
             this.tabControl1.SuspendLayout();
             this.tabPageInterface.SuspendLayout();
             this.tabPageScene.SuspendLayout();
@@ -162,6 +164,8 @@
             // 
             // tabPageThemes
             // 
+            this.tabPageThemes.Controls.Add(this.label3);
+            this.tabPageThemes.Controls.Add(this.panelMenuBackColor);
             this.tabPageThemes.Controls.Add(this.label2);
             this.tabPageThemes.Controls.Add(this.panel1);
             this.tabPageThemes.Location = new System.Drawing.Point(4, 22);
@@ -189,7 +193,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(82, 21);
             this.panel1.TabIndex = 0;
-            this.panel1.Click += new System.EventHandler(this.panel1_Click);
             // 
             // tabPageKeymap
             // 
@@ -208,6 +211,24 @@
             this.tabPageFilePaths.TabIndex = 3;
             this.tabPageFilePaths.Text = "File Paths";
             this.tabPageFilePaths.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(108, 69);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(109, 16);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "Menu Back Color";
+            // 
+            // panelMenuBackColor
+            // 
+            this.panelMenuBackColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelMenuBackColor.Location = new System.Drawing.Point(223, 64);
+            this.panelMenuBackColor.Name = "panelMenuBackColor";
+            this.panelMenuBackColor.Size = new System.Drawing.Size(82, 21);
+            this.panelMenuBackColor.TabIndex = 2;
             // 
             // SettingsForm
             // 
@@ -250,5 +271,7 @@
         private System.Windows.Forms.CheckBox checkBoxAxisCubeDrawFacets;
         private System.Windows.Forms.Button buttonSceneApply;
         private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panelMenuBackColor;
     }
 }

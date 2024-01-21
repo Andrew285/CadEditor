@@ -27,6 +27,7 @@ namespace CadEditor
 
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
+		public ISceneObject previousSelectedObject;
 		public ISceneObject SelectedObject { get; set; }
 		private ISceneObject previousRealSelectedObject;
 		private ISceneObject realSelectedObject;
@@ -97,6 +98,19 @@ namespace CadEditor
 		//	}
 		//	ObjectCollection.Add(AttachingAxisSystem);
 		//}
+
+		public ISceneObject GetPreviousSelectedObject()
+		{
+			foreach (ISceneObject obj in ObjectCollection)
+			{
+				if (((MeshObject3D)obj).IsEqual(previousSelectedObject))
+				{
+					return obj;
+				}
+			}
+
+			return null;
+		}
 
 
 
@@ -177,7 +191,10 @@ namespace CadEditor
 
             ISceneObject realSelectedObject = null;
 
-			foreach (ISceneObject obj in ObjectCollection)
+            previousSelectedObject = SelectedObject != null ? (ISceneObject)SelectedObject.Clone() : null;
+
+
+            foreach (ISceneObject obj in ObjectCollection)
 			{
 				obj.Deselect();
                 realSelectedObject = obj.CheckSelected();

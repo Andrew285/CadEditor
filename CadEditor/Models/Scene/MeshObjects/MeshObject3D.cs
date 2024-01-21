@@ -1,4 +1,5 @@
-﻿using CadEditor.Models.Scene.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.Models.Scene.MeshObjects;
 using SharpGL;
 using System;
 using System.Drawing;
@@ -382,7 +383,7 @@ namespace CadEditor.MeshObjects
 
         public bool IsEqual(ISceneObject obj)
         {
-            if (obj == null && obj is MeshObject3D)
+            if (obj != null && obj is MeshObject3D)
             {
                 MeshObject3D meshObject = (MeshObject3D)obj;
 

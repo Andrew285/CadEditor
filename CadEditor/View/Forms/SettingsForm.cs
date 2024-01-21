@@ -27,6 +27,11 @@ namespace CadEditor.View.Forms
 
             //ThemeTab
             panel1.BackColor = ThemeSettings.MainThemeColor;
+            panelMenuBackColor.BackColor = ThemeSettings.MenuStripBackColor;
+
+            //Set Events
+            panel1.Click += Panel1_Click;
+            panelMenuBackColor.Click += panelMenuBackColor_Click;
         }
 
         private void SettingsForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -54,7 +59,7 @@ namespace CadEditor.View.Forms
 
 
         //ThemeTab
-        private void panel1_Click(object sender, EventArgs e)
+        private void Panel1_Click(object sender, EventArgs e)
         {
             colorDialog1.FullOpen = true;
 
@@ -64,6 +69,18 @@ namespace CadEditor.View.Forms
             ThemeSettings.MainThemeColor = colorDialog1.Color;
             Form1.GetInstance().UpdateFormColor(ThemeSettings.MainThemeColor);
             panel1.BackColor = ThemeSettings.MainThemeColor;
+        }
+
+        private void panelMenuBackColor_Click(object sender, EventArgs e)
+        {
+            colorDialog1.FullOpen = true;
+
+            if (colorDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            ThemeSettings.MenuStripBackColor = colorDialog1.Color;
+            Form1.GetInstance().UpdateMenuBackColor(ThemeSettings.MenuStripBackColor);
+            panelMenuBackColor.BackColor = ThemeSettings.MenuStripBackColor;
         }
     }
 }

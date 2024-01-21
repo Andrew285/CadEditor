@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ActionHistoryController.cs" />
     <Compile Include="Controllers\AttachingController.cs" />
     <Compile Include="Controllers\ComplexStructureController.cs" />
     <Compile Include="Controllers\NameController.cs" />

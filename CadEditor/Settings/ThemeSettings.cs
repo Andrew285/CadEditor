@@ -7,6 +7,7 @@ namespace CadEditor.Settings
     {
         private static ThemeSettings instance;
         public static Color MainThemeColor = Color.White;
+        public static Color MenuStripBackColor = Color.White;
 
         public static ThemeSettings GetInstance()
         {

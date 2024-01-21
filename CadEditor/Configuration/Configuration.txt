@@ -4,6 +4,7 @@ AxisCubeDrawEdges True
 AxisCubeDrawVertices False
 End
 ThemeSettings
-MainThemeColor 255_255_128_255
+MainThemeColor 255_192_192_192
+MenuStripBackColor 255_192_192_192
 End
 

@@ -51,6 +51,12 @@ namespace CadEditor
             instance = this;
             KeyPreview = true;
 
+            //Load Settings
+            SettingsController.GetInstance().LoadData(MainSettings.FilePath);
+            this.BackColor = ThemeSettings.MainThemeColor;
+            this.menuStrip1.BackColor = ThemeSettings.MenuStripBackColor;
+
+            //Load Controls
             contextMenuStrip = openGLControl1.ContextMenuStrip;
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
@@ -62,8 +68,8 @@ namespace CadEditor
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
 
+            //Set Events
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
-            SettingsController.GetInstance().LoadData(MainSettings.FilePath);
 
             selectItem.Click += Select_Object_click;
             selectItem.Image = Resources.select_object;
@@ -173,6 +179,10 @@ namespace CadEditor
 
 				return true;
             }
+            else if (keyData == (Keys.Control | Keys.Z))
+            {
+                ActionHistoryController.GetInstance().InvokePreviousAction();
+            }
 
             return baseResult;
         }
@@ -193,7 +203,16 @@ namespace CadEditor
 
                 if(scene.SelectedObject == null)
                 {
+                    ISceneObject obj = scene.GetPreviousSelectedObject();
+                    if (obj != null)
+                    {
+                        ActionHistoryController.GetInstance().AddAction(SceneAction.DESELECT, obj);
+                    }
                     scene.DeselectAll();
+                }
+                else
+                {
+                    ActionHistoryController.GetInstance().AddAction(SceneAction.SELECT, scene.SelectedObject);
                 }
             }
             else if (e.Button == MouseButtons.Right)
@@ -542,7 +561,7 @@ namespace CadEditor
         private Bitmap CaptureScreen()
         {
             Control c = openGLControl1;
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
+            Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
             c.DrawToBitmap(bmp, c.ClientRectangle);
             return bmp;
         }
@@ -588,6 +607,11 @@ namespace CadEditor
         public void UpdateFormColor(Color color)
         {
             this.BackColor = color;
+        }
+
+        public void UpdateMenuBackColor(Color color)
+        {
+            this.menuStrip1.BackColor = color;
         }
 
     }
