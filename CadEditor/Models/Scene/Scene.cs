@@ -27,6 +27,7 @@ namespace CadEditor
 
 		public static Vector MovingVector;
 		public static CoordinateAxis ActiveMovingAxis;
+		public ISceneObject previousSelectedObject;
 		public ISceneObject SelectedObject { get; set; }
 		private ISceneObject previousRealSelectedObject;
 		private ISceneObject realSelectedObject;
@@ -77,13 +78,47 @@ namespace CadEditor
 			ObjectCollection.Add(AttachingAxisSystem);
         }
 
+		//public void InitializeSelectingAxes(ISceneObject obj)
+		//{
+		//	AttachingAxisSystem = new AxisSystem();
+		//	AttachingAxisSystem.AxisLength = 3.0f;
+
+		//	MeshObject3D meshObject = null;
+
+		//	if (obj is ComplexStructure)
+		//	{
+		//		meshObject = ((ComplexStructure)obj).GetCubes()[0];
+		//	}
+		//	for (int i = 0; i < meshObject.Mesh.Facets.Count; i++)
+		//	{
+		//		if (!obj.Mesh.attachedFacets.Contains(i))
+		//		{
+		//			AttachingAxisSystem.CreateAxis(obj.Mesh.Facets[i].AxisType, obj.Mesh.Facets[i].GetCenterPoint());
+		//		}
+		//	}
+		//	ObjectCollection.Add(AttachingAxisSystem);
+		//}
+
+		public ISceneObject GetPreviousSelectedObject()
+		{
+			foreach (ISceneObject obj in ObjectCollection)
+			{
+				if ((obj).IsEqual(previousSelectedObject))
+				{
+					return obj;
+				}
+			}
+
+			return null;
+		}
 
 
-        #endregion
 
-        #region --- Drawing ---
+		#endregion
 
-        public void Draw()
+		#region --- Drawing ---
+
+		public void Draw()
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
@@ -156,7 +191,10 @@ namespace CadEditor
 
             ISceneObject realSelectedObject = null;
 
-			foreach (ISceneObject obj in ObjectCollection)
+            previousSelectedObject = SelectedObject != null ? (ISceneObject)SelectedObject.Clone() : null;
+
+
+            foreach (ISceneObject obj in ObjectCollection)
 			{
 				obj.Deselect();
                 realSelectedObject = obj.CheckSelected();
@@ -234,11 +272,12 @@ namespace CadEditor
 
 		public void DeleteCompletely(ISceneObject cube)
 		{
-			ObjectCollection.Remove((ComplexCube)cube);
-			SceneCollection.RemoveCube((ComplexCube)cube);
-		}
+			ObjectCollection.Remove(cube);
+			SceneCollection.RemoveCube((IUniqueable)cube);
+			DeleteSelectingCoordAxes();
+        }
 
-		public void AddCube()
+        public void AddCube()
 		{
 			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
 			ObjectCollection.Add(cube);

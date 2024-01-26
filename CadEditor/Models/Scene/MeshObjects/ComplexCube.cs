@@ -21,7 +21,12 @@ namespace CadEditor
             public Mesh LocalMesh { get; set; }
             public Mesh TransformMesh { get; set; }
             public Point3D[] OuterLocalVertices = new Point3D[20];
-            public List<int> OuterVerticesIndices = new List<int>();
+            public List<int> OuterVerticesIndices;
+
+            public LocalSystem()
+            {
+                OuterVerticesIndices = new List<int>();
+            }
 
             public void InitTransformMesh()
             {
@@ -189,11 +194,6 @@ namespace CadEditor
             }
         }
 
-        public ComplexCube(): this(new Point3D(0, 0, 0), new Vector(1, 1, 1))
-        {
-
-        }
-
         public ComplexCube(Point3D _centerPoint, Vector _size, string _cubeName = null):
             base(_centerPoint, _size, _cubeName)
 		{
@@ -223,6 +223,9 @@ namespace CadEditor
             {
                 plane.ParentObject = this;
             }
+
+            localSystem = new LocalSystem();
+            localSystem.InitOuterVertices(OuterVertices, Mesh);
         }
 
         private void InitPoints(Point3D CenterPoint, Vector size)

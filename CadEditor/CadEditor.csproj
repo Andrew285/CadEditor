@@ -54,8 +54,10 @@
     <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -67,12 +69,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ActionHistoryController.cs" />
     <Compile Include="Controllers\AttachingController.cs" />
     <Compile Include="Controllers\ComplexStructureController.cs" />
     <Compile Include="Controllers\NameController.cs" />
+    <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />
+    <Compile Include="Settings\MainSettings.cs" />
+    <Compile Include="Settings\ThemeSettings.cs" />
+    <Compile Include="Settings\SceneSettings.cs" />
+    <Compile Include="Tools\TypeStringConverter.cs" />
     <Compile Include="View\Forms\LibraryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +130,12 @@
     <Compile Include="Models\Scene\Scene.cs" />
     <Compile Include="Models\Scene\ExtraObjects\SceneCollection.cs" />
     <Compile Include="Models\Maths\Vector.cs" />
+    <Compile Include="View\Forms\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\Forms\SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="View\Forms\DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -143,6 +157,9 @@
     </Compile>
     <EmbeddedResource Include="View\Forms\SaveForm.resx">
       <DependentUpon>SaveForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\Forms\SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -173,6 +190,7 @@
     <None Include="Resources\video_camera.png" />
     <None Include="Resources\help.png" />
     <None Include="Resources\select_object.png" />
+    <Content Include="Configuration\Configuration.txt" />
     <Content Include="Resources\camera.png" />
     <Content Include="Resources\deselect_object.png" />
     <None Include="Resources\library.png" />

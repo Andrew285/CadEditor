@@ -1,11 +1,15 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
 using CadEditor.Properties;
+using CadEditor.Settings;
+using CadEditor.View.Forms;
 using SharpGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace CadEditor
@@ -13,6 +17,7 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
+        private static Form1 instance;
         private Library library;
         private static Scene scene;
         private ContextMenuStrip contextMenuStrip;
@@ -30,24 +35,41 @@ namespace CadEditor
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
 
+        public static Form1 GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = new Form1();
+            }
+
+            return instance;
+        }
+
         public Form1()
         {
             InitializeComponent();
+            instance = this;
             KeyPreview = true;
 
+            //Load Settings
+            SettingsController.GetInstance().LoadData(MainSettings.FilePath);
+            this.BackColor = ThemeSettings.MainThemeColor;
+            this.menuStrip1.BackColor = ThemeSettings.MenuStripBackColor;
+
+            //Load Controls
             contextMenuStrip = openGLControl1.ContextMenuStrip;
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
-                selectItem, deselectItem, deleteItem, attachItem, detachItem, setTargetItem, notSetTargetItem
+                selectItem, deselectItem, deleteItem, divideItem, attachItem, detachItem, setTargetItem, notSetTargetItem
             });
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
 
+            //Set Events
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
-
 
             selectItem.Click += Select_Object_click;
             selectItem.Image = Resources.select_object;
@@ -157,6 +179,10 @@ namespace CadEditor
 
 				return true;
             }
+            else if (keyData == (Keys.Control | Keys.Z))
+            {
+                ActionHistoryController.GetInstance().InvokePreviousAction();
+            }
 
             return baseResult;
         }
@@ -177,7 +203,22 @@ namespace CadEditor
 
                 if(scene.SelectedObject == null)
                 {
+                    ISceneObject obj = scene.GetPreviousSelectedObject();
+                    if (obj != null)
+                    {
+                        ActionHistoryController.GetInstance().AddAction(SceneAction.DESELECT, obj);
+                    }
                     scene.DeselectAll();
+                }
+                else
+                {
+                    ActionHistoryController.GetInstance().AddAction(SceneAction.SELECT, scene.SelectedObject);
+                }
+
+                if (scene.SelectedAxisCube != null)
+                {
+                    ActionHistoryController.GetInstance().MovingInstance.StartPoint =
+                        scene.SelectedObject.GetCenterPoint().Clone();
                 }
             }
             else if (e.Button == MouseButtons.Right)
@@ -286,6 +327,7 @@ namespace CadEditor
                 Scene.MovingVector = coords;
 
                 scene.SelectedObject.Move(coords);
+                ActionHistoryController.GetInstance().AddAction(SceneAction.MOVE, scene.SelectedObject, coords);
                 scene.MoveCoordinateAxes(coords);
             }
 
@@ -301,7 +343,13 @@ namespace CadEditor
             {
                 scene.SelectedAxisCube.Deselect();
                 scene.SelectedAxisCube = null;
-			}
+
+                ActionHistoryController controller = ActionHistoryController.GetInstance();
+                controller.MovingInstance.EndPoint =
+                    scene.SelectedObject.GetCenterPoint().Clone();
+
+                controller.AddAction(SceneAction.MOVE, scene.SelectedObject, controller.MovingInstance.GetMovingVector());
+            }
 		}
 
 		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
@@ -491,33 +539,42 @@ namespace CadEditor
 			}
 		}
 
-
-        //Set view by axis
-        private void viewByXToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.X);
-        }
-
-        private void viewYToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
-        }
-
-        private void viewZToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
-        }
-
+        //Scene Tab
         private void captureSceneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Bitmap bmp = CaptureScreen();
             bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\", ImageFormat.Jpeg);
         }
 
+
+        //Camera Tab
+        private void setViewXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.X);
+        }
+
+        private void setViewYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
+        }
+
+        private void setViewZToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
+        }
+
+
+        //Settings Tab
+        private void generalSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm settingsForm = new SettingsForm();
+            DialogResult result = settingsForm.ShowDialog();
+        }
+
         private Bitmap CaptureScreen()
         {
             Control c = openGLControl1;
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
+            Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
             c.DrawToBitmap(bmp, c.ClientRectangle);
             return bmp;
         }
@@ -558,5 +615,17 @@ namespace CadEditor
                 library.AddSave(bmp, filePath, nameOfSave);
             }
         }
+
+
+        public void UpdateFormColor(Color color)
+        {
+            this.BackColor = color;
+        }
+
+        public void UpdateMenuBackColor(Color color)
+        {
+            this.menuStrip1.BackColor = color;
+        }
+
     }
 }

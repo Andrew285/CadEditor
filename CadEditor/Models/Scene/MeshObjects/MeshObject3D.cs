@@ -1,4 +1,5 @@
-﻿using CadEditor.Models.Scene.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.Models.Scene.MeshObjects;
 using SharpGL;
 using System;
 using System.Drawing;
@@ -11,7 +12,9 @@ namespace CadEditor.MeshObjects
 		public Mesh Mesh { get; set; }
 
 		public Vector Size { get; set; }
-		public bool DrawFacets { get; set; }
+        public bool DrawFacets { get; set; } = true;
+        public bool DrawEdges { get; set; } = true;
+        public bool DrawVertices { get; set; } = true;
         private Point3D centerPoint { get; set; }
         public ISceneObject ParentObject { get; set; }
         public bool IsSelected { get; set; }
@@ -67,36 +70,40 @@ namespace CadEditor.MeshObjects
 		{
 
 			//Draw Vertexes
-			for (int i = 0; i < Mesh.Vertices.Count; i++)
-			{
-				if (IsSelected)
-				{
-					Mesh.Vertices[i].SelectedColor = VertexSelectedColor;
-				}
-				else
-				{
-					Mesh.Vertices[i].NonSelectedColor = VertexNonSelectedColor;
-				}
+            if (DrawVertices)
+            {
+                for (int i = 0; i < Mesh.Vertices.Count; i++)
+                {
+                    if (IsSelected)
+                    {
+                        Mesh.Vertices[i].SelectedColor = VertexSelectedColor;
+                    }
+                    else
+                    {
+                        Mesh.Vertices[i].NonSelectedColor = VertexNonSelectedColor;
+                    }
 
-				Mesh.Vertices[i].Draw();
-			}
-
+                    Mesh.Vertices[i].Draw();
+                }
+            }
 
             //Draw Edges
-			for (int i = 0; i < Mesh.Edges.Count; i++)
-			{
-				if (IsSelected)
-				{
-					Mesh.Edges[i].SelectedColor = EdgeSelectedColor;
-				}
-				else
-				{
-					Mesh.Edges[i].NonSelectedColor = EdgeNonSelectedColor;
-				}
+            if (DrawEdges)
+            {
+                for (int i = 0; i < Mesh.Edges.Count; i++)
+                {
+                    if (IsSelected)
+                    {
+                        Mesh.Edges[i].SelectedColor = EdgeSelectedColor;
+                    }
+                    else
+                    {
+                        Mesh.Edges[i].NonSelectedColor = EdgeNonSelectedColor;
+                    }
 
-				Mesh.Edges[i].Draw();
-			}
-
+                    Mesh.Edges[i].Draw();
+                }
+            }
 
             //Draw Facets
             if (DrawFacets)
@@ -376,7 +383,7 @@ namespace CadEditor.MeshObjects
 
         public bool IsEqual(ISceneObject obj)
         {
-            if (obj == null && obj is MeshObject3D)
+            if (obj != null && obj is MeshObject3D)
             {
                 MeshObject3D meshObject = (MeshObject3D)obj;
 
