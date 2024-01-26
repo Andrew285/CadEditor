@@ -61,7 +61,7 @@ namespace CadEditor
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
-                selectItem, deselectItem, deleteItem, attachItem, detachItem, setTargetItem, notSetTargetItem
+                selectItem, deselectItem, deleteItem, divideItem, attachItem, detachItem, setTargetItem, notSetTargetItem
             });
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
@@ -214,6 +214,12 @@ namespace CadEditor
                 {
                     ActionHistoryController.GetInstance().AddAction(SceneAction.SELECT, scene.SelectedObject);
                 }
+
+                if (scene.SelectedAxisCube != null)
+                {
+                    ActionHistoryController.GetInstance().MovingInstance.StartPoint =
+                        scene.SelectedObject.GetCenterPoint().Clone();
+                }
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -321,6 +327,7 @@ namespace CadEditor
                 Scene.MovingVector = coords;
 
                 scene.SelectedObject.Move(coords);
+                ActionHistoryController.GetInstance().AddAction(SceneAction.MOVE, scene.SelectedObject, coords);
                 scene.MoveCoordinateAxes(coords);
             }
 
@@ -336,7 +343,13 @@ namespace CadEditor
             {
                 scene.SelectedAxisCube.Deselect();
                 scene.SelectedAxisCube = null;
-			}
+
+                ActionHistoryController controller = ActionHistoryController.GetInstance();
+                controller.MovingInstance.EndPoint =
+                    scene.SelectedObject.GetCenterPoint().Clone();
+
+                controller.AddAction(SceneAction.MOVE, scene.SelectedObject, controller.MovingInstance.GetMovingVector());
+            }
 		}
 
 		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)

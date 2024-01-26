@@ -103,7 +103,7 @@ namespace CadEditor
 		{
 			foreach (ISceneObject obj in ObjectCollection)
 			{
-				if (((MeshObject3D)obj).IsEqual(previousSelectedObject))
+				if ((obj).IsEqual(previousSelectedObject))
 				{
 					return obj;
 				}
