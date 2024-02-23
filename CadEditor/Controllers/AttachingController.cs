@@ -155,7 +155,7 @@ namespace CadEditor
                 //targetMesh.Vertices[index1] = attachingPoint;
                 //targetMesh.Vertices[index1].Coefficient += coef;
 
-                attachingMesh.Vertices[index2] = targetPoint;
+                attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
                 attachingMesh.Vertices[index2].Coefficient += 1;
             }
         }

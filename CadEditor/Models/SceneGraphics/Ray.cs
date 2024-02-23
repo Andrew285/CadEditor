@@ -72,7 +72,7 @@ namespace CadEditor
 
 		public Point3D RayIntersectsLine(Line edge)
 		{
-			double coPlanerThreshold = 0.7;
+			double coPlanerThreshold = 0.2;
 
 			Vector da = Direction;
 			Vector db = edge.P2 - edge.P1;

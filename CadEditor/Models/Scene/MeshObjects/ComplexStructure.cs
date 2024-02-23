@@ -3,7 +3,9 @@ using CadEditor.MeshObjects;
 using CadEditor.Models.Scene.MeshObjects;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,6 +62,7 @@ namespace CadEditor
         {
             cube.ParentObject = this;
             cubes.Add(cube);
+
         }
 
         public void RemoveCube(ComplexCube cube)
@@ -92,6 +95,24 @@ namespace CadEditor
             foreach (ComplexCube cube in cubes)
             {
                 cube.Move(v);
+            }
+
+        }
+
+        private void UpdateAttachingCubes()
+        {
+            foreach (AttachingDetails item in AttachingDetailsList)
+            {
+                for (int i = 0; i < item.attachingFacet.Points.Count; i++)
+                {
+                    //int positionInCube = item.attachingFacet.Points[i].PositionInCube;
+                    //Point3D p = item.targetFacet.Points[i];
+                    //item.attachingFacet[i] = p;
+
+                    //Point3D p2 = item.attachingCube.OuterVertices[positionInCube];
+                    //cubes[0].UpdateOuterVertices();
+                    ////p2.Move(v);
+                }
             }
         }
 

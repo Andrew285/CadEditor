@@ -174,5 +174,10 @@ namespace CadEditor
 
 			return null;
 		}
+
+		public void ClearAll()
+		{
+			sceneCollection.Nodes[0].Nodes.Clear();
+        }
 	}
 }

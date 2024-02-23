@@ -297,7 +297,8 @@ namespace CadEditor
         {
 			if (MouseController.IsMiddleButtonPressed)
             {
-                scene.Camera.Update(e.X, e.Y);
+                //scene.Camera.Update(e.X, e.Y);
+                scene.Camera.UpdateRotation(e.X, e.Y);
 			}
 
             //move selected objects towards the selected axis
@@ -550,17 +551,17 @@ namespace CadEditor
         //Camera Tab
         private void setViewXToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            scene.Camera.SetViewByAxis(CoordinateAxis.X);
+            //scene.Camera.SetViewByAxis(CoordinateAxis.X);
         }
 
         private void setViewYToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Y);
+            //scene.Camera.SetViewByAxis(CoordinateAxis.Y);
         }
 
         private void setViewZToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            scene.Camera.SetViewByAxis(CoordinateAxis.Z);
+            //scene.Camera.SetViewByAxis(CoordinateAxis.Z);
         }
 
 

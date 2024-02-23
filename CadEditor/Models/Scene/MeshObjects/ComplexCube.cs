@@ -6,13 +6,15 @@ using CadEditor.Maths;
 using CadEditor.MeshObjects;
 using System.Text;
 using CadEditor.Models.Scene.MeshObjects;
+using System.Linq;
+using System.Web.UI.WebControls;
 
 namespace CadEditor
 {
     public class ComplexCube: MeshObject3D, IDivideable, IExportable
     {
         private const int OUTER_VERTICES_AMOUNT = 20;
-        private Point3D[] OuterVertices = new Point3D[20];
+        public Point3D[] OuterVertices { get; set; }
         private LocalSystem localSystem;
         public bool IsDivided { get; set; } = false;
 
@@ -159,7 +161,7 @@ namespace CadEditor
             {
                 for (int i = 0; i < prevMesh.Vertices.Count; i++)
                 {
-                    OuterVertices[i] = prevMesh.Vertices[i].Clone();
+                    OuterVertices[i] = prevMesh.Vertices[i];
 
                     if (OuterVerticesIndices.Count == 0)
                     {
@@ -203,6 +205,7 @@ namespace CadEditor
             InitEdges(Mesh);
 
             localSystem = new LocalSystem();
+            OuterVertices = new Point3D[20];
             localSystem.InitOuterVertices(OuterVertices, Mesh);
 
         }
@@ -225,7 +228,34 @@ namespace CadEditor
             }
 
             localSystem = new LocalSystem();
-            localSystem.InitOuterVertices(OuterVertices, Mesh);
+
+            if (OuterVertices == null)
+            {
+                OuterVertices = new Point3D[20];
+                localSystem.InitOuterVertices(OuterVertices, Mesh);
+            }
+        }
+
+        public ComplexCube(Mesh mesh, Point3D[] outer): base(mesh)
+        {
+            foreach (Point3D p in mesh.Vertices)
+            {
+                p.ParentObject = this;
+            }
+
+            foreach (Line l in mesh.Edges)
+            {
+                l.ParentObject = this;
+            }
+
+            foreach (Plane plane in mesh.Facets)
+            {
+                plane.ParentObject = this;
+            }
+
+            localSystem = new LocalSystem();
+            OuterVertices = outer;
+            //localSystem.InitOuterVertices(OuterVertices, Mesh);
         }
 
         private void InitPoints(Point3D CenterPoint, Vector size)
@@ -451,6 +481,11 @@ namespace CadEditor
             UpdateMesh(Mesh, cloneMesh);
         }
 
+        public void UpdateOuterVertices()
+        {
+            List<int> list = localSystem.OuterVerticesIndices;
+        }
+
         public void UpdateMesh(Mesh original, Mesh clone)
         {
             for (int i = 0; i < clone.Facets.Count; i++)
@@ -540,19 +575,18 @@ namespace CadEditor
 
         public string Export()
         {
-            string exportString = "";
+            string exportString = Name + "\n";
 
-            exportString += Name + "\n";
-            //exportString += "Center_Point: " + CenterPoint.ToString() + "\n";
+            //Vertices
             exportString += "Vertices:\n";
             for(int i = 0; i < Mesh.Vertices.Count; i++)
             {
                 exportString += String.Format("({0} {1} {2})", Mesh.Vertices[i].X, Mesh.Vertices[i].Y, Mesh.Vertices[i].Z);
                 exportString += "\n";
             }
-
             exportString += "\n";
-			//exportString += "Edges:\n";
+
+			//Edges
 			for (int i = 0; i < Mesh.Edges.Count; i++)
 			{
                 int indexOfPoint1 = this.Mesh.GetIndexOfPoint(Mesh.Edges[i].P1);
@@ -560,10 +594,9 @@ namespace CadEditor
 				exportString += String.Format("Edge_{0} {1}", indexOfPoint1, indexOfPoint2);
 				exportString += "\n";
 			}
-
             exportString += "\n";
-            //exportString += "Facets:\n";
 
+            //Facets
             for (int i = 0; i < Mesh.Facets.Count; i++)
             {
                 StringBuilder sb = new StringBuilder();
@@ -579,6 +612,16 @@ namespace CadEditor
                 exportString += sb.ToString();
                 exportString += "\n";
             }
+
+            StringBuilder sb2 = new StringBuilder();
+            sb2.Append("OuterVertices ");
+            for (int i = 0; i < OuterVertices.Length; i++)
+            {
+                sb2.Append(this.Mesh.GetIndexOfPoint(OuterVertices[i]));
+                sb2.Append(" ");
+            }
+            sb2.Append('\n');
+            exportString += sb2.ToString();
 
             return exportString;
         }

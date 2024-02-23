@@ -1,14 +1,12 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
 using CadEditor.Models.Scene.MeshObjects;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using Microsoft.SqlServer.Server;
+using GeometRi;
 using SharpGL;
-using SharpGL.SceneGraph;
+using SharpGL.SceneGraph.Cameras;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Numerics;
 
 namespace CadEditor
 {
@@ -21,7 +19,7 @@ namespace CadEditor
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
-		//public Ray selectingRay;
+		public static Ray3d selectingRay;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
 
@@ -60,8 +58,23 @@ namespace CadEditor
             SceneCollection.AddCube(cube);
             SceneCollection.AddCube(cube2);
 
-            Camera.Target = new Point3D(0, 0, 0);
-			grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
+			//Point3D centerPoint = new Point3D(1, 0, 0);
+			Point3D centerPoint = cube.GetCenterPoint();
+            Camera.SetTarget((float)centerPoint.X, (float)centerPoint.Y, (float)centerPoint.Z);
+
+            //Camera.cameraTarget = new System.Numerics.Vector3((float)centerPoint.X, (float)centerPoint.Y, (float)centerPoint.Z);
+            //         Camera.cameraDirection = Vector3.Normalize(Camera.cameraPosition - Camera.cameraTarget);
+            //         Camera.cameraRight = Vector3.Normalize(Vector3.Cross(Camera.up, Camera.cameraDirection));
+            //         Camera.cameraUp = Vector3.Normalize(Vector3.Cross(Camera.cameraDirection, Camera.cameraRight));
+
+            //         Camera.view = Matrix4x4.CreateLookAt(Camera.cameraPosition, Camera.cameraTarget, Camera.cameraUp);
+
+
+            grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
+
+
+
+
         }
 
 		public void InitializeAttachingAxes(MeshObject3D obj)
@@ -121,28 +134,30 @@ namespace CadEditor
 		public void Draw()
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+			
 
-			// Set up the projection matrix
-			GraphicsGL.SetUpProjectionMatrix();
+            // Set up the projection matrix
+            GraphicsGL.SetUpProjectionMatrix();
 
-			// Set up the view matrix
-			GraphicsGL.SetUpViewMatrix(Camera);
+            //// Set up the view matrix
+            //GraphicsGL.SetUpViewMatrix(Camera);
 
 			//Rotate Camera
+			//Camera.Rotate();
 			Camera.Rotate();
 
-			//Draw Scene Grid
-			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
+            //Draw Scene Grid
+            DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
 			grid.Draw();
 
-   //         //Draw ray when user clicks with left button
-   //         if (selectingRay != null && selectingRay.Direction != null)
-			//{
-			//	DrawLine(selectingRay.Origin, selectingRay.Direction);
-			//}
+			//Draw ray when user clicks with left button
+			if (selectingRay != null && selectingRay.Direction != null)
+			{
+				DrawLine(selectingRay);
+			}
 
-            //Draw all objects
-            foreach (var obj in ObjectCollection)
+			//Draw all objects
+			foreach (var obj in ObjectCollection)
 			{
 				if (obj is ComplexCube)
                 {
@@ -152,6 +167,19 @@ namespace CadEditor
                 obj.Draw();
 			}
 		}
+
+		private void DrawLine(Ray3d ray)
+		{
+            GraphicsGL.GL.LineWidth((float)2f);
+            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
+
+            GraphicsGL.GL.Color(1f, 1, 1, 0);
+            GraphicsGL.GL.Vertex(ray.Point.X, ray.Point.Y, ray.Point.Z);
+            GraphicsGL.GL.Vertex(ray.Direction.X, ray.Direction.Y, ray.Direction.Z);
+
+            GraphicsGL.GL.End();
+            GraphicsGL.GL.Flush();
+        }
 
         public void DrawCordinateAxes(Point3D v, double lineWidth, double axisLength)
         {
@@ -371,7 +399,21 @@ namespace CadEditor
 					attachingCube,
 					attachingFacet
 				));
-				ObjectCollection.Remove(targetCube);
+
+                for (int j = 0; j < targetFacet.Points.Count; j++)
+                {
+                    int posInCube = attachingFacet[j].PositionInCube;
+					for (int k = 0; k < attachingCube.OuterVertices.Length; k++)
+					{
+						if (attachingCube.OuterVertices[k] == attachingFacet[j])
+						{
+							attachingCube.OuterVertices[k] = targetFacet[j];
+						}
+					}
+                }
+
+
+                ObjectCollection.Remove(targetCube);
 				ObjectCollection.Remove(attachingCube);
 				
 				if (structure != null && !ObjectCollection.Contains(structure))
@@ -410,6 +452,7 @@ namespace CadEditor
 			List<Point3D> currentPoints = new List<Point3D>();
 			List<Line> currentLines = new List<Line>();
 			List<Plane> currentPlanes = new List<Plane>();
+			List<Point3D> currentOuterVertices = new List<Point3D>();
 			ComplexStructure currentComplexStructure = null;
 			string name = "";
 
@@ -429,7 +472,7 @@ namespace CadEditor
                         currentMesh.Vertices = currentPoints;
                         currentMesh.Edges = currentLines;
                         currentMesh.Facets = currentPlanes;
-                        ComplexCube newCube = new ComplexCube(currentMesh);
+                        ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
                         newCube.DrawFacets = true;
                         newCube.Name = name;
                         if (currentComplexStructure != null)
@@ -444,8 +487,7 @@ namespace CadEditor
                         currentPoints = new List<Point3D>();
                         currentLines = new List<Line>();
                         currentPlanes = new List<Plane>();
-
-
+						currentOuterVertices = new List<Point3D>();
                     }
 
                     //Attach cubes
@@ -489,6 +531,9 @@ namespace CadEditor
 					));
 
                     AttachingController = new AttachingController();
+
+
+
                 }
 				else if (importStrings[i].Contains("ComplexStructure"))
 				{
@@ -518,7 +563,7 @@ namespace CadEditor
 						currentMesh.Vertices = currentPoints;
 						currentMesh.Edges = currentLines;
 						currentMesh.Facets = currentPlanes;
-						ComplexCube newCube = new ComplexCube(currentMesh);
+						ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
                         newCube.DrawFacets = true;
                         newCube.Name = name;
 
@@ -533,9 +578,10 @@ namespace CadEditor
                         currentPoints = new List<Point3D>();
 						currentLines = new List<Line>();
 						currentPlanes = new List<Plane>();
-					}
+                        currentOuterVertices = new List<Point3D>();
+                    }
 
-					name = importStrings[i];
+                    name = importStrings[i];
 				}
 				else if (importStrings[i].Contains("("))
 				{
@@ -559,6 +605,16 @@ namespace CadEditor
 
 					currentLines.Add(new Line(p1, p2));
 				}
+				else if (importStrings[i].Contains("OuterVertices"))
+				{
+                    string trimmedString = importStrings[i].Substring("OuterVertices".Length + 1);
+                    string[] splitted = trimmedString.Split(' ');
+
+					for (int j = 0; j < splitted.Length-1; j++)
+					{
+						currentOuterVertices.Add(currentPoints[Int32.Parse(splitted[j])]);
+					}
+                }
 				
 			}
 
@@ -568,8 +624,8 @@ namespace CadEditor
 				currentMesh.Vertices = currentPoints;
 				currentMesh.Edges = currentLines;
 				currentMesh.Facets = currentPlanes;
-				ComplexCube newCube = new ComplexCube(currentMesh);
-				newCube.DrawFacets = true;
+                ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
+                newCube.DrawFacets = true;
 				newCube.Name = name;
 				if (currentComplexStructure != null)
 				{
@@ -579,14 +635,11 @@ namespace CadEditor
 				{
 					cubes.Add(newCube);
 				}
-
-                currentPoints = new List<Point3D>();
-                currentLines = new List<Line>();
-                currentPlanes = new List<Plane>();
             }
 
-
+			//add new object to SceneCollection
 			ObjectCollection = cubes;
+			SceneCollection.ClearAll();
 			foreach (ISceneObject cube in cubes)
 			{
 				if (cube is ComplexCube)

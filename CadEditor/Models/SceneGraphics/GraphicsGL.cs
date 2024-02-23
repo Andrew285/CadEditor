@@ -63,16 +63,21 @@ namespace CadEditor
             GL.MatrixMode(OpenGL.GL_MODELVIEW);
             GL.LoadIdentity();
 
-            Vector eye = camera.Position;
             //Point3D center = camera.Target;
             //Vector up = camera.RotationAxis;
             //GL.LookAt(eye[0], eye[1], eye[2],
             //          center[0], 0, center[2],
             //          up[0], up[1], up[2]);
 
-            GL.LookAt(eye[0], eye[1], eye[2],
-                      0, 0, 0,
-                      0, 1, 0);
+            //GL.LookAt(eye[0], eye[1], eye[2],
+            //          0, 0, 0,
+            //          0, 1, 0);
+
+            GL.LookAt(
+                    camera.Position.X, camera.Position.Y, camera.Position.Z,
+                    camera.Target.X, camera.Target.Y, camera.Target.Z,
+                    camera.Up.X, camera.Up.Y, camera.Up.Z
+                );
         }
 
         public static void SetUpProjectionMatrix()

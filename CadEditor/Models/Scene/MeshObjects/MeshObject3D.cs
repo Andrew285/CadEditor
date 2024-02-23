@@ -1,7 +1,8 @@
-﻿using CadEditor.Controllers;
-using CadEditor.Models.Scene.MeshObjects;
+﻿using CadEditor.Models.Scene.MeshObjects;
+using GeometRi;
 using SharpGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace CadEditor.MeshObjects
@@ -169,24 +170,67 @@ namespace CadEditor.MeshObjects
             Deselect();
 
             Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
+            Vector origin = ray.Origin;
+            Vector dir = ray.Direction;
+
+            Scene.selectingRay = new Ray3d(new Point3d(origin[0], origin[1], origin[2]), new Vector3d(dir[0], dir[1], dir[2]));
+
 
             //check if any vertex is selected
-            Point3D selectedVertex = CheckSelectedVertex(ray);
-            if (selectedVertex != null)
-            {
-                return selectedVertex;
-            }
+            //Point3D selectedVertex2 = CheckSelectedVertex(ray);
+
+            //Vector3d vector = new Vector3d(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y, 0);
+            //Vector3d global = vector
+            ISceneObject clickedObject;
+
+            (Point3D, double) selectedVertex = CheckSelectedVertex(ray);
+            //if (selectedVertex.Item1 != null)
+            //{
+            //    //minDistance = selectedVertex.Item2;
+            //    //clickedObject = selectedVertex.Item1;
+
+            //    return selectedVertex;
+            //}
 
             //check if any edge is selected
-            Line selectedEdge = CheckSelectedEdge(ray);
-            if (selectedEdge != null)
-            {
-                return selectedEdge;
-            }
+            (Line, double) selectedEdge = CheckSelectedEdge(ray);
+
+            //if (selectedEdge != null)
+            //{
+            //    return selectedEdge;
+            //}
 
             //check if any facet is selected
             Plane selectedFacet = CheckSelectedFacet(ray);
-            if (selectedFacet != null)
+            //if (selectedFacet != null)
+            //{
+            //    return selectedFacet;
+            //}
+
+            double minDistance = 0;
+            if (selectedVertex.Item1 != null)
+            {
+                minDistance = selectedVertex.Item2;
+            }
+
+            if (selectedEdge.Item1 != null)
+            {
+                if (minDistance != 0 && selectedEdge.Item2 < minDistance)
+                {
+                    minDistance = selectedEdge.Item2;
+                }
+                else if (minDistance == 0)
+                {
+                    minDistance = selectedEdge.Item2;
+                }
+            }
+
+            if (minDistance != 0)
+            {
+                if (minDistance == selectedVertex.Item2) return selectedVertex.Item1;
+                if (minDistance == selectedEdge.Item2) return selectedEdge.Item1;
+            }
+            else
             {
                 return selectedFacet;
             }
@@ -194,9 +238,9 @@ namespace CadEditor.MeshObjects
             return null;
         }
 
-        public Line CheckSelectedEdge(Ray ray)
+        public (Line, double) CheckSelectedEdge(Ray ray)
         {
-            double? minDistance = null; //minimal distance between edge and ray origin
+            double minDistance = 0; //minimal distance between edge and ray origin
             Line selectedEdge = null; //edge that is selected
             Point3D minIntersectionPoint = null;
 
@@ -211,7 +255,7 @@ namespace CadEditor.MeshObjects
                     //compare distances from ray origin to intersection point
                     double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
 
-                    if (minDistance != null)
+                    if (minDistance != 0)
                     {
                         if (distanceToPoint < minDistance)
                         {
@@ -231,15 +275,45 @@ namespace CadEditor.MeshObjects
 
             if (!IsOnClickableArea(selectedEdge, minIntersectionPoint))
             {
-                return null;
+                return (null, 0);
             }
 
-            return selectedEdge;
+            return (selectedEdge, minDistance);
         }
 
-        public Point3D CheckSelectedVertex(Ray ray)
+        //public (Line, double) CheckSelectedEdgeNEW(Ray3d ray)
+        //{
+        //    Line line = Mesh.Edges[0];
+        //    Line3d line3D = new Line3d(new Point3d(line.P1.X, line.P1.Y, line.P1.Z),
+        //                               new Point3d(line.P2.X, line.P2.Y, line.P2.Z));
+        //    double minDistance = ray.DistanceTo(line3D);
+        //    Line minLine = line;
+
+        //    for (int i = 0; i < Mesh.Edges.Count; i++)
+        //    {
+        //        line = Mesh.Edges[i];
+        //        line3D = new Line3d(new Point3d(line.P1.X, line.P1.Y, line.P1.Z),
+        //                                   new Point3d(line.P2.X, line.P2.Y, line.P2.Z));
+        //        double distance = ray.DistanceTo(line3D);
+        //        var obj = ray.IntersectionWith(line3D);
+        //        if (obj != null && obj is Point3d)
+        //        {
+        //            Console.WriteLine();
+        //        }
+
+        //        if (distance < minDistance)
+        //        {
+        //            minDistance = distance;
+        //            minLine = Mesh.Edges[i];
+        //        }
+        //    }
+
+        //    return (minLine, minDistance);
+        //}
+
+        public (Point3D, double) CheckSelectedVertex(Ray ray)
         {
-            double? minDistance = null; //minimal distance between vertex and ray origin
+            double minDistance = 0; //minimal distance between vertex and ray origin
             Point3D selectedVertex = null; //vertex that is selected
             Point3D minIntersectionPoint = null;
 
@@ -254,7 +328,7 @@ namespace CadEditor.MeshObjects
                     //compare distances from ray origin to intersection point
                     double distanceToPoint = GetDistance(intersectionPoint, new Point3D(ray.Origin));
 
-                    if (minDistance != null)
+                    if (minDistance != 0)
                     {
                         if (distanceToPoint < minDistance)
                         {
@@ -277,8 +351,30 @@ namespace CadEditor.MeshObjects
             //             selectingRay.Direction = new Vector(minIntersectionPoint);
             //         }
 
-            return selectedVertex;
+            return (selectedVertex, minDistance);
         }
+
+        //public (Point3D, double) CheckSelectedVertexNEW(Ray3d ray)
+        //{
+        //    Point3D p = Mesh.Vertices[0];
+        //    Point3d newP = new Point3d(p.X, p.Y, p.Z);
+        //    double minDistance = ray.DistanceTo(newP);
+        //    Point3D minPoint = p;
+
+        //    for (int i = 0; i < Mesh.Vertices.Count; i++)
+        //    {
+        //        p = Mesh.Vertices[i];
+        //        newP = new Point3d(p.X, p.Y, p.Z);
+        //        double distance = ray.DistanceTo(newP);
+
+        //        if (distance < minDistance) {
+        //            minDistance = distance;
+        //            minPoint = Mesh.Vertices[i];
+        //        }
+        //    }
+
+        //    return (minPoint, minDistance);
+        //}
 
         private (ISceneObject, Point3D) GetIntersectionPoint(Ray ray)
         {
@@ -359,6 +455,63 @@ namespace CadEditor.MeshObjects
 
             return (Plane)result.Item1;
         }
+
+        //public Plane CheckSelectedFacetNEW(Ray3d ray)
+        //{
+        //    double minDistance = 0;
+        //    Plane minPlane = null;
+
+        //    for (int i = 0; i < Mesh.Facets.Count; i++)
+        //    {
+        //        Plane plane = Mesh.Facets[i];
+        //        var obj = ray.IntersectionWith(new Plane3d(new Point3d(plane[0].X, plane[0].Y, plane[0].Z),
+        //                                                   new Point3d(plane[2].X, plane[2].Y, plane[2].Z),
+        //                                                   new Point3d(plane[4].X, plane[4].Y, plane[4].Z)));
+
+        //        var obj2 = ray.IntersectionWith(new Plane3d(new Point3d(plane[0].X, plane[0].Y, plane[0].Z),
+        //                                                   new Point3d(plane[4].X, plane[4].Y, plane[4].Z),
+        //                                                   new Point3d(plane[6].X, plane[6].Y, plane[6].Z)));
+        //        if (obj != null)
+        //        {
+        //            double distance = ray.DistanceTo((Point3d)obj);
+
+        //            if (minDistance != 0)
+        //            {
+        //                if (distance < minDistance)
+        //                {
+        //                    minPlane = Mesh.Facets[i];
+        //                    minDistance = distance;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                minPlane = Mesh.Facets[i];
+        //                minDistance = distance;
+        //            }
+        //        }
+
+        //        if (obj2 != null)
+        //        {
+        //            double distance = ray.DistanceTo((Point3d)obj2);
+
+        //            if (minDistance != 0)
+        //            {
+        //                if (distance < minDistance)
+        //                {
+        //                    minPlane = Mesh.Facets[i];
+        //                    minDistance = distance;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                minPlane = Mesh.Facets[i];
+        //                minDistance = distance;
+        //            }
+        //        }
+        //    }
+
+        //    return minPlane;
+        //}
 
         private double GetDistance(Point3D v1, Point3D v2)
         {
