@@ -1,13 +1,8 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
 using CadEditor.Models.Scene.MeshObjects;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace CadEditor
 {
@@ -99,23 +94,6 @@ namespace CadEditor
 
         }
 
-        private void UpdateAttachingCubes()
-        {
-            foreach (AttachingDetails item in AttachingDetailsList)
-            {
-                for (int i = 0; i < item.attachingFacet.Points.Count; i++)
-                {
-                    //int positionInCube = item.attachingFacet.Points[i].PositionInCube;
-                    //Point3D p = item.targetFacet.Points[i];
-                    //item.attachingFacet[i] = p;
-
-                    //Point3D p2 = item.attachingCube.OuterVertices[positionInCube];
-                    //cubes[0].UpdateOuterVertices();
-                    ////p2.Move(v);
-                }
-            }
-        }
-
         public void Select()
         {
             foreach (ComplexCube cube in cubes)
@@ -132,19 +110,34 @@ namespace CadEditor
             }
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
+            ISceneObject resObject = null;
+            double minDistance = 0;
+
             foreach (ComplexCube cube in cubes)
             {
-                ISceneObject sceneObject = cube.CheckSelected();
+                (ISceneObject, double) sceneObject = cube.CheckSelected();
                 
-                if (sceneObject != null)
+                if (sceneObject.Item1 != null)
                 {
-                    return sceneObject;
+                    if (resObject == null && minDistance == 0)
+                    {
+                        resObject = sceneObject.Item1;
+                        minDistance = sceneObject.Item2;
+                    }
+                    else
+                    {
+                        if (sceneObject.Item2 < minDistance)
+                        {
+                            minDistance = sceneObject.Item2;
+                            resObject = sceneObject.Item1;
+                        }
+                    }
                 }
             }
 
-            return null;
+            return (resObject, minDistance);
         }
 
         public void Draw()

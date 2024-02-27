@@ -175,7 +175,7 @@ namespace CadEditor
             IsSelected = false;
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
             throw new NotImplementedException();
         }

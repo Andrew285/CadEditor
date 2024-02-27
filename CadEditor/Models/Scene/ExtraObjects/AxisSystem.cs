@@ -148,7 +148,7 @@ namespace CadEditor.MeshObjects
             }
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
             Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
             foreach (AxisCube cube in axisCubes)
@@ -159,15 +159,15 @@ namespace CadEditor.MeshObjects
             for (int i = 0; i < axisCubes.Count; i++)
             {
 
-                Plane selectedFacet = axisCubes[i].CheckSelectedFacet(ray);
-                if (selectedFacet != null)
+                (Plane, double) selectedFacet = axisCubes[i].CheckSelectedFacet(ray);
+                if (selectedFacet.Item1 != null)
                 {
                     axisCubes[i].IsSelected = true;
-                    return axisCubes[i];
+                    return (axisCubes[i], selectedFacet.Item2);
                 }
             }
 
-            return null;
+            return (null, 0);
         }
 
         public void CreateAxis(CoordinateAxisType axis, Point3D centerPoint)

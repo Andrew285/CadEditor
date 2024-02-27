@@ -1,4 +1,6 @@
 ﻿using CadEditor.MeshObjects;
+using GeometRi;
+using MathNet.Numerics;
 using SharpGL;
 using SharpGL.SceneGraph.Core;
 using System;
@@ -193,6 +195,24 @@ namespace CadEditor
 
             xRotation += xDelta * RotationSpeed;
             yRotation += yDelta * RotationSpeed;
+
+            // Calculate the new position after rotation
+            CalculatePosition();
+        }
+
+        private void CalculatePosition()
+        {
+            // Convert degrees to radians
+            float xRad = xRotation * (float)Math.PI / 180.0f;
+            float yRad = yRotation * (float)Math.PI / 180.0f;
+
+            // Calculate the new position based on the rotation angles
+            float x = Target.X + Position.Z * (float)Math.Sin(yRad) * (float)Math.Cos(xRad);
+            float y = Target.Y + Position.Z * (float)Math.Sin(xRad);
+            //float z = Target.Z + Position.Z * (float)Math.Cos(yRad) * (float)Math.Cos(xRad);
+
+            // Update the camera position
+            Position = new Vector3(x, y, Position.Z);
         }
 
         public void SetTarget(float x, float y, float z)

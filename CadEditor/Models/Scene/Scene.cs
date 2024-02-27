@@ -12,6 +12,8 @@ namespace CadEditor
 {
     public class Scene
     {
+		private static Scene instance;
+
 		private const int SCENE_GRID_SIZE = 20;
 		private const int SCENE_GRID_DENSITY = SCENE_GRID_SIZE * 4;
 		private const float SCENE_GRID_LINE_WIDTH = 0.1f;
@@ -19,7 +21,8 @@ namespace CadEditor
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
-		public static Ray3d selectingRay;
+		public bool IsRayDrawable { get; set; } = false;
+		public static Ray selectingRay2;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
 
@@ -28,7 +31,6 @@ namespace CadEditor
 		public ISceneObject previousSelectedObject;
 		public ISceneObject SelectedObject { get; set; }
 		private ISceneObject previousRealSelectedObject;
-		private ISceneObject realSelectedObject;
 		public AxisCube SelectedAxisCube { get; set; }
 
 		public bool DrawFacets { get; set; }
@@ -38,6 +40,23 @@ namespace CadEditor
 		public AttachingController AttachingController { get; private set; }
 		public ComplexStructureController StructureController { get; private set; }
 
+		public static Scene GetInstance()
+		{
+			if (instance == null)
+			{
+				return new Scene();
+			}
+
+			return instance;
+		}
+
+		public Scene()
+		{
+            ObjectCollection = new List<ISceneObject>();
+            AttachingController = new AttachingController();
+            StructureController = ComplexStructureController.GetInstance();
+        }
+
 		public Scene(Camera _camera, SceneCollection _sceneCollection)
         {
 			Camera = _camera;
@@ -45,11 +64,12 @@ namespace CadEditor
 			ObjectCollection = new List<ISceneObject>();
 			AttachingController = new AttachingController();
 			StructureController = ComplexStructureController.GetInstance();
+            instance = this;
         }
 
-		#region --- Initializing ---
+        #region --- Initializing ---
 
-		public void InitializeObjects()
+        public void InitializeObjects()
 		{
             ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
             ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
@@ -61,20 +81,7 @@ namespace CadEditor
 			//Point3D centerPoint = new Point3D(1, 0, 0);
 			Point3D centerPoint = cube.GetCenterPoint();
             Camera.SetTarget((float)centerPoint.X, (float)centerPoint.Y, (float)centerPoint.Z);
-
-            //Camera.cameraTarget = new System.Numerics.Vector3((float)centerPoint.X, (float)centerPoint.Y, (float)centerPoint.Z);
-            //         Camera.cameraDirection = Vector3.Normalize(Camera.cameraPosition - Camera.cameraTarget);
-            //         Camera.cameraRight = Vector3.Normalize(Vector3.Cross(Camera.up, Camera.cameraDirection));
-            //         Camera.cameraUp = Vector3.Normalize(Vector3.Cross(Camera.cameraDirection, Camera.cameraRight));
-
-            //         Camera.view = Matrix4x4.CreateLookAt(Camera.cameraPosition, Camera.cameraTarget, Camera.cameraUp);
-
-
             grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
-
-
-
-
         }
 
 		public void InitializeAttachingAxes(MeshObject3D obj)
@@ -91,27 +98,6 @@ namespace CadEditor
 			ObjectCollection.Add(AttachingAxisSystem);
         }
 
-		//public void InitializeSelectingAxes(ISceneObject obj)
-		//{
-		//	AttachingAxisSystem = new AxisSystem();
-		//	AttachingAxisSystem.AxisLength = 3.0f;
-
-		//	MeshObject3D meshObject = null;
-
-		//	if (obj is ComplexStructure)
-		//	{
-		//		meshObject = ((ComplexStructure)obj).GetCubes()[0];
-		//	}
-		//	for (int i = 0; i < meshObject.Mesh.Facets.Count; i++)
-		//	{
-		//		if (!obj.Mesh.attachedFacets.Contains(i))
-		//		{
-		//			AttachingAxisSystem.CreateAxis(obj.Mesh.Facets[i].AxisType, obj.Mesh.Facets[i].GetCenterPoint());
-		//		}
-		//	}
-		//	ObjectCollection.Add(AttachingAxisSystem);
-		//}
-
 		public ISceneObject GetPreviousSelectedObject()
 		{
 			foreach (ISceneObject obj in ObjectCollection)
@@ -124,9 +110,6 @@ namespace CadEditor
 
 			return null;
 		}
-
-
-
 		#endregion
 
 		#region --- Drawing ---
@@ -150,14 +133,15 @@ namespace CadEditor
             DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
 			grid.Draw();
 
-			//Draw ray when user clicks with left button
-			if (selectingRay != null && selectingRay.Direction != null)
-			{
-				DrawLine(selectingRay);
-			}
+			//Draw Selecting Ray
+            if (selectingRay2 != null && IsRayDrawable)
+            {
+                DrawSelectingRay(selectingRay2);
+            }
 
-			//Draw all objects
-			foreach (var obj in ObjectCollection)
+
+            //Draw all objects
+            foreach (var obj in ObjectCollection)
 			{
 				if (obj is ComplexCube)
                 {
@@ -168,14 +152,16 @@ namespace CadEditor
 			}
 		}
 
-		private void DrawLine(Ray3d ray)
-		{
-            GraphicsGL.GL.LineWidth((float)2f);
+        private void DrawSelectingRay(Ray ray)
+        {
+            GraphicsGL.GL.LineWidth(2f);
             GraphicsGL.GL.Begin(OpenGL.GL_LINES);
 
-            GraphicsGL.GL.Color(1f, 1, 1, 0);
-            GraphicsGL.GL.Vertex(ray.Point.X, ray.Point.Y, ray.Point.Z);
-            GraphicsGL.GL.Vertex(ray.Direction.X, ray.Direction.Y, ray.Direction.Z);
+            GraphicsGL.GL.Color(1f, 0f, 0f, 0f);
+			GraphicsGL.GL.Vertex(ray.Origin[0], ray.Origin[1], ray.Origin[2]);
+			GraphicsGL.GL.Vertex(ray.Origin[0] + ray.Direction[0] * Camera.Position.Z,
+                                 ray.Origin[1] + ray.Direction[1] * Camera.Position.Z,
+                                 ray.Origin[2] + ray.Direction[2] * Camera.Position.Z);
 
             GraphicsGL.GL.End();
             GraphicsGL.GL.Flush();
@@ -214,21 +200,30 @@ namespace CadEditor
 
 		public void Select()
 		{
-			//selectingRay = new Ray();
-			//selectingRay.Origin = ray.Origin;
-
             ISceneObject realSelectedObject = null;
 
             previousSelectedObject = SelectedObject != null ? (ISceneObject)SelectedObject.Clone() : null;
 
-
+			double minDistance = 0;
             foreach (ISceneObject obj in ObjectCollection)
 			{
 				obj.Deselect();
-                realSelectedObject = obj.CheckSelected();
-				if(realSelectedObject != null)
+                (ISceneObject, double) result = obj.CheckSelected();
+				if(result.Item1 != null)
 				{
-					break;
+					if (minDistance == 0 || realSelectedObject == null)
+					{
+                        realSelectedObject = result.Item1;
+                        minDistance = result.Item2;
+                    }
+					else
+					{
+						if (result.Item2 < minDistance)
+						{
+							minDistance = result.Item2;
+							realSelectedObject = result.Item1;
+						}
+					}
 				}
 			}
 

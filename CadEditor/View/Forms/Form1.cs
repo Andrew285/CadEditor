@@ -628,5 +628,9 @@ namespace CadEditor
             this.menuStrip1.BackColor = color;
         }
 
+        private void generalTab_checkBoxDrawRay_CheckedChanged(object sender, EventArgs e)
+        {
+            scene.IsRayDrawable = generalTab_checkBoxDrawRay.Checked ? true : false;
+        }
     }
 }

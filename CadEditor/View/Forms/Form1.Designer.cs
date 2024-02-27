@@ -336,6 +336,7 @@
             this.generalTab_checkBoxDrawRay.TabIndex = 10;
             this.generalTab_checkBoxDrawRay.Text = "Draw Selecting Ray";
             this.generalTab_checkBoxDrawRay.UseVisualStyleBackColor = true;
+            this.generalTab_checkBoxDrawRay.CheckedChanged += new System.EventHandler(this.generalTab_checkBoxDrawRay_CheckedChanged);
             // 
             // tabPage2
             // 

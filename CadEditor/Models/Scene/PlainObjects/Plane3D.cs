@@ -265,6 +265,11 @@ namespace CadEditor
             return false;
         }
 
+        (ISceneObject, double) ISceneObject.CheckSelected()
+        {
+            throw new NotImplementedException();
+        }
+
         public static bool operator ==(Plane a, Plane b)
         {
             if (ReferenceEquals(a, b))
