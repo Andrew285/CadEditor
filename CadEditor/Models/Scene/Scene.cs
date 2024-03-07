@@ -22,7 +22,7 @@ namespace CadEditor
         public List<ISceneObject> ObjectCollection { get; private set; }
 		public AxisSystem AttachingAxisSystem { get; private set; }
 		public bool IsRayDrawable { get; set; } = false;
-		public static Ray selectingRay2;
+		public static Ray selectingRay;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
 
@@ -71,16 +71,18 @@ namespace CadEditor
 
         public void InitializeObjects()
 		{
-            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            ObjectCollection.Add(cube);
-            ObjectCollection.Add(cube2);
+			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			//ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			//ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			ObjectCollection.Add(cube);
+            //ObjectCollection.Add(cube2);
             SceneCollection.AddCube(cube);
-            SceneCollection.AddCube(cube2);
+            //SceneCollection.AddCube(cube2);
 
 			//Point3D centerPoint = new Point3D(1, 0, 0);
-			Point3D centerPoint = cube.GetCenterPoint();
-            Camera.SetTarget((float)centerPoint.X, (float)centerPoint.Y, (float)centerPoint.Z);
+			//Point3D centerPoint = cube.GetCenterPoint();
+			Point3D centerPoint = new Point3D(0, 0, 0);
+            Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
             grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
         }
 
@@ -122,11 +124,10 @@ namespace CadEditor
             // Set up the projection matrix
             GraphicsGL.SetUpProjectionMatrix();
 
-            //// Set up the view matrix
-            //GraphicsGL.SetUpViewMatrix(Camera);
+			//// Set up the view matrix
+			//GraphicsGL.SetUpViewMatrix(Camera);
 
 			//Rotate Camera
-			//Camera.Rotate();
 			Camera.Rotate();
 
             //Draw Scene Grid
@@ -134,9 +135,9 @@ namespace CadEditor
 			grid.Draw();
 
 			//Draw Selecting Ray
-            if (selectingRay2 != null && IsRayDrawable)
+            if (selectingRay != null && IsRayDrawable)
             {
-                DrawSelectingRay(selectingRay2);
+                DrawSelectingRay(selectingRay);
             }
 
 
@@ -262,7 +263,7 @@ namespace CadEditor
                     SelectedObject.Select();
                     SelectedObject.IsSelected = true;
 					
-                    axisSystem = new AxisSystem(SelectedObject);
+                    axisSystem = new AxisSystem(SelectedObject.GetCenterPoint(), selectingRay);
                     ObjectCollection.Insert(0, axisSystem);
                 }
 				else

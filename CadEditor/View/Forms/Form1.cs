@@ -30,6 +30,7 @@ namespace CadEditor
         private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Set as Target");
         private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Deselect Target");
         private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
+        private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Set Camera Target");
         
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
@@ -61,7 +62,7 @@ namespace CadEditor
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
-                selectItem, deselectItem, deleteItem, divideItem, attachItem, detachItem, setTargetItem, notSetTargetItem
+                selectItem, deselectItem, deleteItem, divideItem, attachItem, detachItem, setTargetItem, notSetTargetItem, setTarget
             });
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
@@ -85,6 +86,7 @@ namespace CadEditor
             setTargetItem.Click += SetTarget_Object_click;
             notSetTargetItem.Click += NotSetTarget_Object_click;
             divideItem.Click += Divide_Object_click;
+            setTarget.Click += SetCameraTarget_click;
         }
 
 		#region ---- OpenGLControl Events ----
@@ -241,6 +243,8 @@ namespace CadEditor
         {
             if (scene.SelectedObject != null) 
             {
+                setTarget.Visible = true;
+
                 if (scene.SelectedObject is IDivideable)
                 {
                     divideItem.Visible = true;
@@ -427,6 +431,12 @@ namespace CadEditor
             scene.ObjectCollection.Remove(scene.AttachingAxisSystem);
         }
 
+        private static void SetCameraTarget_click(object sender, EventArgs e)
+        {
+            Point3D centerPoint = scene.SelectedObject.GetCenterPoint();
+            scene.Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
+        }
+
         private static DividingCubeForm InitializeDividingForm()
         {
             DividingCubeForm form = new DividingCubeForm();
@@ -479,7 +489,7 @@ namespace CadEditor
                     scene.SelectedObject = obj;
                     obj.Select();
                     //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
-                    AxisSystem axisSystem = new AxisSystem(obj);
+                    AxisSystem axisSystem = new AxisSystem(obj.GetCenterPoint(), Scene.selectingRay);
                     scene.ObjectCollection.Insert(0, axisSystem);
 				}
             }

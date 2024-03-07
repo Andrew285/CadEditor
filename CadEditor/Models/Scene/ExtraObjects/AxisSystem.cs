@@ -52,25 +52,32 @@ namespace CadEditor.MeshObjects
             axes = new List<Axis>();
         }
 
-        public AxisSystem(ISceneObject obj) 
+        public AxisSystem(Point3D centerPoint, Ray ray) 
         {
-            if (obj is Point3D)
-            {
-                centerPoint = ((Point3D)obj).Clone();
-            }
-            else
-            {
-                centerPoint = obj.GetCenterPoint();
-            }
+            //if (obj is Point3D)
+            //{
+            //    centerPoint = ((Point3D)obj).Clone();
+            //}
+            //else
+            //{
+            //    centerPoint = obj.GetCenterPoint();
+            //}
 
-            if(obj is ComplexCube)
-            {
-                AxisLength += 1.0f;
-            }
+            //if(obj is ComplexCube)
+            //{
+            //    AxisLength += 1.0f;
+            //}
 
-            Axis axisX = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
-            Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
-            Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z);
+            Vector distance = ray.Origin - new Vector(centerPoint);
+            AxisLength += 1.0f;
+
+            double xCoord = distance[0] - centerPoint.X > 0 ? AxisLength + centerPoint.X : centerPoint.X - AxisLength;
+            double yCoord = distance[1] - centerPoint.Y > 0 ? AxisLength + centerPoint.Y : centerPoint.Y - AxisLength;
+            double zCoord = distance[2] - centerPoint.Z > 0 ? AxisLength + centerPoint.Z : centerPoint.Z - AxisLength;
+
+            Axis axisX = new Axis(centerPoint.Clone(), new Point3D(xCoord, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
+            Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, yCoord, centerPoint.Z), CoordinateAxis.Y);
+            Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, zCoord), CoordinateAxis.Z);
 
             axisX.NonSelectedColor = Color.Red;
             axisY.NonSelectedColor = Color.Green;
@@ -82,9 +89,9 @@ namespace CadEditor.MeshObjects
             axes = new List<Axis> { axisX, axisY, axisZ };
 
             //Create Axis Cubes
-            AxisCube cubeX = new AxisCube(new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
-            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
-            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
+            AxisCube cubeX = new AxisCube(new Point3D(xCoord, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
+            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, yCoord, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
+            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, zCoord), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
 
             //Set colors
             cubeX.FacetSelectedColor = Color.Red;

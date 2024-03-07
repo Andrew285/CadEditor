@@ -170,7 +170,7 @@ namespace CadEditor.MeshObjects
             Deselect();
 
             Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
-            Scene.selectingRay2 = ray;
+            Scene.selectingRay = ray;
             (ISceneObject, double) selectedVertex = CheckSelectedVertex(ray);
             (ISceneObject, double) selectedEdge = CheckSelectedEdge(ray);
             (ISceneObject, double) selectedFacet = CheckSelectedFacet(ray);
@@ -313,9 +313,9 @@ namespace CadEditor.MeshObjects
             Vector3 cameraPos = Scene.GetInstance().Camera.Position;
             //double distance = GetDistance(result.Item2, new Point3D(cameraPos.X, cameraPos.Y, cameraPos.Z));
 
-            double distance = GetDistance(result.Item2, new Point3D(Scene.selectingRay2.Origin[0],
-                                                                    Scene.selectingRay2.Origin[1],
-                                                                    Scene.selectingRay2.Origin[2]));
+            double distance = GetDistance(result.Item2, new Point3D(Scene.selectingRay.Origin[0],
+                                                                    Scene.selectingRay.Origin[1],
+                                                                    Scene.selectingRay.Origin[2]));
 
 
             return (result.Item1, distance);
