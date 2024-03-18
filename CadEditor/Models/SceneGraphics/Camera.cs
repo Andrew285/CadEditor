@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpGL.SceneGraph.Cameras;
+using System;
 using System.Numerics;
 
 namespace CadEditor
@@ -18,9 +19,13 @@ namespace CadEditor
         public Vector3 Target {  get; set; }
         public Vector3 Up {  get; set; }
 
+        private float distance = 10.0f;
+        private float azimuth = 0.0f; // Angle around the Y-axis
+        private float elevation = 10.0f; // Angle above the XZ-plane
+
         public Camera()
         {
-            Position = new Vector3(0, 0, 10);
+            Position = new Vector3(0, 0, distance);
             Target = new Vector3(0, 0, 0);
             Up = new Vector3(0, 1, 0);
 
@@ -29,7 +34,7 @@ namespace CadEditor
 
         public void Rotate()
         {
-            GraphicsGL.GL.Translate(0.0f, 0.0f, -Position.Z);
+            GraphicsGL.GL.Translate(0.0f, 0.0f, -distance);
             GraphicsGL.GL.Rotate(yRotation, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(xRotation, 0.0f, 1.0f, 0.0f);
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
@@ -43,41 +48,23 @@ namespace CadEditor
             xRotation += xDelta * RotationSpeed;
             yRotation += yDelta * RotationSpeed;
 
-            // Calculate the new position after rotation
-            //CalculatePosition();
+            UpdateCameraPosition();
+            GraphicsGL.Control.Invalidate();
         }
 
-        private void CalculatePosition()
-        {
-            // Convert degrees to radians
-            float xRad = xRotation * (float)Math.PI / 180.0f;
-            float yRad = yRotation * (float)Math.PI / 180.0f;
-
-            // Calculate the new position based on the rotation angles
-            float x = Target.X + Position.Z * (float)Math.Sin(yRad) * (float)Math.Cos(xRad);
-            float y = Target.Y + Position.Z * (float)Math.Sin(xRad);
-            //float z = Target.Z + Position.Z * (float)Math.Cos(yRad) * (float)Math.Cos(xRad);
-
-            // Update the camera position
-            Position = new Vector3(x, y, Position.Z);
-        }
 
         public void SetTarget(double x, double y, double z)
         {
             xRotation = 0.0f;
             yRotation = 0.0f;
-            Position = new Vector3(0, 0, 10);
-            Target = new Vector3(0, 0, 0);
             Up = new Vector3(0, 1, 0);
 
             Target = new Vector3((float)x, (float)y, (float)z);
-            GraphicsGL.SetUpViewMatrix(this);
-
         }
 
         public void LimitDistance()
         {
-            float zValue = Position.Z;
+            float zValue = distance;
             zValue = (float)Math.Max(zValue, MinZoom);
             zValue = (float)Math.Min(zValue, MaxZoom);
 
@@ -86,9 +73,21 @@ namespace CadEditor
 
         public void Zoom(double value)
         {
-            float zValue = Position.Z;
-            zValue += (float)(-value * ZoomSensitivity);
-            Position = new Vector3(Position.X, Position.Y, zValue);
+            distance += (float)(-value * ZoomSensitivity);
+        }
+
+
+        private void UpdateCameraPosition()
+        {
+            // Calculate camera position based on azimuth, elevation, and distance.
+            double azimuthRad = azimuth * Math.PI / 180.0;
+            double elevationRad = elevation * Math.PI / 180.0;
+
+            float X = (float)(Target.X + distance * Math.Cos(elevationRad) * Math.Sin(azimuthRad));
+            float Y = (float)(Target.Y + distance * Math.Sin(elevationRad));
+            float Z = (float)(Target.Z + distance * Math.Cos(elevationRad) * Math.Cos(azimuthRad));
+
+            Position = new Vector3(X, Y, Z);
         }
     }
 }

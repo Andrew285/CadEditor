@@ -71,13 +71,13 @@ namespace CadEditor
 
         public void InitializeObjects()
 		{
-			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
-			//ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
-			//ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			//ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
+			ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
 			ObjectCollection.Add(cube);
-            //ObjectCollection.Add(cube2);
-            SceneCollection.AddCube(cube);
-            //SceneCollection.AddCube(cube2);
+			ObjectCollection.Add(cube2);
+			SceneCollection.AddCube(cube);
+			SceneCollection.AddCube(cube2);
 
 			//Point3D centerPoint = new Point3D(1, 0, 0);
 			//Point3D centerPoint = cube.GetCenterPoint();
@@ -119,10 +119,10 @@ namespace CadEditor
 		public void Draw()
         {
 			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-			
 
-            // Set up the projection matrix
-            GraphicsGL.SetUpProjectionMatrix();
+
+			// Set up the projection matrix
+			GraphicsGL.SetUpProjectionMatrix();
 
 			//// Set up the view matrix
 			//GraphicsGL.SetUpViewMatrix(Camera);
