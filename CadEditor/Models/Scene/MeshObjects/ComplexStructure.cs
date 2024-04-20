@@ -1,18 +1,26 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
 using System.Collections.Generic;
 
 
 namespace CadEditor
 {
-    public class ComplexStructure: ISceneObject, IDivideable, IExportable, IUniqueable
+    public class ComplexStructure: ISceneObject, IDivideable, IExportable, IUniqueable, IRotateable
     {
         private List<ComplexCube> cubes;
         public List<AttachingDetails> AttachingDetailsList { get; set; }
         public string Name { get; set; }
 
-        public class AttachingDetails: IExportable
+        public ISceneObject ParentObject { get; set; }
+        public bool IsSelected { get; set; }
+        public bool IsDivided { get; set; }
+
+        public float xRotation { get; set; } = 0.0f;
+        public float yRotation { get; set; } = 0.0f;
+
+        public class AttachingDetails : IExportable
         {
             public ComplexCube attachingCube;
             public ComplexCube targetCube;
@@ -34,10 +42,6 @@ namespace CadEditor
                        attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
             }
         }
-
-        public ISceneObject ParentObject { get; set; }
-        public bool IsSelected { get; set; }
-        public bool IsDivided { get; set; }
 
         public ComplexStructure()
         {

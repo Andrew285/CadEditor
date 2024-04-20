@@ -78,6 +78,7 @@
     <Compile Include="Controllers\NameController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
+    <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />
     <Compile Include="Settings\MainSettings.cs" />

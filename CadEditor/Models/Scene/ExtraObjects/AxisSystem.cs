@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadEditor.MeshObjects
 {
@@ -54,19 +51,6 @@ namespace CadEditor.MeshObjects
 
         public AxisSystem(Point3D centerPoint, Ray ray) 
         {
-            //if (obj is Point3D)
-            //{
-            //    centerPoint = ((Point3D)obj).Clone();
-            //}
-            //else
-            //{
-            //    centerPoint = obj.GetCenterPoint();
-            //}
-
-            //if(obj is ComplexCube)
-            //{
-            //    AxisLength += 1.0f;
-            //}
 
             Vector distance = ray.Origin - new Vector(centerPoint);
             AxisLength += 1.0f;

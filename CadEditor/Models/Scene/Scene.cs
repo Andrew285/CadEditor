@@ -1,12 +1,10 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
-using GeometRi;
 using SharpGL;
-using SharpGL.SceneGraph.Cameras;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace CadEditor
 {
@@ -39,6 +37,8 @@ namespace CadEditor
 
 		public AttachingController AttachingController { get; private set; }
 		public ComplexStructureController StructureController { get; private set; }
+
+		public bool IsObjectRotate { get; set; } = false;
 
 		public static Scene GetInstance()
 		{
@@ -125,13 +125,13 @@ namespace CadEditor
 			GraphicsGL.SetUpProjectionMatrix();
 
 			//// Set up the view matrix
-			//GraphicsGL.SetUpViewMatrix(Camera);
+			GraphicsGL.SetUpViewMatrix(Camera);
 
 			//Rotate Camera
 			Camera.Rotate();
 
-            //Draw Scene Grid
-            DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
+			//Draw Scene Grid
+			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
 			grid.Draw();
 
 			//Draw Selecting Ray
@@ -140,13 +140,21 @@ namespace CadEditor
                 DrawSelectingRay(selectingRay);
             }
 
+			//// Load the identity matrix.
+			//GraphicsGL.GL.LoadIdentity();
 
-            //Draw all objects
-            foreach (var obj in ObjectCollection)
+			//Draw all objects
+			foreach (var obj in ObjectCollection)
 			{
 				if (obj is ComplexCube)
                 {
-					((ComplexCube)obj).DrawFacets = this.DrawFacets;
+                    ((ComplexCube)obj).DrawFacets = this.DrawFacets;
+                }
+
+				if (obj is IRotateable)
+				{
+                    RotateObject(obj);
+					continue;
                 }
 
                 obj.Draw();
@@ -356,6 +364,33 @@ namespace CadEditor
             Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
 			attachingObject.Move(distanceVector*(-1));
 		}
+
+		public void UpdateObjectRotation(IRotateable rotateable, int x, int y)
+		{
+            float xDelta = (float)MouseController.GetHorizontalAngle(x);
+            float yDelta = (float)MouseController.GetVerticalAngle(y);
+
+            rotateable.xRotation += xDelta * 1f;
+            rotateable.yRotation += yDelta * 1f;
+
+            GraphicsGL.Control.Invalidate();
+        }
+
+		public void RotateObject(ISceneObject obj)
+		{
+			if (obj is IRotateable)
+			{
+                GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+                GraphicsGL.GL.PushMatrix();
+                Point3D p = obj.GetCenterPoint();
+                GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
+                GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
+                (obj).Draw();
+                GraphicsGL.GL.PopMatrix();
+            }
+        }
 
 		public void AttachCubes()
 		{

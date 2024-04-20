@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using SharpGL;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
 using System.Text;
 using CadEditor.Models.Scene.MeshObjects;
-using System.Linq;
-using System.Web.UI.WebControls;
+using CadEditor.Models.Scene;
 
 namespace CadEditor
 {
-    public class ComplexCube: MeshObject3D, IDivideable, IExportable
+    public class ComplexCube: MeshObject3D, IDivideable, IExportable, IRotateable
     {
         private const int OUTER_VERTICES_AMOUNT = 20;
         public Point3D[] OuterVertices { get; set; }
         private LocalSystem localSystem;
         public bool IsDivided { get; set; } = false;
+
+        public float xRotation { get; set; } = 0.0f;
+        public float yRotation { get; set; } = 0.0f;
 
         public class LocalSystem
         {
@@ -256,6 +256,17 @@ namespace CadEditor
             localSystem = new LocalSystem();
             OuterVertices = outer;
             //localSystem.InitOuterVertices(OuterVertices, Mesh);
+        }
+
+        public void UpdateRotation(int x, int y)
+        {
+            float xDelta = (float)MouseController.GetHorizontalAngle(x);
+            float yDelta = (float)MouseController.GetVerticalAngle(y);
+
+            xRotation += xDelta * 1f;
+            yRotation += yDelta * 1f;
+
+            GraphicsGL.Control.Invalidate();
         }
 
         private void InitPoints(Point3D CenterPoint, Vector size)

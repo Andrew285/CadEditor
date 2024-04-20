@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.Models.Scene;
 using CadEditor.Properties;
 using CadEditor.Settings;
 using CadEditor.View.Forms;
@@ -9,7 +10,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace CadEditor
@@ -149,6 +149,21 @@ namespace CadEditor
 
                 case Keys.Space:
                     scene.AttachCubes();
+                    break;
+
+                case Keys.ControlKey:
+                    scene.IsObjectRotate = true;
+                    break;
+            }
+        }
+
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.ControlKey:
+                    scene.IsObjectRotate = false;
                     break;
             }
         }
@@ -299,11 +314,14 @@ namespace CadEditor
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
         {
-			if (MouseController.IsMiddleButtonPressed)
+			if (MouseController.IsMiddleButtonPressed && scene.IsObjectRotate && scene.SelectedObject != null && scene.SelectedObject.IsSelected && scene.SelectedObject is IRotateable)
             {
-                //scene.Camera.Update(e.X, e.Y);
+                scene.UpdateObjectRotation((IRotateable)scene.SelectedObject, e.X, e.Y);
+            }
+            else if (MouseController.IsMiddleButtonPressed)
+            {
                 scene.Camera.UpdateRotation(e.X, e.Y);
-			}
+            }
 
             //move selected objects towards the selected axis
             if(scene.SelectedAxisCube != null)
@@ -642,5 +660,6 @@ namespace CadEditor
         {
             scene.IsRayDrawable = generalTab_checkBoxDrawRay.Checked ? true : false;
         }
+
     }
 }

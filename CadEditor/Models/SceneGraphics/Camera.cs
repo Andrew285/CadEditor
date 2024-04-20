@@ -1,5 +1,4 @@
-﻿using SharpGL.SceneGraph.Cameras;
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace CadEditor
@@ -34,7 +33,7 @@ namespace CadEditor
 
         public void Rotate()
         {
-            GraphicsGL.GL.Translate(0.0f, 0.0f, -distance);
+            GraphicsGL.GL.Translate(Target.X, Target.Y, Target.Z);
             GraphicsGL.GL.Rotate(yRotation, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(xRotation, 0.0f, 1.0f, 0.0f);
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
