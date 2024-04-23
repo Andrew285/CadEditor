@@ -12,9 +12,9 @@ namespace CadEditor
     {
 		private static Scene instance;
 
-		private const int SCENE_GRID_SIZE = 20;
-		private const int SCENE_GRID_DENSITY = SCENE_GRID_SIZE * 4;
-		private const float SCENE_GRID_LINE_WIDTH = 0.1f;
+		private const int sceneGridSize = 20;
+		private const int sceneGridDensity = sceneGridSize * 4;
+		private const float sceneGridLineWidth = 0.1f;
         public Camera Camera { get; private set; }
         public SceneCollection SceneCollection { get; private set; }
         public List<ISceneObject> ObjectCollection { get; private set; }
@@ -83,7 +83,7 @@ namespace CadEditor
 			//Point3D centerPoint = cube.GetCenterPoint();
 			Point3D centerPoint = new Point3D(0, 0, 0);
             Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
-            grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
+            grid = new SceneGrid(sceneGridDensity, sceneGridSize, sceneGridLineWidth);
         }
 
 		public void InitializeAttachingAxes(MeshObject3D obj)
@@ -130,11 +130,11 @@ namespace CadEditor
 			//Rotate Camera
 			Camera.Rotate();
 
-			//Draw Scene Grid
-			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
+            //Draw Scene Grid
+            DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, sceneGridSize);
 			grid.Draw();
 
-			//Draw Selecting Ray
+            //Draw Selecting Ray
             if (selectingRay != null && IsRayDrawable)
             {
                 DrawSelectingRay(selectingRay);
@@ -159,7 +159,7 @@ namespace CadEditor
 
                 obj.Draw();
 			}
-		}
+        }
 
         private void DrawSelectingRay(Ray ray)
         {

@@ -95,7 +95,7 @@ namespace CadEditor
             {
                 cube.Move(v);
             }
-
+            GraphicsGL.Control.Invalidate();
         }
 
         public void Select()

@@ -31,8 +31,15 @@ namespace CadEditor
             GraphicsGL.SetUpViewMatrix(this);
         }
 
+        public float GetDistance()
+        {
+            return distance;
+        }
+
         public void Rotate()
         {
+            //GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+            //GraphicsGL.GL.PushMatrix();
             GraphicsGL.GL.Translate(Target.X, Target.Y, Target.Z);
             GraphicsGL.GL.Rotate(yRotation, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(xRotation, 0.0f, 1.0f, 0.0f);
