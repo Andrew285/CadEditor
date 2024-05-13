@@ -77,6 +77,16 @@
     <Compile Include="Controllers\ComplexStructureController.cs" />
     <Compile Include="Controllers\NameController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="Models\Commands\SceneCommand.cs" />
+    <Compile Include="Models\Commands\CommandList.cs" />
+    <Compile Include="Models\Commands\CommandsHistory.cs" />
+    <Compile Include="Models\Commands\DivisionCommand.cs" />
+    <Compile Include="Models\Commands\DeleteAxesCommand.cs" />
+    <Compile Include="Models\Commands\InitAxesCommand.cs" />
+    <Compile Include="Models\Commands\MoveCommand.cs" />
+    <Compile Include="Models\Commands\DeselectionCommand.cs" />
+    <Compile Include="Models\Commands\SelectionCommand.cs" />
+    <Compile Include="Models\Commands\UnaryCommand.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
     <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />

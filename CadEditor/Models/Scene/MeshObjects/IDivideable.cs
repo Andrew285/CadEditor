@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace CadEditor
 {
-    public interface IDivideable
+    public interface IDivideable: ISceneObject
     {
         bool IsDivided { get; set; }
 
         void Divide(Vector v);
+
+        void Unite();
     }
 }

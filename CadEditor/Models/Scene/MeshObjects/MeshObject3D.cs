@@ -67,6 +67,14 @@ namespace CadEditor.MeshObjects
                                       allZ / verticesCount);
 		}
 
+        public MeshObject3D(MeshObject3D meshObjectToClone)
+        {
+            Name = meshObjectToClone.Name;
+            Mesh = meshObjectToClone.Mesh.Clone();
+
+            centerPoint = (Point3D)meshObjectToClone.centerPoint.Clone();
+        }
+
 		public void Draw()
 		{
 
@@ -133,6 +141,8 @@ namespace CadEditor.MeshObjects
 				Mesh.Vertices[i].Move(vector);
 			}
 			centerPoint.Move(vector);
+
+            GraphicsGL.Control.Invalidate();
 		}
 
 		public void Select()
@@ -141,6 +151,8 @@ namespace CadEditor.MeshObjects
 			{
 				edge.IsSelected = true;
 			}
+
+            IsSelected = true;
 		}
 
 		public void Deselect()
@@ -167,7 +179,7 @@ namespace CadEditor.MeshObjects
         public (ISceneObject, double) CheckSelected()
         {
             //deselect all facets, edges and vertices before another selecting
-            Deselect();
+            //Deselect();
 
             Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
             Scene.selectingRay = ray;
@@ -310,7 +322,7 @@ namespace CadEditor.MeshObjects
 
             //double distance = GetDistance(new Point3D(ray.Origin), result.Item2);
 
-            Vector3 cameraPos = Scene.GetInstance().Camera.Position;
+            //Vector3 cameraPos = Scene.GetInstance().Camera.Position;
             //double distance = GetDistance(result.Item2, new Point3D(cameraPos.X, cameraPos.Y, cameraPos.Z));
 
             double distance = GetDistance(result.Item2, new Point3D(Scene.selectingRay.Origin[0],
@@ -385,25 +397,19 @@ namespace CadEditor.MeshObjects
                 }
 
                 return true;
-            }
-
-            return false;
+            }            return false;
         }
 
         private double GetDistance(Point3D v1, Point3D v2)
-        {
+        {            
             return Math.Sqrt(Math.Pow((v2.X - v1.X), 2) + Math.Pow((v2.Y - v1.Y), 2) + Math.Pow((v2.Z - v1.Z), 2));
         }
 
-        public Point3D GetCenterPoint()
+        public Point3D GetCenterPoint() 
         {
             return centerPoint;
         }
 
-        public object Clone()
-        {
-            return new MeshObject3D(Mesh.Clone());
-        }
 
         public void SetDefaultColors()
         {
@@ -446,6 +452,11 @@ namespace CadEditor.MeshObjects
             }
 
             return false;
+        }
+
+        public virtual ISceneObject Clone()
+        {
+            return new MeshObject3D(this);
         }
     }
 }

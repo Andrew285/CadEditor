@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Policy;
 
 namespace CadEditor
 {
@@ -35,6 +36,51 @@ namespace CadEditor
             vertices = new List<Point3D>();
             edges = new List<Line>();
             attachedFacets = new List<int>();
+        }
+
+        public Mesh(Mesh meshToClone)
+        {
+            facets = new List<Plane>();
+            vertices = new List<Point3D>();
+            edges = new List<Line>();
+            attachedFacets = new List<int>();
+
+            for (int i = 0; i < meshToClone.Vertices.Count; i++)
+            {
+                vertices.Add((Point3D)meshToClone.Vertices[i].Clone());
+            }
+
+            for (int i = 0; i < meshToClone.Edges.Count; i++)
+            {
+                Point3D p1 = ContainsPoint(meshToClone.Edges[i].P1);
+                Point3D p2 = ContainsPoint(meshToClone.Edges[i].P2);
+                Edges.Add(new Line(p1, p2));
+                //edges.Add((Line)meshToClone.Edges[i].Clone());
+            }
+
+            for (int i = 0; i < meshToClone.Facets.Count; i++)
+            {
+                facets.Add((Plane)meshToClone.Facets[i].Clone());
+            }
+
+            for (int i = 0; i < meshToClone.attachedFacets.Count; i++)
+            {
+                attachedFacets.Add(meshToClone.attachedFacets[i]);
+            }
+
+            //for (int i = 0; i < this.Edges.Count; i++)
+            //{
+            //    Point3D p1 = cloneMesh.ContainsPoint(this.Edges[i].P1);
+            //    Point3D p2 = cloneMesh.ContainsPoint(this.Edges[i].P2);
+            //    cloneMesh.Edges.Add(new Line(p1, p2));
+            //}
+
+            //for (int i = 0; i < this.Facets.Count; i++)
+            //{
+            //    cloneMesh.Facets.Add((Plane)Facets[i].Clone());
+            //}
+
+            //return cloneMesh;
         }
 
         public bool Equals(Mesh mesh)
@@ -110,7 +156,7 @@ namespace CadEditor
 
             for (int i = 0; i < listToClone.Count; i++)
             {
-                resultList.Add(listToClone[i].Clone());
+                resultList.Add((Point3D)listToClone[i].Clone());
             }
 
             return resultList;
@@ -122,7 +168,7 @@ namespace CadEditor
 
             for (int i = 0; i < listToClone.Length; i++)
             {
-                resultList[i] = listToClone[i].Clone();
+                resultList[i] = (Point3D)listToClone[i].Clone();
             }
 
             return resultList;
@@ -130,32 +176,7 @@ namespace CadEditor
 
         public Mesh Clone()
         {
-            Mesh cloneMesh = new Mesh();
-
-			for (int i = 0; i < this.Vertices.Count; i++)
-			{
-                cloneMesh.Vertices.Add(Vertices[i].Clone());
-			}
-
-			for (int i = 0; i < this.Edges.Count; i++)
-			{
-                Point3D p1 = cloneMesh.ContainsPoint(this.Edges[i].P1);
-                Point3D p2 = cloneMesh.ContainsPoint(this.Edges[i].P2);
-                cloneMesh.Edges.Add(new Line(p1, p2));
-			}
-
-			for (int i = 0; i < this.Facets.Count; i++)
-			{
-                //Point3D p1 = cloneMesh.ContainsPoint(this.Facets[i][0]);
-                //Point3D p2 = cloneMesh.ContainsPoint(this.Facets[i][1]);
-                //Point3D p3 = cloneMesh.ContainsPoint(this.Facets[i][2]);
-                //Point3D p4 = cloneMesh.ContainsPoint(this.Facets[i][3]);
-                //cloneMesh.Facets.Add(new Plane(new List<Point3D> {p1, p2, p3, p4 }));
-
-                cloneMesh.Facets.Add((Plane)Facets[i].Clone());
-            }
-
-            return cloneMesh;
+            return new Mesh(this);
 		}
 	}
 }
