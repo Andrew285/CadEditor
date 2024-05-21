@@ -25,7 +25,7 @@ namespace CadEditor.Models.Commands
                 (divideableObject as IDivideable).Divide(divisionDimensions);
                 if (divideableObject is ComplexCube)
                 {
-                    ComplexStructure structure = ComplexStructureController.GetInstance().GetStructureOf(divideableObject as ComplexCube);
+                    ComplexStructure structure = scene.GetComplexStructureByCube(divideableObject as ComplexCube);
                     if (structure != null)
                     {
                         List<ComplexCube> attachedCubesByX = structure.GetAttachedCubesByAxis(divideableObject as ComplexCube, MeshObjects.CoordinateAxis.X);
@@ -56,7 +56,17 @@ namespace CadEditor.Models.Commands
             {
                 for (int i = 0; i < cubes.Count; i++)
                 {
-                    cubes[i].Divide(divDimensions);
+                    //if (cubes[i].IsDivided)
+                    //{
+                    //    cubes[i].Unite();
+                    //}
+
+                    // TODO: If cube is united local system is not appropriate
+
+                    if (!cubes[i].IsDivided)
+                    {
+                        cubes[i].Divide(divDimensions);
+                    }
                 }
             }
         }

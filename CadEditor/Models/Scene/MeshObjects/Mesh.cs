@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using CadEditor.MeshObjects;
+using MathNet.Numerics.Providers.FourierTransform;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Security.Policy;
 
 namespace CadEditor
@@ -67,20 +70,6 @@ namespace CadEditor
             {
                 attachedFacets.Add(meshToClone.attachedFacets[i]);
             }
-
-            //for (int i = 0; i < this.Edges.Count; i++)
-            //{
-            //    Point3D p1 = cloneMesh.ContainsPoint(this.Edges[i].P1);
-            //    Point3D p2 = cloneMesh.ContainsPoint(this.Edges[i].P2);
-            //    cloneMesh.Edges.Add(new Line(p1, p2));
-            //}
-
-            //for (int i = 0; i < this.Facets.Count; i++)
-            //{
-            //    cloneMesh.Facets.Add((Plane)Facets[i].Clone());
-            //}
-
-            //return cloneMesh;
         }
 
         public bool Equals(Mesh mesh)
@@ -178,5 +167,17 @@ namespace CadEditor
         {
             return new Mesh(this);
 		}
+
+        public Plane GetFacetByCoordinateAxisType(CoordinateAxisType type)
+        {
+            for (int i = 0; i < facets.Count; i++)
+            {
+                if (facets[i].AxisType == type)
+                {
+                    return facets[i];
+                }
+            }
+            return null;
+        }
 	}
 }

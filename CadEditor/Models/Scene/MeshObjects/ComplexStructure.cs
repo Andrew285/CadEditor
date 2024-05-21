@@ -2,121 +2,338 @@
 using CadEditor.MeshObjects;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
+using Nito.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 
 namespace CadEditor
 {
     public class ComplexStructure: IDivideable, IExportable, IUniqueable, IRotateable
     {
-        private List<ComplexCube> cubes;
-        public List<AttachingDetails> AttachingDetailsList { get; set; }
-        public string Name { get; set; }
+        //public List<AttachingDetails> AttachingDetailsList { get; set; }
+        private Dictionary<CellPosition, ComplexCube> cells;
+        private Dictionary<(ComplexCube, ComplexCube), (Plane, Plane)> connections;
 
+        public string Name { get; set; }
         public ISceneObject ParentObject { get; set; }
         public bool IsSelected { get; set; }
         public bool IsDivided { get; set; }
-
         public float xRotation { get; set; } = 0.0f;
         public float yRotation { get; set; } = 0.0f;
 
-        public class AttachingDetails : IExportable
+        public struct CellPosition 
         {
-            public ComplexCube attachingCube;
-            public ComplexCube targetCube;
+            public int X, Y, Z;
 
-            public Plane attachingFacet;
-            public Plane targetFacet;
-
-            public AttachingDetails(ComplexCube tC, Plane tF, ComplexCube aC, Plane aF)
+            public CellPosition(CellPosition pos)
             {
-                attachingCube = aC;
-                attachingFacet = aF;
-                targetCube = tC;
-                targetFacet = tF;
+                X = pos.X;
+                Y = pos.Y;
+                Z = pos.Z;
             }
 
-            public ComplexCube Contains(ComplexCube cube)
+            public CellPosition(int x, int y, int z)
             {
-                if (cube == attachingCube) return attachingCube;
-                else if (cube == targetCube) return targetCube;
-                else return null;
+                X = x; Y = y; Z = z;
             }
 
-            public ComplexCube GetAttachedTo(ComplexCube cube)
+            public CellPosition Clone()
             {
-                if (cube == attachingCube) return targetCube;
-                else if (cube == targetCube) return attachingCube;
-                else return null;
-            }
-
-            public Plane GetAttachingFacet(ComplexCube cube)
-            {
-                if (cube == attachingCube) return attachingFacet;
-                else if (cube == targetCube) return targetFacet;
-                else return null;
-            }
-
-            public string Export()
-            {
-                return targetCube.Name + " " + targetCube.Mesh.GetIndexOfFacet(targetFacet) + " " +
-                       attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
+                return new CellPosition(this);
             }
         }
 
+        //public class AttachingDetails : IExportable
+        //{
+        //    public ComplexCube attachingCube;
+        //    public ComplexCube targetCube;
+
+        //    public Plane attachingFacet;
+        //    public Plane targetFacet;
+
+        //    public AttachingDetails(ComplexCube tC, Plane tF, ComplexCube aC, Plane aF)
+        //    {
+        //        attachingCube = aC;
+        //        attachingFacet = aF;
+        //        targetCube = tC;
+        //        targetFacet = tF;
+        //    }
+
+        //    public ComplexCube Contains(ComplexCube cube)
+        //    {
+        //        if (cube == attachingCube) return attachingCube;
+        //        else if (cube == targetCube) return targetCube;
+        //        else return null;
+        //    }
+
+        //    public ComplexCube GetAttachedTo(ComplexCube cube)
+        //    {
+        //        if (cube == attachingCube) return targetCube;
+        //        else if (cube == targetCube) return attachingCube;
+        //        else return null;
+        //    }
+
+        //    public Plane GetAttachingFacet(ComplexCube cube)
+        //    {
+        //        if (cube == attachingCube) return attachingFacet;
+        //        else if (cube == targetCube) return targetFacet;
+        //        else return null;
+        //    }
+
+        //    public string Export()
+        //    {
+        //        return targetCube.Name + " " + targetCube.Mesh.GetIndexOfFacet(targetFacet) + " " +
+        //               attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
+        //    }
+        //}
+
         public ComplexStructure()
         {
-            cubes = new List<ComplexCube>();
-            AttachingDetailsList = new List<AttachingDetails>();
+            //cubes = new List<ComplexCube>();
+            //AttachingDetailsList = new List<AttachingDetails>();
             ParentObject = null;
             IsSelected = false;
             Name = NameController.GetNextStructureName();
+            cells = new Dictionary<CellPosition, ComplexCube>();
+            connections = new Dictionary<(ComplexCube, ComplexCube), (Plane, Plane)>();
         }
 
         public ComplexStructure(ComplexStructure source)
         {
-            List<ICloneable> cubes = new List<ICloneable>(source.cubes.Count);
+            //List<ICloneable> cubes = new List<ICloneable>(source.cells.Count);
 
-            source.cubes.ForEach((item) =>
-            {
-                cubes.Add((ICloneable)item.Clone());
-            });
+            //source.cells.Values.ForEach((item) =>
+            //{
+            //    cubes.Add((ICloneable)item.Clone());
+            //});
 
-            ParentObject = source.ParentObject.Clone();
-            IsSelected = source.IsSelected;
-            Name = source.Name;
+            //ParentObject = source.ParentObject.Clone();
+            //IsSelected = source.IsSelected;
+            //Name = source.Name;
 
             //TODO: AttachingDetailsList doesn't clone
         }
 
+        public ComplexStructure(ComplexCube target, CoordinateAxisType targetAxis,
+                                ComplexCube attaching, CoordinateAxisType attachingAxis) : this()
+        {
+            AttachCubes(target, targetAxis, attaching, attachingAxis);
+        }
+
         public List<ComplexCube> GetCubes()
         {
-            return cubes;
+            return cells.Values.ToList();
         }
 
-        public void AddCube(ComplexCube cube)
+        public void AttachCubes(ComplexCube target, CoordinateAxisType targetAxis,
+                                ComplexCube attaching, CoordinateAxisType attachingAxis)
         {
-            cube.ParentObject = this;
-            cubes.Add(cube);
+            CellPosition? targetPosition = GetCellPositionByCube(target);
+            if (targetPosition == null) 
+            {
+                targetPosition = new CellPosition(0, 0, 0);
+                cells[(CellPosition)targetPosition] = target;
+            }
 
+            CellPosition attachingPosition = new CellPosition((CellPosition)targetPosition);
+            switch (targetAxis)
+            {
+                case CoordinateAxisType.PlusZ: attachingPosition.Z += 1; break;
+                case CoordinateAxisType.MinusZ: attachingPosition.Z -= 1; break;
+                case CoordinateAxisType.PlusY: attachingPosition.Y += 1; break;
+                case CoordinateAxisType.MinusY: attachingPosition.Y -= 1; break;
+                case CoordinateAxisType.PlusX: attachingPosition.X += 1; break;
+                case CoordinateAxisType.MinusX: attachingPosition.X -= 1; break;
+            }
+
+            //Get all neighbours of attachingPosition to find all connections
+            Dictionary<CellPosition, ComplexCube> neighbourCells = GetClosestCubesToPosition(attachingPosition);
+
+            foreach (var cell in neighbourCells)
+            {
+                (CoordinateAxisType, CoordinateAxisType) axisTypes = GetAxesFromCellPositions(cell.Key, attachingPosition);
+                Plane targetFacet = cell.Value.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item1);
+                Plane attachingFacet = attaching.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item2);
+                Attach(cell.Value, targetFacet, attaching, attachingFacet);
+                cells[attachingPosition] = attaching;
+                connections[(cell.Value, attaching)] = (targetFacet, attachingFacet);
+            }
         }
 
-        public void RemoveCube(ComplexCube cube)
+        private Dictionary<CellPosition, ComplexCube> GetClosestCubesToPosition(CellPosition pos)
         {
-            cubes.Remove(cube);
+            // Define the possible movements in 3D space as direction vectors
+            (int, int, int)[] directions = new (int, int, int)[]
+            {
+            (1, 0, 0),
+            (-1, 0, 0),
+            (0, 1, 0),
+            (0, -1, 0),
+            (0, 0, 1),
+            (0, 0, -1)
+            };
+
+            // Iterate through each direction vector and compute the neighbor's position
+            Dictionary<CellPosition, ComplexCube> results = new Dictionary<CellPosition, ComplexCube>();
+            int x = pos.X, y = pos.Y, z = pos.Z;
+            foreach (var direction in directions)
+            {
+                int newX = x + direction.Item1;
+                int newY = y + direction.Item2;
+                int newZ = z + direction.Item3;
+
+                CellPosition newPosition = new CellPosition(newX, newY, newZ);
+                if (cells.ContainsKey(newPosition))
+                {
+                    results.Add(newPosition, cells[newPosition]);
+                }
+            }
+            return results;
+        }
+
+        private (CoordinateAxisType, CoordinateAxisType) GetAxesFromCellPositions(CellPosition pos1, CellPosition pos2)
+        {
+            int resultX = (pos1.X - pos2.X) % 2;
+            int resultY = (pos1.Y - pos2.Y) % 2;
+            int resultZ = (pos1.Z - pos2.Z) % 2;
+
+            if (resultX == 1) return (CoordinateAxisType.MinusX, CoordinateAxisType.PlusX);
+            else if (resultX == -1) return (CoordinateAxisType.PlusX, CoordinateAxisType.MinusX);
+            else if (resultY == 1) return (CoordinateAxisType.MinusY, CoordinateAxisType.PlusY);
+            else if (resultY == -1) return (CoordinateAxisType.PlusY, CoordinateAxisType.MinusY);
+            else if (resultZ == 1) return (CoordinateAxisType.MinusZ, CoordinateAxisType.PlusZ);
+            else if (resultZ == -1) return (CoordinateAxisType.PlusZ, CoordinateAxisType.MinusZ);
+            else return (CoordinateAxisType.MinusX, CoordinateAxisType.MinusX);
+        }
+
+        private void Attach(ComplexCube targetCube, Plane targetFacet, ComplexCube attachingCube, Plane attachingFacet)
+        {
+            //find closest point to attaching cube
+            (int, Vector) closestDistance = GetClosestDistanceToAttach(targetFacet, attachingFacet);
+            int indexOfMinPoint = closestDistance.Item1;
+            Vector minVector = closestDistance.Item2;
+
+            //move to target cube
+            Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
+            Vector centerToPoint = minVector - pointToPoint;
+            Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
+            Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
+            attachingCube.Move(resultVector * (-1));
+
+            //attach facet
+            AttachFacets(targetCube, targetFacet, attachingCube, attachingFacet);
+            UpdateObjects(targetCube, targetFacet, attachingCube, attachingFacet);
+
+            for (int j = 0; j < targetFacet.Points.Count; j++)
+            {
+                for (int k = 0; k < attachingCube.OuterVertices.Length; k++)
+                {
+                    if (attachingCube.OuterVertices[k] == attachingFacet[j])
+                    {
+                        attachingCube.OuterVertices[k] = targetFacet[j];
+                    }
+                }
+            }
+        }
+
+        private void UpdateObjects(ComplexCube targetCube, Plane targetFacet, ComplexCube attachingCube, Plane attachingFacet)
+        {
+            targetCube.UpdateObject();
+            attachingCube.UpdateObject();
+
+            int targetFacetIndex = targetCube.Mesh.GetIndexOfFacet(targetFacet);
+            targetCube.Mesh.attachedFacets.Add(targetFacetIndex);
+
+            int attachingFacetIndex = attachingCube.Mesh.GetIndexOfFacet(attachingFacet);
+            attachingCube.Mesh.attachedFacets.Add(attachingFacetIndex);
+        }
+
+        private void AttachFacets(ComplexCube targetCube, Plane targetFacet, ComplexCube attachingCube, Plane attachingFacet)
+        {
+            Mesh targetMesh = targetCube.Mesh;
+            Mesh attachingMesh = attachingCube.Mesh;
+
+            for (int i = 0; i < targetFacet.Points.Count; i++)
+            {
+                int index1 = targetMesh.GetIndexOfPoint(targetFacet[i]);
+                Point3D targetPoint = targetMesh.Vertices[index1];
+
+                int index2 = attachingMesh.GetIndexOfPoint(attachingFacet[i]);
+                Point3D attachingPoint = attachingMesh.Vertices[index2];
+
+                Vector v = attachingPoint - targetPoint;
+                attachingPoint.Move(v * (-1));
+                int coef = targetMesh.Vertices[index1].Coefficient;
+                //targetMesh.Vertices[index1] = attachingPoint;
+                //targetMesh.Vertices[index1].Coefficient += coef;
+
+                attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
+                attachingMesh.Vertices[index2].Coefficient += 1;
+            }
+        }
+
+        private (int, Vector) GetClosestDistanceToAttach(Plane targetFacet, Plane attachingFacet)
+        {
+            double minDistance = 0;
+            Vector minVector = null;
+            int indexOfMinPoint = -1;
+            for (int i = 0; i < targetFacet.Points.Count; i++)
+            {
+                Point3D p = targetFacet.Points[i];
+                Vector distanceVector = attachingFacet.GetCenterPoint() - p;
+                double distance = distanceVector.Length();
+
+                if (minDistance == 0 || distance < minDistance)
+                {
+                    minDistance = distance;
+                    minVector = distanceVector;
+                    indexOfMinPoint = i;
+                }
+            }
+
+            return (indexOfMinPoint, minVector);
+        }
+
+        private CellPosition? GetCellPositionByCube(ComplexCube cube)
+        {
+            if (cube != null)
+            {
+                foreach (var item in cells)
+                {
+                    if (item.Value == cube)
+                    {
+                        return item.Key;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public void AddCell(CellPosition position, ComplexCube cube)
+        {
+            cells.Add(position, cube);
+        }
+
+        public void AddConnection()
+        {
+
         }
 
         public bool Contains(ComplexCube cube)
         {
-            return cubes.Contains(cube);
+            return cells.Values.Contains(cube);
         }
 
         public Point3D GetCenterPoint()
         {
             double x = 0, y = 0, z = 1;
 
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 Point3D centerPoint = cube.GetCenterPoint();
                 x += centerPoint.X;
@@ -124,12 +341,12 @@ namespace CadEditor
                 z += centerPoint.Z;
             }
 
-            return new Point3D(x/cubes.Count, y/cubes.Count, z/cubes.Count);
+            return new Point3D(x/cells.Count, y/ cells.Count, z/ cells.Count);
         }
 
         public void Move(Vector v)
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Move(v);
             }
@@ -138,7 +355,7 @@ namespace CadEditor
 
         public void Select()
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Select();
             }
@@ -146,7 +363,7 @@ namespace CadEditor
 
         public void Deselect()
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Deselect();
             }
@@ -157,7 +374,7 @@ namespace CadEditor
             ISceneObject resObject = null;
             double minDistance = 0;
 
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 (ISceneObject, double) sceneObject = cube.CheckSelected();
                 
@@ -178,13 +395,12 @@ namespace CadEditor
                     }
                 }
             }
-
             return (resObject, minDistance);
         }
 
         public void Draw()
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Draw();
             }
@@ -192,22 +408,12 @@ namespace CadEditor
 
         public ISceneObject Clone()
         {
-            //ComplexStructure cloneStructure = new ComplexStructure();
-
-            //foreach (ComplexCube cube in cubes)
-            //{
-            //    cube.Clone();
-            //    cloneStructure.AddCube(cube);
-            //}
-
-            //return cloneStructure;
-
             return new ComplexStructure(this);
         }
 
         public void Divide(Vector v)
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Divide(v);
             }
@@ -215,7 +421,7 @@ namespace CadEditor
 
         public void Unite()
         {
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 cube.Unite();
             }
@@ -227,9 +433,9 @@ namespace CadEditor
             {
                 ComplexStructure complexStructure = (ComplexStructure)obj;
 
-                for (int i = 0; i < complexStructure.cubes.Count; i++)
+                for (int i = 0; i < complexStructure.cells.Count; i++)
                 {
-                    if (!this.cubes[i].IsEqual(complexStructure.cubes[i]))
+                    if (!this.cells.ElementAt(i).Value.IsEqual(complexStructure.cells.ElementAt(i).Value))
                     {
                         return false;
                     }
@@ -243,14 +449,13 @@ namespace CadEditor
 
         public ISceneObject GetObjectByName(string name)
         {
-            foreach (ISceneObject obj in cubes)
+            foreach (ISceneObject obj in cells.Values)
             {
                 if (((MeshObject3D)obj).Name == name)
                 {
                     return obj;
                 }
             }
-
             return null;
         }
 
@@ -291,17 +496,20 @@ namespace CadEditor
 
         public ComplexCube GetAttachedCubeByAxis(ComplexCube cube, CoordinateAxisType axis)
         {
-            for (int i = 0; i < AttachingDetailsList.Count; i++)
+            CellPosition cubePosition = ((CellPosition)GetCellPositionByCube(cube)).Clone();
+            switch (axis)
             {
-                AttachingDetails details = AttachingDetailsList[i];
-                ComplexCube attachedCube = details.Contains(cube);
-                Plane attachingFacet = details.GetAttachingFacet(cube);
-                if (attachedCube != null && attachingFacet != null && attachingFacet.AxisType == axis)
-                {
-                    return details.GetAttachedTo(attachedCube);
-                }
+                case CoordinateAxisType.PlusZ: cubePosition.Z += 1; break;
+                case CoordinateAxisType.MinusZ: cubePosition.Z -= 1; break;
+                case CoordinateAxisType.PlusY: cubePosition.Y += 1; break;
+                case CoordinateAxisType.MinusY: cubePosition.Y -= 1; break;
+                case CoordinateAxisType.PlusX: cubePosition.X += 1; break;
+                case CoordinateAxisType.MinusX: cubePosition.X -= 1; break;
             }
-            return null;
+
+            ComplexCube resultCube;
+            cells.TryGetValue(cubePosition, out resultCube);
+            return resultCube;
         }
 
         public string Export()
@@ -309,20 +517,30 @@ namespace CadEditor
             string stringToExport = "";
 
             stringToExport += NameController.GetNextStructureName() + "\n";
-            foreach (ComplexCube cube in cubes)
+            foreach (ComplexCube cube in cells.Values)
             {
                 stringToExport += cube.Export();
             }
+            stringToExport += "\n";
 
-            //Export Attaching Details
-            foreach (AttachingDetails details in AttachingDetailsList)
+            StringBuilder cellStringBuilder = new StringBuilder();
+            foreach (var cell in cells)
             {
-                stringToExport += "Attaching ";
-                stringToExport += details.Export();
+                CellPosition pos = cell.Key;
+                ComplexCube cube = cell.Value;
+                cellStringBuilder.Append($"Cell {pos.X} {pos.Y} {pos.Z} {cube.Name}\n");
             }
+            stringToExport += cellStringBuilder.ToString() + "\n";
 
+            StringBuilder connectionsStringBuilder = new StringBuilder();
+            foreach (var connection in connections)
+            {
+                connectionsStringBuilder.Append($"Connection " +
+                                                $"{connection.Key.Item1.Name} {connection.Key.Item2.Name} " +
+                                                $"{connection.Value.Item1.AxisType} {connection.Value.Item2.AxisType}\n");
+            }
+            stringToExport += connectionsStringBuilder.ToString();
             stringToExport += "End of Structure\n";
-
             return stringToExport;
         }
     }

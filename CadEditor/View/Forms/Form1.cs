@@ -26,8 +26,6 @@ namespace CadEditor
         private ContextMenuStrip contextMenuStrip;
         private SceneCollection sceneCollection;
         public AxisSystem AttachingAxisSystem { get; private set; }
-        private AttachingController attachingController;
-        public ComplexStructureController StructureController { get; private set; }
         private Camera camera;
         private CommandsHistory commandsHistory;
         private Point3D startMovePoint;
@@ -35,6 +33,11 @@ namespace CadEditor
         private ISceneObject selectedObject;
         private ISceneObject prevObject;
         private AxisCube axisCube;
+
+        private ComplexCube targetCube;
+        private ComplexCube attachingCube;
+        private CoordinateAxisType targetFacetAxis;
+        private CoordinateAxisType attachingFacetAxis;
 
 
         private static ToolStripMenuItem selectItem = new ToolStripMenuItem("Select Object");
@@ -45,6 +48,7 @@ namespace CadEditor
         private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Set as Target");
         private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Deselect Target");
         private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
+        private static ToolStripMenuItem uniteItem = new ToolStripMenuItem("Unite");
         private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Set Camera Target");
         
         private static int KeyX_Clicks = 0;
@@ -77,7 +81,7 @@ namespace CadEditor
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
-                selectItem, deselectItem, deleteItem, divideItem, attachItem, detachItem, setTargetItem, notSetTargetItem, setTarget
+                selectItem, deselectItem, deleteItem, divideItem, uniteItem, attachItem, detachItem, setTargetItem, notSetTargetItem, setTarget
             });
 
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
@@ -104,6 +108,7 @@ namespace CadEditor
             setTargetItem.Click += SetTarget_Object_click;
             notSetTargetItem.Click += NotSetTarget_Object_click;
             divideItem.Click += Divide_Object_click;
+            uniteItem.Click += Unite_Object_click;
             setTarget.Click += SetCameraTarget_click;
         }
 
@@ -117,7 +122,7 @@ namespace CadEditor
             //Initializing fundemental objects of scene
             camera = new Camera();
             sceneCollection = new SceneCollection(treeView1, "Collection");
-            scene = new Scene()
+            scene = new Scene(sceneCollection)
             {
                 DrawFacets = checkBox_DrawFacets.Checked
             };
@@ -133,10 +138,6 @@ namespace CadEditor
 
             Point3D centerPoint = new Point3D(0, 0, 0);
             camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
-
-            attachingController = new AttachingController();
-            StructureController = ComplexStructureController.GetInstance();
-
             library = new Library();
         }
 
@@ -205,29 +206,30 @@ namespace CadEditor
                     break;
 
                 case Keys.Space:
-                    ComplexStructure complexStructure = attachingController.AttachCubes();
+                    AttachingCommand attachingCommand = new AttachingCommand(scene, targetCube, attachingCube, targetFacetAxis, attachingFacetAxis);
+                    attachingCommand.Execute();
+                    commandsHistory.Push(attachingCommand);
+                    ComplexStructure complexStructure = attachingCommand.GetComplexStructure();
                     scene.Remove(AttachingAxisSystem);
-
 
                     if (complexStructure != null && !scene.Contains(complexStructure))
                     {
-                        scene.Remove(attachingController.GetTargetObject());
-                        scene.Remove(attachingController.GetAttachingObject());
-
-                        attachingController.Clear();
-
+                        scene.Remove(targetCube);
+                        scene.Remove(attachingCube);
+                        DetachObject();
+                        NotSetTargetObject();
                         scene.Add(complexStructure);
                         sceneCollection.AddComplexStructure(complexStructure);
                     }
                     else
                     {
-                        sceneCollection.RemoveCube(attachingController.GetAttachingObject());
-                        sceneCollection.AddCube((ComplexCube)attachingController.GetAttachingObject(), complexStructure);
-
-                        attachingController.Clear();
-
-                        scene.Remove(attachingController.GetTargetObject());
-                        scene.Remove(attachingController.GetAttachingObject());
+                        sceneCollection.RemoveCube(attachingCube);
+                        sceneCollection.AddCube(attachingCube, complexStructure);
+                        ComplexCube attachingCubeCopy = attachingCube;
+                        DetachObject();
+                        NotSetTargetObject();
+                        scene.Remove(targetCube);
+                        scene.Remove(attachingCubeCopy);
                     }
                     AttachingAxisSystem = null;
                     break;
@@ -252,9 +254,39 @@ namespace CadEditor
         private int ClickKeyAxes(CoordinateAxis axis, int clicks)
         {
             List<Axis> axes = AttachingAxisSystem.GetAxes(axis);
-            attachingController.SetAttachingObjectToAxis(axes[clicks%axes.Count]);
+            SetAttachingObjectToAxis(axes[clicks%axes.Count]);
             clicks = clicks == 1 ? 0 : 1;
             return clicks;
+        }
+
+        public void SetAttachingObjectToAxis(Axis targetAxis)
+        {
+            Point3D pointToMove = targetAxis.P2;
+
+            //Create AttachingFacetsPair
+            foreach (Plane facet in targetCube.Mesh.Facets)
+            {
+                if (facet.GetCenterPoint() == targetAxis.P1)
+                {
+                    facet.IsAttached = true;
+                    targetFacetAxis = facet.AxisType;
+                    break;
+                }
+            }
+
+            CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(targetFacetAxis);
+            foreach (Plane facet in attachingCube.Mesh.Facets)
+            {
+                if (facet.AxisType == oppositeType)
+                {
+                    facet.IsAttached = true;
+                    attachingFacetAxis = facet.AxisType;
+                    break;
+                }
+            }
+
+            Vector distanceVector = attachingCube.GetCenterPoint() - pointToMove;
+            attachingCube.Move(distanceVector * (-1));
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -306,12 +338,12 @@ namespace CadEditor
             MouseController.X = e.X;
             MouseController.Y = e.Y;
 
+            prevObject = selectedObject;
+            selectedObject = scene.Select();
             if (e.Button == MouseButtons.Left)
             {
                 GraphicsGL.DisableContexMenu();
 
-                prevObject = selectedObject;
-                selectedObject = scene.Select();
                 CommandList selectionCommandList = new CommandList();
 
                 if (selectedObject != null)
@@ -332,7 +364,6 @@ namespace CadEditor
                     {
                         if (prevObject != null && selectedObject != prevObject)
                         {
-
                             CommandList commandList = new CommandList(
                                 new List<ICommand> {
                                 new DeselectionCommand(scene, prevObject),
@@ -375,9 +406,9 @@ namespace CadEditor
             else if (e.Button == MouseButtons.Right)
             {
                 GraphicsGL.DisableContexMenu();
-                scene.Select();
+                //scene.Select();
 
-                if (scene.SelectedObject != null)
+                if (selectedObject != null)
                 {
                     InitContextMenu(MouseController.X, MouseController.Y);
                 }
@@ -408,47 +439,49 @@ namespace CadEditor
             {
                 setTarget.Visible = true;
 
-                if (scene.SelectedObject is IDivideable)
+                if (scene.SelectedObject is IDivideable && !(scene.SelectedObject as IDivideable).IsDivided)
                 {
                     divideItem.Visible = true;
+                    uniteItem.Visible = false;
                 }
                 else
                 {
                     divideItem.Visible = false;
+                    uniteItem.Visible = true;
                 }
 
 
-                if (attachingController.IsAttaching(scene.SelectedObject))
+                if (scene.SelectedObject == attachingCube)
                 {
                     detachItem.Visible = true;
                     attachItem.Visible = false;
                     setTargetItem.Visible = false;
                     notSetTargetItem.Visible = false;
                 }
-                else if (attachingController.IsEmpty())
+                else if (attachingCube == null && targetCube == null)
                 {
                     attachItem.Visible = true;
                     setTargetItem.Visible = true;
                     detachItem.Visible = false;
                     notSetTargetItem.Visible = false;
                 }
-                else if (attachingController.IsTarget(scene.SelectedObject))
+                else if (scene.SelectedObject == targetCube)
                 {
                     notSetTargetItem.Visible = true;
                     setTargetItem.Visible = false;
                     attachItem.Visible = false;
                     detachItem.Visible = false;
                 }
-                else if (!attachingController.IsTarget(scene.SelectedObject) &&
-                         attachingController.GetTargetObject() == null)
+                else if (scene.SelectedObject != targetCube &&
+                         targetCube == null)
                 {
                     setTargetItem.Visible = true;
                     notSetTargetItem.Visible = false;
                     attachItem.Visible = false;
                     detachItem.Visible = false;
                 }
-                else if (!attachingController.IsAttaching(scene.SelectedObject) &&
-                         attachingController.GetAttachingObject() == null)
+                else if (scene.SelectedObject != attachingCube &&
+                         attachingCube == null)
                 {
                     attachItem.Visible = true;
                     detachItem.Visible = false;
@@ -571,6 +604,11 @@ namespace CadEditor
 			}
 		}
 
+        private void Unite_Object_click(object sender, EventArgs e)
+        {
+            (scene.SelectedObject as IDivideable).Unite();
+        }
+
         private void Delete_Object_click(object sender, EventArgs e)
         {
             scene.DeleteCompletely(scene.SelectedObject);
@@ -579,23 +617,51 @@ namespace CadEditor
 
         private void Attach_Object_click(object sender, EventArgs e)
         {
-            attachingController.DoAttach(scene.SelectedObject);
+            AttachObject(scene.SelectedObject);
         }
 
         private void Detach_Object_click(object sender, EventArgs e)
         {
-            attachingController.DoDetach();
+            DetachObject();
         }
 
         private void SetTarget_Object_click(object sender, EventArgs e)
         {
-            attachingController.DoSetTarget(scene.SelectedObject);
-            InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
+            SetTargetObject(scene.SelectedObject);
         }
 
         private void NotSetTarget_Object_click(object sender, EventArgs e)
         {
-            attachingController.DoNotSetTarget();
+            NotSetTargetObject();
+        }
+
+        private void AttachObject(ISceneObject cube)
+        {
+            attachingCube = (ComplexCube)cube;
+            attachingCube.EdgeSelectedColor = Color.Green;
+            attachingCube.EdgeNonSelectedColor = Color.Green;
+        }
+
+        private void DetachObject()
+        {
+            attachingCube.EdgeSelectedColor = Color.Red;
+            attachingCube.EdgeNonSelectedColor = Color.Black;
+            attachingCube = null;
+        }
+
+        private void SetTargetObject(ISceneObject cube)
+        {
+            targetCube = (ComplexCube)cube;
+            targetCube.EdgeSelectedColor = Color.Blue;
+            targetCube.EdgeNonSelectedColor = Color.Blue;
+            InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
+        }
+
+        private void NotSetTargetObject()
+        {
+            targetCube.EdgeSelectedColor = Color.Red;
+            targetCube.EdgeNonSelectedColor = Color.Black;
+            targetCube = null;
             scene.ObjectCollection.Remove(AttachingAxisSystem);
         }
 
@@ -692,9 +758,7 @@ namespace CadEditor
 				{
 					MessageBox.Show("Error occurred while saving the file: " + ex.Message, "Save File", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
-
 			}
-
 		}
 
 		private void importToolStripMenuItem_Click(object sender, EventArgs e)
