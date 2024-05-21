@@ -42,6 +42,9 @@
     <Reference Include="MathNet.Spatial, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Spatial.0.6.0\lib\net461\MathNet.Spatial.dll</HintPath>
     </Reference>
+    <Reference Include="Nito.Collections.Deque, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.Collections.Deque.1.2.1\lib\net461\Nito.Collections.Deque.dll</HintPath>
+    </Reference>
     <Reference Include="SharpGL, Version=3.1.1.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpGL.3.1.1\lib\net472\SharpGL.dll</HintPath>
     </Reference>
@@ -73,10 +76,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ActionHistoryController.cs" />
-    <Compile Include="Controllers\AttachingController.cs" />
-    <Compile Include="Controllers\ComplexStructureController.cs" />
     <Compile Include="Controllers\NameController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="Models\Commands\AttachingCommand.cs" />
+    <Compile Include="Models\Commands\BinaryCommand.cs" />
     <Compile Include="Models\Commands\SceneCommand.cs" />
     <Compile Include="Models\Commands\CommandList.cs" />
     <Compile Include="Models\Commands\CommandsHistory.cs" />
@@ -88,6 +91,7 @@
     <Compile Include="Models\Commands\SelectionCommand.cs" />
     <Compile Include="Models\Commands\UnaryCommand.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
+    <Compile Include="Models\Scene\ComplexStructureList.cs" />
     <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />

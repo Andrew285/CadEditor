@@ -613,6 +613,7 @@ namespace CadEditor
                     }
 
                     currentMesh.Vertices[i][index] = sum;
+                    currentMesh.Vertices[i].ParentObject = this;
                 }
             }
 
