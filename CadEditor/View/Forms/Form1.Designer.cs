@@ -336,6 +336,7 @@
             this.generalTab_checkBoxDrawRay.TabIndex = 10;
             this.generalTab_checkBoxDrawRay.Text = "Draw Selecting Ray";
             this.generalTab_checkBoxDrawRay.UseVisualStyleBackColor = true;
+            this.generalTab_checkBoxDrawRay.CheckedChanged += new System.EventHandler(this.generalTab_checkBoxDrawRay_CheckedChanged);
             // 
             // tabPage2
             // 
@@ -369,6 +370,7 @@
             this.Name = "Form1";
             this.Text = "CadEditor";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

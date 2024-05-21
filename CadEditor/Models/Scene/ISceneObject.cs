@@ -1,4 +1,6 @@
 ﻿
+using CadEditor.Models.Scene.MeshObjects;
+
 namespace CadEditor
 {
     public interface IDrawable
@@ -16,8 +18,8 @@ namespace CadEditor
         void Move(Vector v);
         void Select();
         void Deselect();
-        object Clone();
-        ISceneObject CheckSelected();
+        ISceneObject Clone();
+        (ISceneObject, double) CheckSelected();
         bool IsEqual(ISceneObject obj);
     }
 }

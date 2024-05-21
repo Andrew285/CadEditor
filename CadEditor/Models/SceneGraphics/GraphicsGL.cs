@@ -1,4 +1,9 @@
 ﻿using SharpGL;
+using SharpGL.SceneGraph.Cameras;
+using System.Threading;
+using System;
+using System.Numerics;
+using System.Diagnostics;
 
 namespace CadEditor
 {
@@ -35,10 +40,44 @@ namespace CadEditor
             return Control.Width;
         }
 
-        public static Ray InitializeRay(double x, double y)
+        public static Ray InitializeRay(double mouseX, double mouseY)
         {
-            double[] unProject1 = GraphicsGL.GL.UnProject(x, y, 0);
-            double[] unProject2 = GraphicsGL.GL.UnProject(x, y, 1);
+            //double[] modelviewMatrix = new double[16];
+            //double[] projectionMatrix = new double[16];
+            //int[] viewport = new int[4];
+
+            //GL.GetDouble(OpenGL.GL_MODELVIEW_MATRIX, modelviewMatrix);
+            //GL.GetDouble(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
+            //GL.GetInteger(OpenGL.GL_VIEWPORT, viewport);
+
+            //double x = 0, y = 0, z = 0;
+            //GL.UnProject(mouseX, mouseY, 0.0, modelviewMatrix, projectionMatrix, viewport, ref x, ref y, ref z);
+
+            //// Camera position
+            //Vector3 cameraPos = Scene.GetInstance().Camera.Position;
+
+            //// Direction from camera to clicked point
+            //double directionX = x - cameraPos.X;
+            //double directionY = y - cameraPos.Y;
+            //double directionZ = z - cameraPos.Z;
+
+            //// You now have the direction vector from the camera position to the clicked point
+            //// You can use this information for various purposes, such as ray casting.
+
+            //// Example: Normalize the direction vector
+            //double length = Math.Sqrt(directionX * directionX + directionY * directionY + directionZ * directionZ);
+            //directionX /= length;
+            //directionY /= length;
+            //directionZ /= length;
+
+            //// Now you have a normalized direction vector
+
+            //// Example: Use the direction vector for ray casting or other calculations
+            //return new Ray(new Vector(cameraPos.X, cameraPos.Y, cameraPos.Z), new Vector((float)directionX, (float)directionY, (float)directionZ));
+
+
+            double[] unProject1 = GraphicsGL.GL.UnProject(mouseX, mouseY, 0);
+            double[] unProject2 = GraphicsGL.GL.UnProject(mouseX, mouseY, 1);
 
             Vector near = new Vector(unProject1);
             Vector far = new Vector(unProject2);
@@ -63,16 +102,11 @@ namespace CadEditor
             GL.MatrixMode(OpenGL.GL_MODELVIEW);
             GL.LoadIdentity();
 
-            Vector eye = camera.Position;
-            //Point3D center = camera.Target;
-            //Vector up = camera.RotationAxis;
-            //GL.LookAt(eye[0], eye[1], eye[2],
-            //          center[0], 0, center[2],
-            //          up[0], up[1], up[2]);
-
-            GL.LookAt(eye[0], eye[1], eye[2],
-                      0, 0, 0,
-                      0, 1, 0);
+            GL.LookAt(
+                    camera.Position.X, camera.Position.Y, camera.GetDistance(),
+                    camera.Target.X, camera.Target.Y, camera.Target.Z,
+                    camera.Up.X, camera.Up.Y, camera.Up.Z
+                );
         }
 
         public static void SetUpProjectionMatrix()

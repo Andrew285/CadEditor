@@ -155,7 +155,7 @@ namespace CadEditor
                 //targetMesh.Vertices[index1] = attachingPoint;
                 //targetMesh.Vertices[index1].Coefficient += coef;
 
-                attachingMesh.Vertices[index2] = targetPoint;
+                attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
                 attachingMesh.Vertices[index2].Coefficient += 1;
             }
         }
@@ -170,6 +170,92 @@ namespace CadEditor
 
             int attachingFacetIndex = GetAttachingObject().Mesh.GetIndexOfFacet(GetAttachingFacet());
             GetAttachingObject().Mesh.attachedFacets.Add(attachingFacetIndex);
+        }
+
+        public void SetAttachingObjectToAxis(Axis axis)
+        {
+            Point3D pointToMove = axis.P2;
+            MeshObject3D attachingObject = GetAttachingObject();
+
+            //Create AttachingFacetsPair
+            foreach (Plane facet in GetTargetObject().Mesh.Facets)
+            {
+                if (facet.GetCenterPoint() == axis.P1)
+                {
+                    facet.IsAttached = true;
+                    AddTargetFacet(facet);
+                    break;
+                }
+            }
+
+            CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(GetTargetFacet().AxisType);
+            foreach (Plane facet in GetAttachingObject().Mesh.Facets)
+            {
+                if (facet.AxisType == oppositeType)
+                {
+                    facet.IsAttached = true;
+                    AddAttachingFacet(facet);
+                    break;
+                }
+            }
+
+            Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
+            attachingObject.Move(distanceVector * (-1));
+        }
+
+        public ComplexStructure AttachCubes()
+        {
+            if (IsFacetsInitialized())
+            {
+                Plane targetFacet = GetTargetFacet();
+                Plane attachingFacet = GetAttachingFacet();
+
+                ComplexCube targetCube = ((ComplexCube)GetTargetObject());
+                ComplexCube attachingCube = ((ComplexCube)GetAttachingObject());
+
+                //find closest point to attaching cube
+                (int, Vector) closestDistance = GetClosestDistanceToAttach();
+                int indexOfMinPoint = closestDistance.Item1;
+                Vector minVector = closestDistance.Item2;
+
+                //move to target cube
+                Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
+                Vector centerToPoint = minVector - pointToPoint;
+                Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
+                Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
+                GetAttachingObject().Move(resultVector * (-1));
+
+                //attach facet
+                AttachFacets();
+                UpdateObjects();
+                //Clear();
+
+                //Creating complex structure or adding cube to it
+                ComplexStructure structure = ComplexStructureController.GetInstance().AddCubes(attachingCube, targetCube);
+                structure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails(
+
+                    targetCube,
+                    targetFacet,
+                    attachingCube,
+                    attachingFacet
+                ));
+
+                for (int j = 0; j < targetFacet.Points.Count; j++)
+                {
+                    //int posInCube = attachingFacet[j].PositionInCube;
+                    for (int k = 0; k < attachingCube.OuterVertices.Length; k++)
+                    {
+                        if (attachingCube.OuterVertices[k] == attachingFacet[j])
+                        {
+                            attachingCube.OuterVertices[k] = targetFacet[j];
+                        }
+                    }
+                }
+
+                return structure;
+            }
+
+            return null;
         }
     }
 }

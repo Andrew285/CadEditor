@@ -1,0 +1,562 @@
+ComplexStructure_9
+Cube_2
+Vertices:
+(4 4 9)
+(6 4 9)
+(6 4 7)
+(4 4 7)
+(4 6,17099999547004 9)
+(6 6,13949999630451 9)
+(6 5,54550001204015 7)
+(4 5,62200001001359 7)
+(5 4 9)
+(6 4 8)
+(5 4 7)
+(4 4 8)
+(4 5 9)
+(6 5 9)
+(6 5 7)
+(4 5 7)
+(5 6,17099999547004 9)
+(6 6 8)
+(5 5,52300001263619 7)
+(4 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_2
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_2
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_2
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_2
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_2
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_2
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_1
+Vertices:
+(6 4 9)
+(8 4 9)
+(8 4 7)
+(6 4 7)
+(6 6,13949999630451 9)
+(8 6,13499999642372 9)
+(8 5,59950001060963 7)
+(6 5,54550001204015 7)
+(7 4 9)
+(8 4 8)
+(7 4 7)
+(6 4 8)
+(6 5 9)
+(8 5 9)
+(8 5 7)
+(6 5 7)
+(7 6,11699999690056 9)
+(8 6 8)
+(7 5,51400001287461 7)
+(6 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_1
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_1
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_1
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_1
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_1
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_1
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_3
+Vertices:
+(8 4 9)
+(10 4 9)
+(10 4 7)
+(8 4 7)
+(8 6,13499999642372 9)
+(10 6,1439999961853 9)
+(10 5,61300001025201 7)
+(8 5,59950001060963 7)
+(9 4 9)
+(10 4 8)
+(9 4 7)
+(8 4 8)
+(8 5 9)
+(10 5 9)
+(10 5 7)
+(8 5 7)
+(9 6,15299999594688 9)
+(10 6 8)
+(9 5,59500001072884 7)
+(8 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_3
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_3
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_3
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_3
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_3
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_3
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_4
+Vertices:
+(10 4 9)
+(12 4 9)
+(12 4 7)
+(10 4 7)
+(10 6,1439999961853 9)
+(12 6,19799999475479 9)
+(12 5,64450000941754 7)
+(10 5,61300001025201 7)
+(11 4 9)
+(12 4 8)
+(11 4 7)
+(10 4 8)
+(10 5 9)
+(12 5 9)
+(12 5 7)
+(10 5 7)
+(11 6,17999999523163 9)
+(12 6 8)
+(11 5,59500001072884 7)
+(10 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_4
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_4
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_4
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_4
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_4
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_4
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_5
+Vertices:
+(12 4 9)
+(14 4 9)
+(14 4 7)
+(12 4 7)
+(12 6,19799999475479 9)
+(14 6,13499999642372 9)
+(14 5,60400001049042 7)
+(12 5,64450000941754 7)
+(13 4 9)
+(14 4 8)
+(13 4 7)
+(12 4 8)
+(12 5 9)
+(14 5 9)
+(14 5 7)
+(12 5 7)
+(13 6,17099999547004 9)
+(14 6 8)
+(13 5,61300001025201 7)
+(12 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_5
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_5
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_5
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_5
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_5
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_5
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_6
+Vertices:
+(4 4 11)
+(6 4 11)
+(6 4 9)
+(4 4 9)
+(4 6 11)
+(6 6 11)
+(6 6,13949999630451 9)
+(4 6,17099999547004 9)
+(5 4 11)
+(6 4 10)
+(5 4 9)
+(4 4 10)
+(4 5 11)
+(6 5 11)
+(6 5 9)
+(4 5 9)
+(5 6 11)
+(6 6,18899999499321 10)
+(5 6,17099999547004 9)
+(4 6,10799999713898 10)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_6
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_6
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_6
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_6
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_6
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_6
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_7
+Vertices:
+(6 4 11)
+(8 4 11)
+(8 4 9)
+(6 4 9)
+(6 6 11)
+(8 6 11)
+(8 6,13499999642372 9)
+(6 6,13949999630451 9)
+(7 4 11)
+(8 4 10)
+(7 4 9)
+(6 4 10)
+(6 5 11)
+(8 5 11)
+(8 5 9)
+(6 5 9)
+(7 6 11)
+(8 6,12599999666214 10)
+(7 6,11699999690056 9)
+(6 6 10)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_7
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_7
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_7
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_7
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_7
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_7
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_8
+Vertices:
+(8 4 11)
+(10 4 11)
+(10 4 9)
+(8 4 9)
+(8 6 11)
+(10 6 11)
+(10 6,1439999961853 9)
+(8 6,13499999642372 9)
+(9 4 11)
+(10 4 10)
+(9 4 9)
+(8 4 10)
+(8 5 11)
+(10 5 11)
+(10 5 9)
+(8 5 9)
+(9 6 11)
+(10 6,11699999690056 10)
+(9 6,15299999594688 9)
+(8 6 10)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_8
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_8
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_8
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_8
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_8
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_8
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_9
+Vertices:
+(10 4 11)
+(12 4 11)
+(12 4 9)
+(10 4 9)
+(10 6 11)
+(12 6 11)
+(12 6,19799999475479 9)
+(10 6,1439999961853 9)
+(11 4 11)
+(12 4 10)
+(11 4 9)
+(10 4 10)
+(10 5 11)
+(12 5 11)
+(12 5 9)
+(10 5 9)
+(11 6 11)
+(12 6,12599999666214 10)
+(11 6,17999999523163 9)
+(10 6 10)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_9
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_9
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_9
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_9
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_9
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_9
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_10
+Vertices:
+(12 4 11)
+(14 4 11)
+(14 4 9)
+(12 4 9)
+(12 6 11)
+(14 6 11)
+(14 6,13499999642372 9)
+(12 6,19799999475479 9)
+(13 4 11)
+(14 4 10)
+(13 4 9)
+(12 4 10)
+(12 5 11)
+(14 5 11)
+(14 5 9)
+(12 5 9)
+(13 6 11)
+(14 6,16199999570846 10)
+(13 6,17099999547004 9)
+(12 6 10)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_10
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_10
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_10
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_10
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_10
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_10
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Attaching Cube_2 1 Cube_1 3
+Attaching Cube_1 1 Cube_3 3
+Attaching Cube_3 1 Cube_4 3
+Attaching Cube_4 1 Cube_5 3
+Attaching Cube_2 0 Cube_6 2
+Attaching Cube_1 0 Cube_7 2
+Attaching Cube_3 0 Cube_8 2
+Attaching Cube_4 0 Cube_9 2
+Attaching Cube_5 0 Cube_10 2
+End of Structure
+

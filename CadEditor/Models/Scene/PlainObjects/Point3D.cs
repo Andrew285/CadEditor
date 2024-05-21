@@ -36,6 +36,16 @@ namespace CadEditor
 
         public Point3D(Vector v) : this(v[0], v[1], v[2]) { }
 
+        public Point3D(Point3D pointToClone): this(pointToClone.X, pointToClone.Y, pointToClone.Z)
+        {
+            ParentCube = pointToClone.ParentCube;
+            //ParentObject = pointToClone.ParentObject.Clone();
+            PositionInCube = pointToClone.PositionInCube;
+            Coefficient = pointToClone.Coefficient;
+
+            // TODO: Point3D doesn't cloneo ParentObject
+        }
+
         public bool Equals(Point3D p)
         {
             if (p != null)
@@ -88,7 +98,7 @@ namespace CadEditor
 
         public Point3D GetCenterPoint()
         {
-            return this.Clone();
+            return (Point3D)Clone();
         }
 
         public Point3D GetWorldCoordinates()
@@ -125,13 +135,9 @@ namespace CadEditor
             }
         }
 
-        public Point3D Clone()
+        public ISceneObject Clone()
         {
-            Point3D clonePoint = new Point3D(X, Y, Z);
-            clonePoint.ParentCube = ParentCube;
-            clonePoint.PositionInCube = PositionInCube;
-            clonePoint.Coefficient = Coefficient;
-            return clonePoint;
+            return new Point3D(this);
         }
 
         public void Draw()
@@ -175,14 +181,9 @@ namespace CadEditor
             IsSelected = false;
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
             throw new NotImplementedException();
-        }
-
-        object ISceneObject.Clone()
-        {
-            return Clone();
         }
 
         public bool IsEqual(ISceneObject obj)

@@ -1,27 +1,25 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using Microsoft.SqlServer.Server;
 using SharpGL;
-using SharpGL.SceneGraph;
+using SharpGL.SceneGraph.Raytracing;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Numerics;
 
 namespace CadEditor
 {
     public class Scene
     {
-		private const int SCENE_GRID_SIZE = 20;
-		private const int SCENE_GRID_DENSITY = SCENE_GRID_SIZE * 4;
-		private const float SCENE_GRID_LINE_WIDTH = 0.1f;
-        public Camera Camera { get; private set; }
-        public SceneCollection SceneCollection { get; private set; }
+		private static Scene instance;
+
+		private const int sceneGridSize = 20;
+		private const int sceneGridDensity = sceneGridSize * 4;
+		private const float sceneGridLineWidth = 0.1f;
         public List<ISceneObject> ObjectCollection { get; private set; }
-		public AxisSystem AttachingAxisSystem { get; private set; }
-		//public Ray selectingRay;
+		public bool IsRayDrawable { get; set; } = false;
+		public static Ray selectingRay;
 		private AxisSystem axisSystem;
 		private SceneGrid grid;
 
@@ -30,76 +28,34 @@ namespace CadEditor
 		public ISceneObject previousSelectedObject;
 		public ISceneObject SelectedObject { get; set; }
 		private ISceneObject previousRealSelectedObject;
-		private ISceneObject realSelectedObject;
-		public AxisCube SelectedAxisCube { get; set; }
+		//public AxisCube SelectedAxisCube { get; set; }
 
 		public bool DrawFacets { get; set; }
 
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 
-		public AttachingController AttachingController { get; private set; }
-		public ComplexStructureController StructureController { get; private set; }
+		public bool IsObjectRotate { get; set; } = false;
 
-		public Scene(Camera _camera, SceneCollection _sceneCollection)
-        {
-			Camera = _camera;
-			SceneCollection = _sceneCollection;
-			ObjectCollection = new List<ISceneObject>();
-			AttachingController = new AttachingController();
-			StructureController = ComplexStructureController.GetInstance();
-        }
-
-		#region --- Initializing ---
-
-		public void InitializeObjects()
+		public static Scene GetInstance()
 		{
-            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            ObjectCollection.Add(cube);
-            ObjectCollection.Add(cube2);
-            SceneCollection.AddCube(cube);
-            SceneCollection.AddCube(cube2);
+			if (instance == null)
+			{
+				return new Scene();
+			}
 
-            Camera.Target = new Point3D(0, 0, 0);
-			grid = new SceneGrid(SCENE_GRID_DENSITY, SCENE_GRID_SIZE, SCENE_GRID_LINE_WIDTH);
-        }
+			return instance;
+		}
 
-		public void InitializeAttachingAxes(MeshObject3D obj)
+		public Scene()
 		{
-			AttachingAxisSystem = new AxisSystem();
-            AttachingAxisSystem.AxisLength = 5.0f;
-            for (int i = 0; i < obj.Mesh.Facets.Count; i++)
-            {
-                if (!obj.Mesh.attachedFacets.Contains(i))
-                {
-					AttachingAxisSystem.CreateAxis(obj.Mesh.Facets[i].AxisType, obj.Mesh.Facets[i].GetCenterPoint());
-                }
-            }
-			ObjectCollection.Add(AttachingAxisSystem);
+            ObjectCollection = new List<ISceneObject>();
+            instance = this;
+            grid = new SceneGrid(sceneGridDensity, sceneGridSize, sceneGridLineWidth);
         }
 
-		//public void InitializeSelectingAxes(ISceneObject obj)
-		//{
-		//	AttachingAxisSystem = new AxisSystem();
-		//	AttachingAxisSystem.AxisLength = 3.0f;
+        #region --- Initializing ---
 
-		//	MeshObject3D meshObject = null;
-
-		//	if (obj is ComplexStructure)
-		//	{
-		//		meshObject = ((ComplexStructure)obj).GetCubes()[0];
-		//	}
-		//	for (int i = 0; i < meshObject.Mesh.Facets.Count; i++)
-		//	{
-		//		if (!obj.Mesh.attachedFacets.Contains(i))
-		//		{
-		//			AttachingAxisSystem.CreateAxis(obj.Mesh.Facets[i].AxisType, obj.Mesh.Facets[i].GetCenterPoint());
-		//		}
-		//	}
-		//	ObjectCollection.Add(AttachingAxisSystem);
-		//}
-
-		public ISceneObject GetPreviousSelectedObject()
+        public ISceneObject GetPreviousSelectedObject()
 		{
 			foreach (ISceneObject obj in ObjectCollection)
 			{
@@ -111,47 +67,51 @@ namespace CadEditor
 
 			return null;
 		}
-
-
-
 		#endregion
 
 		#region --- Drawing ---
 
 		public void Draw()
         {
-			GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
-			// Set up the projection matrix
-			GraphicsGL.SetUpProjectionMatrix();
-
-			// Set up the view matrix
-			GraphicsGL.SetUpViewMatrix(Camera);
-
-			//Rotate Camera
-			Camera.Rotate();
-
-			//Draw Scene Grid
-			DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, SCENE_GRID_SIZE);
+            //Draw Scene Grid
+            DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, sceneGridSize);
 			grid.Draw();
 
-   //         //Draw ray when user clicks with left button
-   //         if (selectingRay != null && selectingRay.Direction != null)
-			//{
-			//	DrawLine(selectingRay.Origin, selectingRay.Direction);
-			//}
-
-            //Draw all objects
-            foreach (var obj in ObjectCollection)
+			//Draw all objects
+			foreach (var obj in ObjectCollection)
 			{
 				if (obj is ComplexCube)
                 {
-					((ComplexCube)obj).DrawFacets = this.DrawFacets;
+                    ((ComplexCube)obj).DrawFacets = this.DrawFacets;
+                }
+
+				if (obj is IRotateable)
+				{
+                    RotateObject(obj);
+					continue;
                 }
 
                 obj.Draw();
 			}
-		}
+        }
+
+        public void DrawSelectingRay(Vector3 cameraPosition)
+        {
+			if (selectingRay != null && IsRayDrawable)
+			{
+                GraphicsGL.GL.LineWidth(2f);
+                GraphicsGL.GL.Begin(OpenGL.GL_LINES);
+
+                GraphicsGL.GL.Color(1f, 0f, 0f, 0f);
+                GraphicsGL.GL.Vertex(selectingRay.Origin[0], selectingRay.Origin[1], selectingRay.Origin[2]);
+                GraphicsGL.GL.Vertex(selectingRay.Origin[0] + selectingRay.Direction[0] * cameraPosition.Z,
+                selectingRay.Origin[1] + selectingRay.Direction[1] * cameraPosition.Z,
+                selectingRay.Origin[2] + selectingRay.Direction[2] * cameraPosition.Z);
+
+                GraphicsGL.GL.End();
+                GraphicsGL.GL.Flush();
+            }
+        }
 
         public void DrawCordinateAxes(Point3D v, double lineWidth, double axisLength)
         {
@@ -175,32 +135,36 @@ namespace CadEditor
             GraphicsGL.GL.Flush();
         }
 
-		public void DeleteSelectingCoordAxes()
-		{
-			ObjectCollection.Remove(axisSystem);
-		}
-
 		#endregion
 
 		#region --- Selection ---
 
-		public void Select()
+		public ISceneObject Select()
 		{
-			//selectingRay = new Ray();
-			//selectingRay.Origin = ray.Origin;
-
             ISceneObject realSelectedObject = null;
 
-            previousSelectedObject = SelectedObject != null ? (ISceneObject)SelectedObject.Clone() : null;
+            //previousSelectedObject = SelectedObject != null ? (ISceneObject)SelectedObject.Clone() : null;
 
-
+			double minDistance = 0;
             foreach (ISceneObject obj in ObjectCollection)
 			{
-				obj.Deselect();
-                realSelectedObject = obj.CheckSelected();
-				if(realSelectedObject != null)
+				//obj.Deselect();
+                (ISceneObject, double) result = obj.CheckSelected();
+				if(result.Item1 != null)
 				{
-					break;
+					if (minDistance == 0 || realSelectedObject == null)
+					{
+                        realSelectedObject = result.Item1;
+                        minDistance = result.Item2;
+                    }
+					else
+					{
+						if (result.Item2 < minDistance)
+						{
+							minDistance = result.Item2;
+							realSelectedObject = result.Item1;
+						}
+					}
 				}
 			}
 
@@ -225,7 +189,7 @@ namespace CadEditor
 								if (previousRealSelectedObject == null ||
 									!previousRealSelectedObject.IsEqual(realSelectedObject))
 								{
-                                    ComplexStructure structure = StructureController.GetStructureOf((ComplexCube)SelectedObject);
+                                    ComplexStructure structure = ComplexStructureController.GetInstance().GetStructureOf((ComplexCube)SelectedObject);
 
                                     if (structure != null)
                                     {
@@ -236,17 +200,19 @@ namespace CadEditor
                         }
                     }
 
-                    SelectedObject.Select();
-                    SelectedObject.IsSelected = true;
+                    //SelectedObject.Select();
+                    //SelectedObject.IsSelected = true;
 					
-                    axisSystem = new AxisSystem(SelectedObject);
-                    ObjectCollection.Insert(0, axisSystem);
+                    //axisSystem = new AxisSystem(SelectedObject.GetCenterPoint(), selectingRay);
+                    //ObjectCollection.Insert(0, axisSystem);
                 }
 				else
 				{
-					SelectedAxisCube = (AxisCube)realSelectedObject;
-					SelectedAxisCube.Select();
-					SelectedAxisCube.IsSelected = true;
+					//SelectedAxisCube = (AxisCube)realSelectedObject;
+					SelectedObject = (AxisCube)realSelectedObject;
+
+					//SelectedAxisCube.Select();
+					//SelectedAxisCube.IsSelected = true;
 				}
             }
 			else
@@ -256,6 +222,42 @@ namespace CadEditor
             }
 
             previousRealSelectedObject = realSelectedObject != null ? (ISceneObject)realSelectedObject.Clone() : null;
+
+			return SelectedObject;
+        }
+
+		public ISceneObject GetObjectByName(string name)
+		{
+			foreach (ISceneObject obj in ObjectCollection)
+			{
+				if (obj is IUniqueable && ((IUniqueable)obj).Name == name)
+				{
+					return obj;
+				}
+			}
+			return null;
+		}
+
+		public void SetObjectByName(string name, ISceneObject objToSet)
+		{
+			ISceneObject obj = GetObjectByName(name);
+            int index = ObjectCollection.IndexOf(obj);
+			if (index != -1)
+			{
+				ObjectCollection[index] = objToSet;
+			}
+        }
+
+		public bool Select(ISceneObject obj)
+		{
+			obj.Select();
+			return true;
+        }
+
+        public bool Deselect(ISceneObject obj)
+		{
+			obj.Deselect();
+			return true;
         }
 
         public void DeselectAll()
@@ -265,23 +267,38 @@ namespace CadEditor
 				c.Deselect();
 			}
 		}
-
-		#endregion
-
-		#region --- Manipulation ---
-
-		public void DeleteCompletely(ISceneObject cube)
+		
+		public bool CreateAxes(ISceneObject obj)
 		{
-			ObjectCollection.Remove(cube);
-			SceneCollection.RemoveCube((IUniqueable)cube);
+			if (axisSystem != null)
+			{
+				ObjectCollection.Remove(axisSystem);
+            }
+
+            axisSystem = new AxisSystem(obj.GetCenterPoint(), selectingRay);
+            ObjectCollection.Insert(0, axisSystem);
+            return true;
+        }
+
+        public bool DeleteSelectingCoordAxes()
+        {
+            ObjectCollection.Remove(axisSystem);
+			return true;
+        }
+
+        #endregion
+
+        #region --- Manipulation ---
+
+        public void DeleteCompletely(ISceneObject obj)
+		{
+			ObjectCollection.Remove(obj);
 			DeleteSelectingCoordAxes();
         }
 
-        public void AddCube()
+        public void AddObject(ISceneObject obj)
 		{
-			ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
-			ObjectCollection.Add(cube);
-			SceneCollection.AddCube(cube);
+			ObjectCollection.Add(obj);
 		}
 
 		public void MoveCoordinateAxes(Vector vector)
@@ -302,91 +319,48 @@ namespace CadEditor
 			}
 		}
 
-		public void SetAttachingObjectToAxis(Axis axis)
+		public void UpdateObjectRotation(IRotateable rotateable, int x, int y)
 		{
-			Point3D pointToMove = axis.P2;
-			MeshObject3D attachingObject = AttachingController.GetAttachingObject();
+            float xDelta = (float)MouseController.GetHorizontalAngle(x);
+            float yDelta = (float)MouseController.GetVerticalAngle(y);
 
-			//Create AttachingFacetsPair
-			foreach(Plane facet in AttachingController.GetTargetObject().Mesh.Facets)
+            rotateable.xRotation += xDelta * 1f;
+            rotateable.yRotation += yDelta * 1f;
+
+            GraphicsGL.Control.Invalidate();
+        }
+
+		public void RotateObject(ISceneObject obj)
+		{
+			if (obj is IRotateable)
 			{
-				if(facet.GetCenterPoint() == axis.P1)
-				{
-					facet.IsAttached = true;
-					AttachingController.AddTargetFacet(facet);
-					break;
-				}
-			}
-
-			CoordinateAxisType oppositeType = AxisSystem.GetOppositeAxisType(AttachingController.GetTargetFacet().AxisType);
-            foreach (Plane facet in AttachingController.GetAttachingObject().Mesh.Facets)
-            {
-                if (facet.AxisType == oppositeType)
-                {
-                    facet.IsAttached = true;
-					AttachingController.AddAttachingFacet(facet);
-                    break;
-                }
+                GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+                GraphicsGL.GL.PushMatrix();
+                Point3D p = obj.GetCenterPoint();
+                GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
+                GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
+                (obj).Draw();
+                GraphicsGL.GL.PopMatrix();
             }
+        }
 
-            Vector distanceVector = attachingObject.GetCenterPoint() - pointToMove;
-			attachingObject.Move(distanceVector*(-1));
+		public void Remove(ISceneObject obj)
+		{
+			ObjectCollection.Remove(obj);
+		}
+        
+		public bool Contains(ISceneObject obj)
+		{
+			return ObjectCollection.Contains(obj);
 		}
 
-		public void AttachCubes()
+		public void Add(ISceneObject obj)
 		{
-			if(AttachingController.IsFacetsInitialized())
-			{
-				Plane targetFacet = AttachingController.GetTargetFacet();
-				Plane attachingFacet = AttachingController.GetAttachingFacet();
+			ObjectCollection.Add(obj);
+		}
 
-                ComplexCube targetCube = ((ComplexCube)AttachingController.GetTargetObject());
-                ComplexCube attachingCube = ((ComplexCube)AttachingController.GetAttachingObject());
-
-				//find closest point to attaching cube
-				(int, Vector) closestDistance = AttachingController.GetClosestDistanceToAttach();
-				int indexOfMinPoint = closestDistance.Item1;
-				Vector minVector = closestDistance.Item2;
-
-				//move to target cube
-				Vector pointToPoint = attachingFacet.Points[indexOfMinPoint] - targetFacet.Points[indexOfMinPoint];
-                Vector centerToPoint = minVector - pointToPoint;
-				Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
-				Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
-				AttachingController.GetAttachingObject().Move(resultVector * (-1));
-
-				//attach facet
-				AttachingController.AttachFacets();
-				AttachingController.UpdateObjects();
-                AttachingController.Clear();
-
-                ObjectCollection.Remove(AttachingAxisSystem);
-
-                //Creating complex structure or adding cube to it
-                ComplexStructure structure = StructureController.AddCubes(attachingCube, targetCube);
-				structure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails(
-
-					targetCube,
-					targetFacet,
-					attachingCube,
-					attachingFacet
-				));
-				ObjectCollection.Remove(targetCube);
-				ObjectCollection.Remove(attachingCube);
-				
-				if (structure != null && !ObjectCollection.Contains(structure))
-				{
-					ObjectCollection.Add(structure);
-                    SceneCollection.AddComplexStructure(structure);
-                }
-				else
-				{
-                    SceneCollection.RemoveCube(attachingCube);
-                    SceneCollection.AddCube(attachingCube, structure);
-                }
-			}
-        }
-        
 		#endregion
 
 		#region --- Export/Import ---
@@ -410,15 +384,17 @@ namespace CadEditor
 			List<Point3D> currentPoints = new List<Point3D>();
 			List<Line> currentLines = new List<Line>();
 			List<Plane> currentPlanes = new List<Plane>();
+			List<Point3D> currentOuterVertices = new List<Point3D>();
 			ComplexStructure currentComplexStructure = null;
 			string name = "";
+			AttachingController attachingController = new AttachingController();
 
 			for (int i = 0; i < importStrings.Length; i++)
 			{
 				if (importStrings[i].Contains("End of Structure"))
 				{
                     cubes.Add(currentComplexStructure);
-                    StructureController.AddStructure(currentComplexStructure);
+					ComplexStructureController.GetInstance().AddStructure(currentComplexStructure);
                     currentComplexStructure = null;
                 }
 				else if (importStrings[i].Contains("Attaching"))
@@ -429,7 +405,7 @@ namespace CadEditor
                         currentMesh.Vertices = currentPoints;
                         currentMesh.Edges = currentLines;
                         currentMesh.Facets = currentPlanes;
-                        ComplexCube newCube = new ComplexCube(currentMesh);
+                        ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
                         newCube.DrawFacets = true;
                         newCube.Name = name;
                         if (currentComplexStructure != null)
@@ -444,28 +420,27 @@ namespace CadEditor
                         currentPoints = new List<Point3D>();
                         currentLines = new List<Line>();
                         currentPlanes = new List<Plane>();
-
-
+						currentOuterVertices = new List<Point3D>();
                     }
 
                     //Attach cubes
                     string[] splitted = importStrings[i].Split(' ');
 					ComplexCube targetCube1 = (ComplexCube)currentComplexStructure.GetObjectByName(splitted[1]);
-                    AttachingController.AddTargetCube(targetCube1);
-					AttachingController.AddTargetFacet(targetCube1.Mesh.Facets[Int32.Parse(splitted[2])]);
+                    attachingController.AddTargetCube(targetCube1);
+                    attachingController.AddTargetFacet(targetCube1.Mesh.Facets[Int32.Parse(splitted[2])]);
 
                     ComplexCube attachingCube1 = (ComplexCube)currentComplexStructure.GetObjectByName(splitted[3]);
-                    AttachingController.AddAttachingCube(attachingCube1);
-                    AttachingController.AddAttachingFacet(attachingCube1.Mesh.Facets[Int32.Parse(splitted[4])]);
+                    attachingController.AddAttachingCube(attachingCube1);
+                    attachingController.AddAttachingFacet(attachingCube1.Mesh.Facets[Int32.Parse(splitted[4])]);
 
-                    Plane targetFacet = AttachingController.GetTargetFacet();
-                    Plane attachingFacet = AttachingController.GetAttachingFacet();
+                    Plane targetFacet = attachingController.GetTargetFacet();
+                    Plane attachingFacet = attachingController.GetAttachingFacet();
 
-                    ComplexCube targetCube = ((ComplexCube)AttachingController.GetTargetObject());
-                    ComplexCube attachingCube = ((ComplexCube)AttachingController.GetAttachingObject());
+                    ComplexCube targetCube = ((ComplexCube)attachingController.GetTargetObject());
+                    ComplexCube attachingCube = ((ComplexCube)attachingController.GetAttachingObject());
 
                     //find closest point to attaching cube
-                    (int, Vector) closestDistance = AttachingController.GetClosestDistanceToAttach();
+                    (int, Vector) closestDistance = attachingController.GetClosestDistanceToAttach();
                     int indexOfMinPoint = closestDistance.Item1;
                     Vector minVector = closestDistance.Item2;
 
@@ -474,11 +449,11 @@ namespace CadEditor
                     Vector centerToPoint = minVector - pointToPoint;
                     Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
                     Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
-                    AttachingController.GetAttachingObject().Move(resultVector * (-1));
+                    attachingController.GetAttachingObject().Move(resultVector * (-1));
 
                     //attach facet
-                    AttachingController.AttachFacets();
-                    AttachingController.UpdateObjects();
+                    attachingController.AttachFacets();
+                    attachingController.UpdateObjects();
 
                     currentComplexStructure.AttachingDetailsList.Add(new ComplexStructure.AttachingDetails(
 
@@ -488,7 +463,7 @@ namespace CadEditor
 						attachingFacet
 					));
 
-                    AttachingController = new AttachingController();
+                    attachingController = new AttachingController();
                 }
 				else if (importStrings[i].Contains("ComplexStructure"))
 				{
@@ -518,7 +493,7 @@ namespace CadEditor
 						currentMesh.Vertices = currentPoints;
 						currentMesh.Edges = currentLines;
 						currentMesh.Facets = currentPlanes;
-						ComplexCube newCube = new ComplexCube(currentMesh);
+						ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
                         newCube.DrawFacets = true;
                         newCube.Name = name;
 
@@ -533,9 +508,10 @@ namespace CadEditor
                         currentPoints = new List<Point3D>();
 						currentLines = new List<Line>();
 						currentPlanes = new List<Plane>();
-					}
+                        currentOuterVertices = new List<Point3D>();
+                    }
 
-					name = importStrings[i];
+                    name = importStrings[i];
 				}
 				else if (importStrings[i].Contains("("))
 				{
@@ -559,6 +535,16 @@ namespace CadEditor
 
 					currentLines.Add(new Line(p1, p2));
 				}
+				else if (importStrings[i].Contains("OuterVertices"))
+				{
+                    string trimmedString = importStrings[i].Substring("OuterVertices".Length + 1);
+                    string[] splitted = trimmedString.Split(' ');
+
+					for (int j = 0; j < splitted.Length-1; j++)
+					{
+						currentOuterVertices.Add(currentPoints[Int32.Parse(splitted[j])]);
+					}
+                }
 				
 			}
 
@@ -568,8 +554,8 @@ namespace CadEditor
 				currentMesh.Vertices = currentPoints;
 				currentMesh.Edges = currentLines;
 				currentMesh.Facets = currentPlanes;
-				ComplexCube newCube = new ComplexCube(currentMesh);
-				newCube.DrawFacets = true;
+                ComplexCube newCube = new ComplexCube(currentMesh, currentOuterVertices.ToArray());
+                newCube.DrawFacets = true;
 				newCube.Name = name;
 				if (currentComplexStructure != null)
 				{
@@ -579,23 +565,20 @@ namespace CadEditor
 				{
 					cubes.Add(newCube);
 				}
-
-                currentPoints = new List<Point3D>();
-                currentLines = new List<Line>();
-                currentPlanes = new List<Plane>();
             }
 
-
+			//add new object to SceneCollection
 			ObjectCollection = cubes;
+			//SceneCollection.ClearAll();
 			foreach (ISceneObject cube in cubes)
 			{
 				if (cube is ComplexCube)
 				{
-                    SceneCollection.AddCube((ComplexCube)cube);
+                    //SceneCollection.AddCube((ComplexCube)cube);
                 }
 				else if (cube is ComplexStructure)
 				{
-                    SceneCollection.AddComplexStructure((ComplexStructure)cube);
+                    //SceneCollection.AddComplexStructure((ComplexStructure)cube);
                 }
             }
 			NameController.GetValuesOf(ObjectCollection);

@@ -23,6 +23,18 @@ namespace CadEditor
             FacetParents = new List<Plane>();
         }
 
+        public Line(Line lineToClone)
+        {
+            P1 = (Point3D)lineToClone.P1.Clone();
+            P2 = (Point3D)lineToClone.P2.Clone();
+
+            FacetParents = new List<Plane>();
+            for (int i = 0; i < lineToClone.FacetParents.Count; i++)
+            {
+                FacetParents[i] = (Plane)lineToClone.FacetParents[i].Clone();
+            }
+        }
+
         public static bool operator ==(Line a, Line b)
         {
             if (object.ReferenceEquals(a, b))
@@ -122,11 +134,6 @@ namespace CadEditor
             return true;
         }
 
-        public Line Clone()
-        {
-            return new Line(P1.Clone(), P2.Clone());
-        }
-
         public void Draw()
         {
 
@@ -187,14 +194,14 @@ namespace CadEditor
             return resultEdge;
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
             throw new NotImplementedException();
         }
 
-        object ISceneObject.Clone()
+        public ISceneObject Clone()
         {
-            return new Line(P1.Clone(), P2.Clone());
+            return new Line(this);
         }
 
         public bool IsEqual(ISceneObject obj)

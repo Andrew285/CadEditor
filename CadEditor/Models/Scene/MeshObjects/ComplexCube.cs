@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using SharpGL;
 using CadEditor.Maths;
 using CadEditor.MeshObjects;
 using System.Text;
 using CadEditor.Models.Scene.MeshObjects;
+using CadEditor.Models.Scene;
+using System.Reflection.Emit;
 
 namespace CadEditor
 {
-    public class ComplexCube: MeshObject3D, IDivideable, IExportable
+    public class ComplexCube: MeshObject3D, IDivideable, IExportable, IRotateable
     {
         private const int OUTER_VERTICES_AMOUNT = 20;
-        private Point3D[] OuterVertices = new Point3D[20];
+        public Point3D[] OuterVertices { get; set; }
         private LocalSystem localSystem;
         public bool IsDivided { get; set; } = false;
 
-        public class LocalSystem
+        public float xRotation { get; set; } = 0.0f;
+        public float yRotation { get; set; } = 0.0f;
+
+        public class LocalSystem: ICloneable
         {
             public Mesh LocalMesh { get; set; }
             public Mesh TransformMesh { get; set; }
@@ -26,6 +29,25 @@ namespace CadEditor
             public LocalSystem()
             {
                 OuterVerticesIndices = new List<int>();
+            }
+
+            public LocalSystem(LocalSystem systemToClone)
+            {
+                if (systemToClone.LocalMesh != null)
+                {
+                    LocalMesh = systemToClone.LocalMesh?.Clone();
+                    TransformMesh = systemToClone.TransformMesh?.Clone();
+                    OuterLocalVertices = new Point3D[20];
+                    for (int i = 0; i < OuterLocalVertices.Length; i++)
+                    {
+                        OuterLocalVertices[i] = (Point3D)systemToClone.OuterLocalVertices[i].Clone();
+                    }
+                    OuterVerticesIndices = new List<int>(systemToClone.OuterVerticesIndices);
+                }
+                else
+                {
+                    OuterVerticesIndices = new List<int>();
+                }
             }
 
             public void InitTransformMesh()
@@ -101,7 +123,7 @@ namespace CadEditor
                                 p.PositionInCube = j;
                                 p.ParentObject = globalCube;
                                 OuterVerticesIndices.Add(j);
-                                uniquePoints.Add(p.Clone());
+                                uniquePoints.Add((Point3D)p.Clone());
                             }
                         }
                         else
@@ -110,7 +132,7 @@ namespace CadEditor
                             p.PositionInCube = j;
                             p.ParentObject = globalCube;
                             OuterVerticesIndices.Add(j);
-                            uniquePoints.Add(p.Clone());
+                            uniquePoints.Add((Point3D)p.Clone());
                         }
                     }
                 }
@@ -159,7 +181,7 @@ namespace CadEditor
             {
                 for (int i = 0; i < prevMesh.Vertices.Count; i++)
                 {
-                    OuterVertices[i] = prevMesh.Vertices[i].Clone();
+                    OuterVertices[i] = prevMesh.Vertices[i];
 
                     if (OuterVerticesIndices.Count == 0)
                     {
@@ -183,7 +205,7 @@ namespace CadEditor
                 {
                     if (LocalMesh.Vertices[i] == sampleCube.Mesh.Vertices[count])
                     {
-                        OuterLocalVertices[count] = LocalMesh.Vertices[i].Clone();
+                        OuterLocalVertices[count] = (Point3D)LocalMesh.Vertices[i].Clone();
                         count++;
                         i = 0;
                         continue;
@@ -191,6 +213,11 @@ namespace CadEditor
 
                     i++;
                 }
+            }
+
+            public object Clone()
+            {
+                return new LocalSystem(this);
             }
         }
 
@@ -203,8 +230,8 @@ namespace CadEditor
             InitEdges(Mesh);
 
             localSystem = new LocalSystem();
+            OuterVertices = new Point3D[20];
             localSystem.InitOuterVertices(OuterVertices, Mesh);
-
         }
 
         public ComplexCube(Mesh mesh) : base(mesh) 
@@ -225,8 +252,65 @@ namespace CadEditor
             }
 
             localSystem = new LocalSystem();
-            localSystem.InitOuterVertices(OuterVertices, Mesh);
+
+            if (OuterVertices == null)
+            {
+                OuterVertices = new Point3D[20];
+                localSystem.InitOuterVertices(OuterVertices, Mesh);
+            }
         }
+
+        public ComplexCube(Mesh mesh, Point3D[] outer): base(mesh)
+        {
+            foreach (Point3D p in mesh.Vertices)
+            {
+                p.ParentObject = this;
+            }
+
+            foreach (Line l in mesh.Edges)
+            {
+                l.ParentObject = this;
+            }
+
+            foreach (Plane plane in mesh.Facets)
+            {
+                plane.ParentObject = this;
+            }
+
+            localSystem = new LocalSystem();
+            OuterVertices = outer;
+            //localSystem.InitOuterVertices(OuterVertices, Mesh);
+        }
+
+        public ComplexCube(ComplexCube cubeToClone): base(cubeToClone)
+        {
+            xRotation = cubeToClone.xRotation;
+            yRotation = cubeToClone.yRotation;
+            IsSelected = cubeToClone.IsSelected;
+            IsDivided = cubeToClone.IsDivided;
+            //localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            //localSystem = new LocalSystem();
+            localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            OuterVertices = new Point3D[20];
+            //localSystem.InitOuterVertices(OuterVertices, cubeToClone.Mesh);
+
+            for (int i = 0; i < cubeToClone.OuterVertices.Length; i++)
+            {
+                OuterVertices[i] = (Point3D)cubeToClone.OuterVertices[i].Clone();
+            }
+        }
+
+        public void UpdateRotation(int x, int y)
+        {
+            float xDelta = (float)MouseController.GetHorizontalAngle(x);
+            float yDelta = (float)MouseController.GetVerticalAngle(y);
+
+            xRotation += xDelta * 1f;
+            yRotation += yDelta * 1f;
+
+            GraphicsGL.Control.Invalidate();
+        }
+
 
         private void InitPoints(Point3D CenterPoint, Vector size)
         {
@@ -431,6 +515,8 @@ namespace CadEditor
             Transform();
 
             IsDivided = true;
+
+            //return new ComplexCube(this);
         }
 
         public void Update(Point3D p)
@@ -449,6 +535,11 @@ namespace CadEditor
             InitEdges(Mesh);
 
             UpdateMesh(Mesh, cloneMesh);
+        }
+
+        public void UpdateOuterVertices()
+        {
+            List<int> list = localSystem.OuterVerticesIndices;
         }
 
         public void UpdateMesh(Mesh original, Mesh clone)
@@ -526,9 +617,24 @@ namespace CadEditor
             }
 
             this.Mesh = currentMesh;
+            GraphicsGL.Control.Invalidate();
         }
-        
-		public bool Equals(ComplexCube cube)
+
+        public void Unite()
+        {
+            //Initializing Mesh
+            InitPoints(GetCenterPoint(), Size);
+            InitFacets(Mesh);
+            InitEdges(Mesh);
+
+            localSystem = new LocalSystem();
+            OuterVertices = new Point3D[20];
+            localSystem.InitOuterVertices(OuterVertices, Mesh);
+
+            IsDivided = false;
+        }
+
+        public bool Equals(ComplexCube cube)
 		{
 			if (cube != null)
 			{
@@ -540,19 +646,18 @@ namespace CadEditor
 
         public string Export()
         {
-            string exportString = "";
+            string exportString = Name + "\n";
 
-            exportString += Name + "\n";
-            //exportString += "Center_Point: " + CenterPoint.ToString() + "\n";
+            //Vertices
             exportString += "Vertices:\n";
             for(int i = 0; i < Mesh.Vertices.Count; i++)
             {
                 exportString += String.Format("({0} {1} {2})", Mesh.Vertices[i].X, Mesh.Vertices[i].Y, Mesh.Vertices[i].Z);
                 exportString += "\n";
             }
-
             exportString += "\n";
-			//exportString += "Edges:\n";
+
+			//Edges
 			for (int i = 0; i < Mesh.Edges.Count; i++)
 			{
                 int indexOfPoint1 = this.Mesh.GetIndexOfPoint(Mesh.Edges[i].P1);
@@ -560,10 +665,9 @@ namespace CadEditor
 				exportString += String.Format("Edge_{0} {1}", indexOfPoint1, indexOfPoint2);
 				exportString += "\n";
 			}
-
             exportString += "\n";
-            //exportString += "Facets:\n";
 
+            //Facets
             for (int i = 0; i < Mesh.Facets.Count; i++)
             {
                 StringBuilder sb = new StringBuilder();
@@ -580,8 +684,23 @@ namespace CadEditor
                 exportString += "\n";
             }
 
+            StringBuilder sb2 = new StringBuilder();
+            sb2.Append("OuterVertices ");
+            for (int i = 0; i < OuterVertices.Length; i++)
+            {
+                sb2.Append(this.Mesh.GetIndexOfPoint(OuterVertices[i]));
+                sb2.Append(" ");
+            }
+            sb2.Append('\n');
+            exportString += sb2.ToString();
+
             return exportString;
         }
 
+        public override ISceneObject Clone()
+        {
+            return new ComplexCube(this);
+            //return null;
+        }
     }
 }

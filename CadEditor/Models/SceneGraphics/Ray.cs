@@ -20,22 +20,22 @@ namespace CadEditor
 		public Vector Direction { get { return direction; } set { direction = value; } }
 
 
-		public Point3D Intersects(ISceneObject obj)
-		{
-			if (obj != null)
-			{
-				if(obj is Plane)
-				{
-					return RayIntersectsPlane((Plane)obj);
-				}
-				else if (obj is Line)
-				{
-					return RayIntersectsLine((Line)obj);
-				}
-			}
+		//public Point3D Intersects(ISceneObject obj)
+		//{
+		//	if (obj != null)
+		//	{
+		//		if(obj is Plane)
+		//		{
+		//			return RayIntersectsPlane((Plane)obj);
+		//		}
+		//		else if (obj is Line)
+		//		{
+		//			return RayIntersectsLine((Line)obj);
+		//		}
+		//	}
 
-			return null;
-		} 
+		//	return null;
+		//} 
 
 		public Point3D RayIntersectsPlane(Plane facet)
 		{
@@ -72,7 +72,7 @@ namespace CadEditor
 
 		public Point3D RayIntersectsLine(Line edge)
 		{
-			double coPlanerThreshold = 0.7;
+			double coPlanerThreshold = 0.1;
 
 			Vector da = Direction;
 			Vector db = edge.P2 - edge.P1;
@@ -99,32 +99,30 @@ namespace CadEditor
 
 		}
 
-		public Point3D RayIntersectsVertex(Point3D vertex)
-		{
-			// Calculate the components of the direction vector.
-			double dx = Direction[0];
-			double dy = Direction[1];
-			double dz = Direction[2];
+		//public Point3D RayIntersectsVertex(Point3D vertex)
+		//{
+		//	// Calculate the components of the direction vector.
+		//	double dx = Direction[0];
+		//	double dy = Direction[1];
+		//	double dz = Direction[2];
 
-			// Calculate the parameter values for each component.
-			double tx = (vertex.X - Origin[0]) / dx;
-			double ty = (vertex.Y - Origin[1]) / dy;
-			double tz = (vertex.Z - Origin[2]) / dz;
+		//	// Calculate the parameter values for each component.
+		//	double tx = (vertex.X - Origin[0]) / dx;
+		//	double ty = (vertex.Y - Origin[1]) / dy;
+		//	double tz = (vertex.Z - Origin[2]) / dz;
 
-			// Check if all the parameter values are equal (within some tolerance).
-			double accuracy = 0.1;
-			if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
-			{
-				// The point lies on the ray.
-				return new Point3D(tx, ty, tz);
-			}
-			else
-			{
-				// The point does not lie on the ray.
-				return null;
-			}
-		}
-
-
+		//	// Check if all the parameter values are equal (within some tolerance).
+		//	double accuracy = 1.4;
+		//	if (Math.Abs(tx - ty) < accuracy && Math.Abs(ty - tz) < accuracy)
+		//	{
+		//		// The point lies on the ray.
+		//		return new Point3D(tx, ty, tz);
+		//	}
+		//	else
+		//	{
+		//		// The point does not lie on the ray.
+		//		return null;
+		//	}
+		//}
 	}
 }

@@ -22,6 +22,17 @@ namespace CadEditor
             IsSelected = false;
         }
 
+        public Plane(Plane planeToClone)
+        {
+            Points = new List<Point3D>();
+            foreach (Point3D p in planeToClone.Points)
+            {
+                Points.Add((Point3D)p.Clone());
+            }
+            IsAttached = planeToClone.IsAttached;
+            IsSelected = planeToClone.IsSelected;
+        }
+
         public Point3D this[int index]
         {
             get
@@ -199,7 +210,7 @@ namespace CadEditor
 
             for (int i = 0; i < resultFacet.Points.Count; i++)
             {
-                Point3D currentVertex = resultFacet.Points[i].Clone();
+                Point3D currentVertex = (Point3D)resultFacet.Points[i].Clone();
                 Vector directionToCenter = currentVertex - GetCenterPoint();
 
                 resultFacet[i] = new Point3D(new Vector(currentVertex) - directionToCenter * tolerance);
@@ -229,20 +240,9 @@ namespace CadEditor
             return true;
         }
 
-        public object Clone()
+        public ISceneObject Clone()
         {
-            List<Point3D> points = new List<Point3D>();
-
-            foreach (Point3D p in Points)
-            {
-                points.Add(p.Clone());
-            }
-
-            Plane resultPlane = new Plane(points);
-            resultPlane.IsAttached = this.IsAttached;
-            resultPlane.IsSelected = this.IsSelected;
-
-            return (Plane)resultPlane;
+            return new Plane(this);
         }
 
         public bool IsEqual(ISceneObject obj)
@@ -263,6 +263,11 @@ namespace CadEditor
             }
 
             return false;
+        }
+
+        (ISceneObject, double) ISceneObject.CheckSelected()
+        {
+            throw new NotImplementedException();
         }
 
         public static bool operator ==(Plane a, Plane b)

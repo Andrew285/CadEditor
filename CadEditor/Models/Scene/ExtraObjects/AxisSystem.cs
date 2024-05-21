@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadEditor.MeshObjects
 {
@@ -52,25 +49,19 @@ namespace CadEditor.MeshObjects
             axes = new List<Axis>();
         }
 
-        public AxisSystem(ISceneObject obj) 
+        public AxisSystem(Point3D centerPoint, Ray ray) 
         {
-            if (obj is Point3D)
-            {
-                centerPoint = ((Point3D)obj).Clone();
-            }
-            else
-            {
-                centerPoint = obj.GetCenterPoint();
-            }
 
-            if(obj is ComplexCube)
-            {
-                AxisLength += 1.0f;
-            }
+            Vector distance = ray.Origin - new Vector(centerPoint);
+            AxisLength += 1.0f;
 
-            Axis axisX = new Axis(centerPoint.Clone(), new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
-            Axis axisY = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y);
-            Axis axisZ = new Axis(centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z);
+            double xCoord = distance[0] - centerPoint.X > 0 ? AxisLength + centerPoint.X : centerPoint.X - AxisLength;
+            double yCoord = distance[1] - centerPoint.Y > 0 ? AxisLength + centerPoint.Y : centerPoint.Y - AxisLength;
+            double zCoord = distance[2] - centerPoint.Z > 0 ? AxisLength + centerPoint.Z : centerPoint.Z - AxisLength;
+
+            Axis axisX = new Axis((Point3D)centerPoint.Clone(), new Point3D(xCoord, centerPoint.Y, centerPoint.Z), CoordinateAxis.X);
+            Axis axisY = new Axis((Point3D)centerPoint.Clone(), new Point3D(centerPoint.X, yCoord, centerPoint.Z), CoordinateAxis.Y);
+            Axis axisZ = new Axis((Point3D)centerPoint.Clone(), new Point3D(centerPoint.X, centerPoint.Y, zCoord), CoordinateAxis.Z);
 
             axisX.NonSelectedColor = Color.Red;
             axisY.NonSelectedColor = Color.Green;
@@ -82,9 +73,9 @@ namespace CadEditor.MeshObjects
             axes = new List<Axis> { axisX, axisY, axisZ };
 
             //Create Axis Cubes
-            AxisCube cubeX = new AxisCube(new Point3D(AxisLength + centerPoint.X, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
-            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, AxisLength + centerPoint.Y, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
-            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, AxisLength + centerPoint.Z), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
+            AxisCube cubeX = new AxisCube(new Point3D(xCoord, centerPoint.Y, centerPoint.Z), CoordinateAxis.X, new Vector(0.1, 0.1, 0.1), "cubeAxisX");
+            AxisCube cubeY = new AxisCube(new Point3D(centerPoint.X, yCoord, centerPoint.Z), CoordinateAxis.Y, new Vector(0.1, 0.1, 0.1), "cubeAxisY");
+            AxisCube cubeZ = new AxisCube(new Point3D(centerPoint.X, centerPoint.Y, zCoord), CoordinateAxis.Z, new Vector(0.1, 0.1, 0.1), "cubeAxisZ");
 
             //Set colors
             cubeX.FacetSelectedColor = Color.Red;
@@ -148,7 +139,7 @@ namespace CadEditor.MeshObjects
             }
         }
 
-        public ISceneObject CheckSelected()
+        public (ISceneObject, double) CheckSelected()
         {
             Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
             foreach (AxisCube cube in axisCubes)
@@ -159,20 +150,20 @@ namespace CadEditor.MeshObjects
             for (int i = 0; i < axisCubes.Count; i++)
             {
 
-                Plane selectedFacet = axisCubes[i].CheckSelectedFacet(ray);
-                if (selectedFacet != null)
+                (Plane, double) selectedFacet = axisCubes[i].CheckSelectedFacet(ray);
+                if (selectedFacet.Item1 != null)
                 {
                     axisCubes[i].IsSelected = true;
-                    return axisCubes[i];
+                    return (axisCubes[i], selectedFacet.Item2);
                 }
             }
 
-            return null;
+            return (null, 0);
         }
 
         public void CreateAxis(CoordinateAxisType axis, Point3D centerPoint)
         {
-            Point3D endPoint = centerPoint.Clone();
+            Point3D endPoint = (Point3D)centerPoint.Clone();
             CoordinateAxis coordinateAxis = new CoordinateAxis();
 
             if(axis == CoordinateAxisType.PlusX)
@@ -207,7 +198,7 @@ namespace CadEditor.MeshObjects
             }
 
 
-            Axis axisLine = new Axis(centerPoint.Clone(), endPoint, coordinateAxis);
+            Axis axisLine = new Axis((Point3D)centerPoint.Clone(), endPoint, coordinateAxis);
             axisLine.LineWidth = AxisWidth;
             axes.Add(axisLine);
         }
@@ -241,7 +232,32 @@ namespace CadEditor.MeshObjects
             }
         }
 
-        public object Clone()
+        public static CoordinateAxis GetAxisFromType(CoordinateAxisType type)
+        {
+            switch (type)
+            {
+                case CoordinateAxisType.PlusX: 
+                case CoordinateAxisType.MinusX: return CoordinateAxis.X;
+                case CoordinateAxisType.PlusY: 
+                case CoordinateAxisType.MinusY: return CoordinateAxis.Y;
+                case CoordinateAxisType.PlusZ: 
+                case CoordinateAxisType.MinusZ: return CoordinateAxis.Z;
+                default: return CoordinateAxis.X;
+            }
+        }
+
+        public static (CoordinateAxisType, CoordinateAxisType) GetAxisTypesFromAxis(CoordinateAxis axis)
+        {
+            switch (axis)
+            {
+                case CoordinateAxis.X: return (CoordinateAxisType.PlusX, CoordinateAxisType.MinusX);
+                case CoordinateAxis.Y: return (CoordinateAxisType.PlusY, CoordinateAxisType.MinusY);
+                case CoordinateAxis.Z: return (CoordinateAxisType.PlusZ, CoordinateAxisType.MinusZ);
+                default: return (CoordinateAxisType.PlusX, CoordinateAxisType.MinusX);
+            }
+        }
+
+        public ISceneObject Clone()
         {
             List<Axis> axes = new List<Axis>();
             List<AxisCube> axisCubes = new List<AxisCube>();
