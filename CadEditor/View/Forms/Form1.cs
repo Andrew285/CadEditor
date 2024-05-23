@@ -254,7 +254,10 @@ namespace CadEditor
         private int ClickKeyAxes(CoordinateAxis axis, int clicks)
         {
             List<Axis> axes = AttachingAxisSystem.GetAxes(axis);
-            SetAttachingObjectToAxis(axes[clicks%axes.Count]);
+            if (axes.Count > 0)
+            {
+                SetAttachingObjectToAxis(axes[clicks % axes.Count]);
+            }
             clicks = clicks == 1 ? 0 : 1;
             return clicks;
         }
@@ -390,6 +393,10 @@ namespace CadEditor
                             new DeleteAxesCommand(scene, prevObject)
                         });
                     }
+                    else
+                    {
+                        scene.DeselectAll();
+                    }
                 }
 
                 if (!selectionCommandList.IsEmpty())
@@ -410,12 +417,14 @@ namespace CadEditor
 
                 if (selectedObject != null)
                 {
+                    SelectionCommand selectionCommand = new SelectionCommand(scene, selectedObject);
+                    selectionCommand.Execute();
                     InitContextMenu(MouseController.X, MouseController.Y);
                 }
 			}
             else if(e.Button == MouseButtons.Middle)
             {
-				MouseController.IsMiddleButtonPressed = true;
+                MouseController.IsMiddleButtonPressed = true;
 			}
         }
 

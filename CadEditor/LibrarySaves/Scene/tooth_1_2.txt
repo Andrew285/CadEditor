@@ -1,0 +1,118 @@
+ComplexStructure_2
+Cube_2
+Vertices:
+(4 4 9)
+(6 4 9)
+(6,84599997758864 4 7)
+(4 4 7)
+(4 6 9)
+(6 6 9)
+(6,51299998641013 6 7)
+(4 6 7)
+(5 4 9)
+(6 4 8)
+(5 4 7)
+(4 4 8)
+(4 5 9)
+(6 5 9)
+(6,68399998188018 5 7)
+(4 5 7)
+(5 6 9)
+(6 6 8)
+(5 6 7)
+(4 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_2
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_2
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_2
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_2
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_2
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_2
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+Cube_1
+Vertices:
+(6 4 9)
+(8 4 9)
+(7,11800002336503 4 7)
+(6,84599997758864 4 7)
+(6 6 9)
+(8 6 9)
+(7,40600001573564 6 7)
+(6,51299998641013 6 7)
+(7 4 9)
+(8 4 8)
+(7 4 7)
+(6 4 8)
+(6 5 9)
+(8 5 9)
+(7,23500002026559 5 7)
+(6,68399998188018 5 7)
+(7 6 9)
+(8 6 8)
+(7 6 7)
+(6 6 8)
+
+Edge_0 8
+Edge_8 1
+Edge_1 13
+Edge_13 5
+Edge_5 16
+Edge_16 4
+Edge_4 12
+Edge_12 0
+Edge_1 9
+Edge_9 2
+Edge_2 14
+Edge_14 6
+Edge_6 17
+Edge_17 5
+Edge_3 10
+Edge_10 2
+Edge_6 18
+Edge_18 7
+Edge_7 15
+Edge_15 3
+Edge_0 11
+Edge_11 3
+Edge_7 19
+Edge_19 4
+
+Facet_0 8 1 13 5 16 4 12 PlusZ Cube_1
+Facet_1 9 2 14 6 17 5 13 PlusX Cube_1
+Facet_3 10 2 14 6 18 7 15 MinusZ Cube_1
+Facet_0 11 3 15 7 19 4 12 MinusX Cube_1
+Facet_4 16 5 17 6 18 7 19 PlusY Cube_1
+Facet_0 8 1 9 2 10 3 11 MinusY Cube_1
+OuterVertices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+
+Cell 0 0 0 Cube_2
+Cell 1 0 0 Cube_1
+
+Connection Cube_2 Cube_1 PlusX MinusX
+End of Structure
+

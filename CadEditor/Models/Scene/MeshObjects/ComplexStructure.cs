@@ -2,12 +2,10 @@
 using CadEditor.MeshObjects;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
-using Nito.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 
 namespace CadEditor
@@ -17,6 +15,7 @@ namespace CadEditor
         //public List<AttachingDetails> AttachingDetailsList { get; set; }
         private Dictionary<CellPosition, ComplexCube> cells;
         private Dictionary<(ComplexCube, ComplexCube), (Plane, Plane)> connections;
+        public bool DrawFacets = false;
 
         public string Name { get; set; }
         public ISceneObject ParentObject { get; set; }
@@ -272,7 +271,12 @@ namespace CadEditor
                 //targetMesh.Vertices[index1].Coefficient += coef;
 
                 attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
-                attachingMesh.Vertices[index2].Coefficient += 1;
+                //if (attachingMesh.Vertices[index2].Coefficient < 4)
+                //{
+                //    attachingMesh.Vertices[index2].Coefficient += 1;
+                //}
+
+                //TODO: Moving is not working
             }
         }
 
@@ -402,6 +406,7 @@ namespace CadEditor
         {
             foreach (ComplexCube cube in cells.Values)
             {
+                cube.DrawFacets = this.DrawFacets;
                 cube.Draw();
             }
         }
@@ -416,6 +421,40 @@ namespace CadEditor
             foreach (ComplexCube cube in cells.Values)
             {
                 cube.Divide(v);
+            }
+        }
+
+        public void Divide(ComplexCube target, Vector v)
+        {
+            CellPosition targetPosition = new CellPosition();
+            foreach (var cell in cells)
+            {
+                if (cell.Value.Name == target.Name)
+                {
+                    targetPosition = cell.Key;
+                }
+            }
+
+            Vector resultVector;
+            foreach (var cell in cells)
+            {
+                int x = Math.Abs(targetPosition.X - cell.Key.X);
+                int y = Math.Abs(targetPosition.Y - cell.Key.Y);
+                int z = Math.Abs(targetPosition.Z - cell.Key.Z);
+
+                int resX = x > 0 ? (int)v[0] : 1;
+                int resY = y > 0 ? (int)v[1] : 1;
+                int resZ = z > 0 ? (int)v[2] : 1;
+                if (resX == 1 && resY == 1 && resZ == 1)
+                {
+                    resultVector = new Vector(1, 1, 1);
+                    continue;
+                }
+                else
+                {
+                    resultVector = new Vector(resX, resY, resZ);
+                }
+                cell.Value.Divide(resultVector);
             }
         }
 

@@ -67,8 +67,12 @@ namespace CadEditor
                 {
                     ((ComplexCube)obj).DrawFacets = this.DrawFacets;
                 }
+				else if (obj is ComplexStructure)
+				{
+                    ((ComplexStructure)obj).DrawFacets = this.DrawFacets;
+                }
 
-				if (obj is IRotateable)
+                if (obj is IRotateable)
 				{
                     RotateObject(obj);
 					continue;

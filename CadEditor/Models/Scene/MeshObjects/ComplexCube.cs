@@ -548,7 +548,7 @@ namespace CadEditor
             {
                 original.Facets[i].IsSelected = clone.Facets[i].IsSelected;
                 original.Facets[i].IsAttached = clone.Facets[i].IsAttached;
-                
+                original.attachedFacets.Clear();
                 foreach(int index in clone.attachedFacets)
                 {
                     original.attachedFacets.Add(index);
