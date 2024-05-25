@@ -20,6 +20,7 @@ namespace CadEditor
 
     public partial class Form1 : Form
     {
+        private ApplicationController _applicationController;
         private static Form1 instance;
         private Library library;
         private static Scene scene;
@@ -127,9 +128,13 @@ namespace CadEditor
                 DrawFacets = checkBox_DrawFacets.Checked
             };
 
+            _applicationController = new ApplicationController();
+            _applicationController.SetScene(scene);
+            _applicationController.SetSceneCollection(sceneCollection);
+
             //Initializing objects by default
-            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), NameController.GetNextCubeName());
+            ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), ModelNameProvider.GetInstance().GetNextName(ModelTypes.COMPLEX_CUBE));
+            ComplexCube cube2 = new ComplexCube(new Point3D(5, 5, 8), new Vector(1, 1, 1), ModelNameProvider.GetInstance().GetNextName(ModelTypes.COMPLEX_CUBE));
             scene.AddObject(cube);
             scene.AddObject(cube2);
 
@@ -698,9 +703,11 @@ namespace CadEditor
 
         private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-            ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            scene.AddObject(cube);
-            sceneCollection.AddCube(cube);
+            //ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
+            //scene.AddObject(cube);
+            //sceneCollection.AddCube(cube);
+
+            _applicationController.AddNewCubeElement();
 		}
 
 		private void mode_comboBox_SelectedIndexChanged(object sender, EventArgs e)

@@ -493,7 +493,7 @@ namespace CadEditor
 					SceneCollection.AddComplexStructure((ComplexStructure)obj);
 				}
             }
-			NameController.GetValuesOf(ObjectCollection);
+			ModelNameProvider.GetInstance().GetValuesOf(ObjectCollection);
 		}
 
 		#endregion

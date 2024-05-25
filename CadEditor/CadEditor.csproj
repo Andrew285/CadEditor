@@ -76,7 +76,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ActionHistoryController.cs" />
-    <Compile Include="Controllers\NameController.cs" />
+    <Compile Include="Controllers\ApplicationController.cs" />
+    <Compile Include="Controllers\CubeController.cs" />
+    <Compile Include="Controllers\INameProvider.cs" />
+    <Compile Include="Controllers\IObjectController.cs" />
+    <Compile Include="Controllers\ModelNameProvider.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Models\Commands\AttachingCommand.cs" />
     <Compile Include="Models\Commands\BinaryCommand.cs" />
@@ -95,6 +99,7 @@
     <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />
+    <Compile Include="Models\Scene\ModelTypes.cs" />
     <Compile Include="Settings\MainSettings.cs" />
     <Compile Include="Settings\ThemeSettings.cs" />
     <Compile Include="Settings\SceneSettings.cs" />

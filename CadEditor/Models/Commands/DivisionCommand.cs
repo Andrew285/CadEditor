@@ -28,19 +28,6 @@ namespace CadEditor.Models.Commands
                     ComplexStructure structure = scene.GetComplexStructureByCube(divideableObject as ComplexCube);
                     if (structure != null)
                     {
-                        //List<ComplexCube> attachedCubesByX = structure.GetAttachedCubesByAxis(divideableObject as ComplexCube, MeshObjects.CoordinateAxis.X);
-                        //Divide(attachedCubesByX, new Vector(1, divisionDimensions[0], 1));
-
-                        //List<ComplexCube> attachedCubesByY = structure.GetAttachedCubesByAxis(divideableObject as ComplexCube, MeshObjects.CoordinateAxis.Y);
-                        //Divide(attachedCubesByY, new Vector(divisionDimensions[1], 1, 1));
-
-                        //List<ComplexCube> attachedCubesByZ = structure.GetAttachedCubesByAxis(divideableObject as ComplexCube, MeshObjects.CoordinateAxis.Z);
-                        //Divide(attachedCubesByZ, new Vector(1, 1, divisionDimensions[2]));
-
-                        //for (int i = 0; i < structure.GetCubes().Count; i++)
-                        //{
-
-                        //}
                         structure.Divide(divideableObject as ComplexCube, divisionDimensions);
                     }
                 }

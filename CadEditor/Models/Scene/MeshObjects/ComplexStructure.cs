@@ -96,7 +96,7 @@ namespace CadEditor
             //AttachingDetailsList = new List<AttachingDetails>();
             ParentObject = null;
             IsSelected = false;
-            Name = NameController.GetNextStructureName();
+            Name = ModelNameProvider.GetInstance().GetNextName(ModelTypes.COMPLEX_STRUCTURE);
             cells = new Dictionary<CellPosition, ComplexCube>();
             connections = new Dictionary<(ComplexCube, ComplexCube), (Plane, Plane)>();
         }
@@ -555,7 +555,7 @@ namespace CadEditor
         {
             string stringToExport = "";
 
-            stringToExport += NameController.GetNextStructureName() + "\n";
+            stringToExport += ModelNameProvider.GetInstance().GetNextName(ModelTypes.COMPLEX_STRUCTURE) + "\n";
             foreach (ComplexCube cube in cells.Values)
             {
                 stringToExport += cube.Export();
