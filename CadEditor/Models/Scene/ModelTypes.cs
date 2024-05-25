@@ -11,4 +11,17 @@ namespace CadEditor.Models.Scene
         COMPLEX_CUBE,
         COMPLEX_STRUCTURE,
     }
+
+    public enum ModelPartTypes 
+    {
+        VERTEX,
+        EDGE,
+        FACET
+    }
+
+    public enum ModelColorMode
+    {
+        SELECTED,
+        NON_SELECTED
+    }
 }

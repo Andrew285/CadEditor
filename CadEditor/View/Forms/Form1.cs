@@ -7,6 +7,7 @@ using CadEditor.Properties;
 using CadEditor.Settings;
 using CadEditor.View.Forms;
 using SharpGL;
+using SharpGL.SceneGraph.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,7 +25,7 @@ namespace CadEditor
         private static Form1 instance;
         private Library library;
         private static Scene scene;
-        private ContextMenuStrip contextMenuStrip;
+        //private ContextMenuStrip contextMenuStrip;
         private SceneCollection sceneCollection;
         public AxisSystem AttachingAxisSystem { get; private set; }
         private Camera camera;
@@ -40,18 +41,6 @@ namespace CadEditor
         private CoordinateAxisType targetFacetAxis;
         private CoordinateAxisType attachingFacetAxis;
 
-
-        private static ToolStripMenuItem selectItem = new ToolStripMenuItem("Select Object");
-        private static ToolStripMenuItem deselectItem = new ToolStripMenuItem("Deselect Object");
-        private static ToolStripMenuItem deleteItem = new ToolStripMenuItem("Delete Object");
-        private static ToolStripMenuItem attachItem = new ToolStripMenuItem("Attach Object");
-        private static ToolStripMenuItem detachItem = new ToolStripMenuItem("Detach Object");
-        private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Set as Target");
-        private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Deselect Target");
-        private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
-        private static ToolStripMenuItem uniteItem = new ToolStripMenuItem("Unite");
-        private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Set Camera Target");
-        
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
@@ -77,40 +66,12 @@ namespace CadEditor
             this.BackColor = ThemeSettings.MainThemeColor;
             this.menuStrip1.BackColor = ThemeSettings.MenuStripBackColor;
 
-            //Load Controls
-            contextMenuStrip = openGLControl1.ContextMenuStrip;
-            contextMenuStrip = new ContextMenuStrip();
-            contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
-            {
-                selectItem, deselectItem, deleteItem, divideItem, uniteItem, attachItem, detachItem, setTargetItem, notSetTargetItem, setTarget
-            });
-
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
 
-
-            commandsHistory = new CommandsHistory();
-
             //Set Events
             GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
-
-            selectItem.Click += Select_Object_click;
-            selectItem.Image = Resources.select_object;
-
-            deselectItem.Click += Deselect_Object_click;
-            deselectItem.Image = Resources.deselect_object;
-
-            deleteItem.Click += Delete_Object_click;
-            deleteItem.Image = Resources.remove;
-
-            attachItem.Click += Attach_Object_click;
-            detachItem.Click += Detach_Object_click;
-            setTargetItem.Click += SetTarget_Object_click;
-            notSetTargetItem.Click += NotSetTarget_Object_click;
-            divideItem.Click += Divide_Object_click;
-            uniteItem.Click += Unite_Object_click;
-            setTarget.Click += SetCameraTarget_click;
         }
 
 		#region ---- OpenGLControl Events ----
@@ -127,10 +88,13 @@ namespace CadEditor
             {
                 DrawFacets = checkBox_DrawFacets.Checked
             };
+            commandsHistory = new CommandsHistory();
 
             _applicationController = new ApplicationController();
             _applicationController.SetScene(scene);
             _applicationController.SetSceneCollection(sceneCollection);
+            _applicationController.SetCommandHistory(commandsHistory);
+            _applicationController.SetCamera(camera);
 
             //Initializing objects by default
             ComplexCube cube = new ComplexCube(new Point3D(6, 0, 5), new Vector(1, 1, 1), ModelNameProvider.GetInstance().GetNextName(ModelTypes.COMPLEX_CUBE));
@@ -424,7 +388,7 @@ namespace CadEditor
                 {
                     SelectionCommand selectionCommand = new SelectionCommand(scene, selectedObject);
                     selectionCommand.Execute();
-                    InitContextMenu(MouseController.X, MouseController.Y);
+                    _applicationController.UIController.InitContextMenu(MouseController.X, MouseController.Y);
                 }
 			}
             else if(e.Button == MouseButtons.Middle)
@@ -445,66 +409,6 @@ namespace CadEditor
             SelectionCommand selectionCommand = new SelectionCommand(scene, obj);
             selectionCommand.Execute();
             commandsHistory.Push(selectionCommand);
-        }
-
-        private void InitContextMenu(int x, int y)
-        {
-            if (scene.SelectedObject != null) 
-            {
-                setTarget.Visible = true;
-
-                if (scene.SelectedObject is IDivideable && !(scene.SelectedObject as IDivideable).IsDivided)
-                {
-                    divideItem.Visible = true;
-                    uniteItem.Visible = false;
-                }
-                else
-                {
-                    divideItem.Visible = false;
-                    uniteItem.Visible = true;
-                }
-
-
-                if (scene.SelectedObject == attachingCube)
-                {
-                    detachItem.Visible = true;
-                    attachItem.Visible = false;
-                    setTargetItem.Visible = false;
-                    notSetTargetItem.Visible = false;
-                }
-                else if (attachingCube == null && targetCube == null)
-                {
-                    attachItem.Visible = true;
-                    setTargetItem.Visible = true;
-                    detachItem.Visible = false;
-                    notSetTargetItem.Visible = false;
-                }
-                else if (scene.SelectedObject == targetCube)
-                {
-                    notSetTargetItem.Visible = true;
-                    setTargetItem.Visible = false;
-                    attachItem.Visible = false;
-                    detachItem.Visible = false;
-                }
-                else if (scene.SelectedObject != targetCube &&
-                         targetCube == null)
-                {
-                    setTargetItem.Visible = true;
-                    notSetTargetItem.Visible = false;
-                    attachItem.Visible = false;
-                    detachItem.Visible = false;
-                }
-                else if (scene.SelectedObject != attachingCube &&
-                         attachingCube == null)
-                {
-                    attachItem.Visible = true;
-                    detachItem.Visible = false;
-                    notSetTargetItem.Visible = false;
-                    setTargetItem.Visible= false;
-                }
-            }
-
-            contextMenuStrip.Show(openGLControl1, new System.Drawing.Point(x, y));
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
@@ -587,73 +491,47 @@ namespace CadEditor
 
 		private void Select_Object_click(object sender, EventArgs e)
 		{
-            SelectionCommand selectionCommand = new SelectionCommand(scene, scene.SelectedObject);
-            selectionCommand.Execute();
-            commandsHistory.Push(selectionCommand);
+            _applicationController.SelectElement();
 		}
 
-		private static void Deselect_Object_click(object sender, EventArgs e)
+		private void Deselect_Object_click(object sender, EventArgs e)
 		{
-            scene.SelectedObject.Deselect();
+            _applicationController.DeselectElement();
 		}
 
 		private void Divide_Object_click(object sender, EventArgs e)
 		{
-			if (scene.SelectedObject != null && scene.SelectedObject is IDivideable)
-			{
-                DividingCubeForm form = InitializeDividingForm();
-				DialogResult result = form.ShowDialog();
-
-				if (result == DialogResult.OK)
-				{
-					Vector nValues = form.nValues;
-                    DivisionCommand divCommand = new DivisionCommand(scene, scene.SelectedObject as IDivideable, nValues);
-                    divCommand.Execute();
-                    commandsHistory.Push(divCommand);
-				}
-			}
-			else
-			{
-				Output.ShowMessageBox("Warning", "There is no selected cube");
-			}
+            _applicationController.DivideElement();
 		}
 
         private void Unite_Object_click(object sender, EventArgs e)
         {
-            (scene.SelectedObject as IDivideable).Unite();
+            _applicationController.UniteElement();
         }
 
         private void Delete_Object_click(object sender, EventArgs e)
         {
-            scene.DeleteCompletely(scene.SelectedObject);
-            sceneCollection.RemoveCube((IUniqueable)scene.SelectedObject);
+            _applicationController.DeleteElement();
         }
 
         private void Attach_Object_click(object sender, EventArgs e)
         {
-            AttachObject(scene.SelectedObject);
+            _applicationController.MakeAttachableElement();
         }
 
         private void Detach_Object_click(object sender, EventArgs e)
         {
-            DetachObject();
+            _applicationController.MakeNonAttachableElement();
         }
 
         private void SetTarget_Object_click(object sender, EventArgs e)
         {
-            SetTargetObject(scene.SelectedObject);
+            _applicationController.MakeTargetableElement();
         }
 
         private void NotSetTarget_Object_click(object sender, EventArgs e)
         {
-            NotSetTargetObject();
-        }
-
-        private void AttachObject(ISceneObject cube)
-        {
-            attachingCube = (ComplexCube)cube;
-            attachingCube.EdgeSelectedColor = Color.Green;
-            attachingCube.EdgeNonSelectedColor = Color.Green;
+            _applicationController.MakeNonTargetableElement();
         }
 
         private void DetachObject()
@@ -661,14 +539,6 @@ namespace CadEditor
             attachingCube.EdgeSelectedColor = Color.Red;
             attachingCube.EdgeNonSelectedColor = Color.Black;
             attachingCube = null;
-        }
-
-        private void SetTargetObject(ISceneObject cube)
-        {
-            targetCube = (ComplexCube)cube;
-            targetCube.EdgeSelectedColor = Color.Blue;
-            targetCube.EdgeNonSelectedColor = Color.Blue;
-            InitializeAttachingAxes((MeshObject3D)scene.SelectedObject);
         }
 
         private void NotSetTargetObject()
@@ -679,34 +549,10 @@ namespace CadEditor
             scene.ObjectCollection.Remove(AttachingAxisSystem);
         }
 
-        private void SetCameraTarget_click(object sender, EventArgs e)
-        {
-            Point3D centerPoint = scene.SelectedObject.GetCenterPoint();
-            camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
-        }
-
-        private static DividingCubeForm InitializeDividingForm()
-        {
-            DividingCubeForm form = new DividingCubeForm();
-            form.TopMost = true;
-            form.FormBorderStyle = FormBorderStyle.FixedDialog;
-            form.StartPosition = FormStartPosition.CenterScreen;
-            form.MinimizeBox = false;
-            form.MaximizeBox = false;
-
-            return form;
-        }
-
-
-
         #endregion
 
         private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-            //ComplexCube cube = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), NameController.GetNextCubeName());
-            //scene.AddObject(cube);
-            //sceneCollection.AddCube(cube);
-
             _applicationController.AddNewCubeElement();
 		}
 
@@ -726,6 +572,7 @@ namespace CadEditor
         private void checkBox_DrawFacets_CheckedChanged(object sender, EventArgs e)
         {
             scene.DrawFacets = checkBox_DrawFacets.Checked;
+            //_applicationController.RenderController.DrawFacets = checkBox_DrawFacets.Checked;
         }
 
 		private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)

@@ -77,11 +77,14 @@
   <ItemGroup>
     <Compile Include="Controllers\ActionHistoryController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
+    <Compile Include="Controllers\AttachingController.cs" />
     <Compile Include="Controllers\CubeController.cs" />
     <Compile Include="Controllers\INameProvider.cs" />
     <Compile Include="Controllers\IObjectController.cs" />
     <Compile Include="Controllers\ModelNameProvider.cs" />
+    <Compile Include="Controllers\RenderController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="Controllers\UIController.cs" />
     <Compile Include="Models\Commands\AttachingCommand.cs" />
     <Compile Include="Models\Commands\BinaryCommand.cs" />
     <Compile Include="Models\Commands\SceneCommand.cs" />

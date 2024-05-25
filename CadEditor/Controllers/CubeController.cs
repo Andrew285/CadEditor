@@ -1,13 +1,14 @@
 ﻿using CadEditor.Models.Scene;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CadEditor.Controllers
 {
-    internal class CubeController: ICubeController
+    public class CubeController: ICubeController
     {
         private readonly INameProvider _nameProvider;
         private readonly ModelTypes _modelType = ModelTypes.COMPLEX_CUBE;
