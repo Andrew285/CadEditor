@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CadEditor.Controllers;
 
 namespace CadEditor.Models.Commands
 {
     public class BinaryCommand : UnaryCommand
     {
         protected ISceneObject extraObject;
-        public BinaryCommand(CadEditor.Scene _scene, ISceneObject firstObject, ISceneObject secondObject) : base(_scene, firstObject)
+        public BinaryCommand(ApplicationController appController, ISceneObject firstObject, ISceneObject secondObject) : base(appController, firstObject)
         {
             extraObject = secondObject;
         }

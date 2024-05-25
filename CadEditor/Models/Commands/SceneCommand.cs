@@ -1,5 +1,7 @@
 ﻿
 
+using CadEditor.Controllers;
+
 namespace CadEditor
 {
     public interface ICommand
@@ -11,11 +13,11 @@ namespace CadEditor
 
     public abstract class SceneCommand
     {
-        protected Scene scene;
+        protected ApplicationController _applicationController;
 
-        public SceneCommand(Scene _scene)
+        public SceneCommand(ApplicationController applicationController)
         {
-            scene = _scene;
+            _applicationController = applicationController;
         }
     }
 }

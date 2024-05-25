@@ -265,7 +265,7 @@ namespace CadEditor
             return false;
         }
 
-        (ISceneObject, double) ISceneObject.CheckSelected()
+        (ISceneObject, double) ISceneObject.CheckSelected(int x, int y)
         {
             throw new NotImplementedException();
         }

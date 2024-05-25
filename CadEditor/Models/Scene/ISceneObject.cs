@@ -19,7 +19,7 @@ namespace CadEditor
         void Select();
         void Deselect();
         ISceneObject Clone();
-        (ISceneObject, double) CheckSelected();
+        (ISceneObject, double) CheckSelected(int x, int y);
         bool IsEqual(ISceneObject obj);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CadEditor.Controllers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace CadEditor.Models.Commands
     {
         private Vector movingVector;
 
-        public MoveCommand(CadEditor.Scene _scene, ISceneObject obj, Vector _movingVector) : base(_scene, obj)
+        public MoveCommand(ApplicationController appController, ISceneObject obj, Vector _movingVector) : base(appController, obj)
         {
             movingVector = _movingVector;
         }

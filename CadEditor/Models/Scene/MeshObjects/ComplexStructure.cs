@@ -12,7 +12,6 @@ namespace CadEditor
 {
     public class ComplexStructure: IDivideable, IExportable, IUniqueable, IRotateable
     {
-        //public List<AttachingDetails> AttachingDetailsList { get; set; }
         private Dictionary<CellPosition, ComplexCube> cells;
         private Dictionary<(ComplexCube, ComplexCube), (Plane, Plane)> connections;
         public bool DrawFacets = false;
@@ -45,50 +44,6 @@ namespace CadEditor
                 return new CellPosition(this);
             }
         }
-
-        //public class AttachingDetails : IExportable
-        //{
-        //    public ComplexCube attachingCube;
-        //    public ComplexCube targetCube;
-
-        //    public Plane attachingFacet;
-        //    public Plane targetFacet;
-
-        //    public AttachingDetails(ComplexCube tC, Plane tF, ComplexCube aC, Plane aF)
-        //    {
-        //        attachingCube = aC;
-        //        attachingFacet = aF;
-        //        targetCube = tC;
-        //        targetFacet = tF;
-        //    }
-
-        //    public ComplexCube Contains(ComplexCube cube)
-        //    {
-        //        if (cube == attachingCube) return attachingCube;
-        //        else if (cube == targetCube) return targetCube;
-        //        else return null;
-        //    }
-
-        //    public ComplexCube GetAttachedTo(ComplexCube cube)
-        //    {
-        //        if (cube == attachingCube) return targetCube;
-        //        else if (cube == targetCube) return attachingCube;
-        //        else return null;
-        //    }
-
-        //    public Plane GetAttachingFacet(ComplexCube cube)
-        //    {
-        //        if (cube == attachingCube) return attachingFacet;
-        //        else if (cube == targetCube) return targetFacet;
-        //        else return null;
-        //    }
-
-        //    public string Export()
-        //    {
-        //        return targetCube.Name + " " + targetCube.Mesh.GetIndexOfFacet(targetFacet) + " " +
-        //               attachingCube.Name + " " + attachingCube.Mesh.GetIndexOfFacet(targetFacet) + "\n";
-        //    }
-        //}
 
         public ComplexStructure()
         {
@@ -273,7 +228,7 @@ namespace CadEditor
                 attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
                 //if (attachingMesh.Vertices[index2].Coefficient < 4)
                 //{
-                //    attachingMesh.Vertices[index2].Coefficient += 1;
+                attachingMesh.Vertices[index2].Coefficient += 1;
                 //}
 
                 //TODO: Moving is not working
@@ -373,14 +328,14 @@ namespace CadEditor
             }
         }
 
-        public (ISceneObject, double) CheckSelected()
+        public (ISceneObject, double) CheckSelected(int x, int y)
         {
             ISceneObject resObject = null;
             double minDistance = 0;
 
             foreach (ComplexCube cube in cells.Values)
             {
-                (ISceneObject, double) sceneObject = cube.CheckSelected();
+                (ISceneObject, double) sceneObject = cube.CheckSelected(x, y);
                 
                 if (sceneObject.Item1 != null)
                 {

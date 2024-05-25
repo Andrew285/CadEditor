@@ -1,12 +1,14 @@
-﻿using System;
+﻿using CadEditor.Models.Scene;
+using SharpGL.SceneGraph.Cameras;
+using System;
 using System.Numerics;
 
 namespace CadEditor
 {
-    public class Camera
+    public class Camera: IRotateable
     {
-        private float xRotation = 0.0f;
-        private float yRotation = 0.0f;
+        public float xRotation { get; set; } = 0.0f;
+        public float yRotation { get; set; } = 0.0f;
 
         public Vector3 Position { get; set; }
         public float RotationSpeed { get; set; } = 1.0f;
@@ -46,17 +48,17 @@ namespace CadEditor
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
         }
 
-        public void UpdateRotation(int x, int y)
-        {
-            float xDelta = (float)MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)MouseController.GetVerticalAngle(y);
+        //public void UpdateRotation(int x, int y, MouseController controller)
+        //{
+        //    float xDelta = (float)controller.GetHorizontalAngle(x);
+        //    float yDelta = (float)controller.GetVerticalAngle(y);
 
-            xRotation += xDelta * RotationSpeed;
-            yRotation += yDelta * RotationSpeed;
+        //    xRotation += xDelta * RotationSpeed;
+        //    yRotation += yDelta * RotationSpeed;
 
-            UpdateCameraPosition();
-            GraphicsGL.Control.Invalidate();
-        }
+        //    UpdateCameraPosition();
+        //    GraphicsGL.Control.Invalidate();
+        //}
 
 
         public void SetTarget(double x, double y, double z)
@@ -94,6 +96,13 @@ namespace CadEditor
             float Z = (float)(Target.Z + distance * Math.Cos(elevationRad) * Math.Cos(azimuthRad));
 
             Position = new Vector3(X, Y, Z);
+        }
+
+        public void ZoomBy(int value)
+        {
+            Zoom(value);
+            LimitDistance();
+            GraphicsGL.Invalidate();
         }
     }
 }

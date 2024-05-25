@@ -82,7 +82,9 @@
     <Compile Include="Controllers\INameProvider.cs" />
     <Compile Include="Controllers\IObjectController.cs" />
     <Compile Include="Controllers\ModelNameProvider.cs" />
+    <Compile Include="Controllers\MovingController.cs" />
     <Compile Include="Controllers\RenderController.cs" />
+    <Compile Include="Controllers\SceneController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Controllers\UIController.cs" />
     <Compile Include="Models\Commands\AttachingCommand.cs" />

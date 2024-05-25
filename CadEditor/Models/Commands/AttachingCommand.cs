@@ -1,6 +1,6 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
 using System;
-using System.Collections.Generic;
 
 namespace CadEditor.Models.Commands
 {
@@ -10,11 +10,11 @@ namespace CadEditor.Models.Commands
         CoordinateAxisType attachingAxisType;
         ComplexStructure complexStructure;
 
-        public AttachingCommand(CadEditor.Scene _scene,
+        public AttachingCommand(ApplicationController appController,
                                ISceneObject target,
                                ISceneObject attaching,
                                CoordinateAxisType targetAxis,
-                               CoordinateAxisType attachingAxis) : base(_scene, target, attaching)
+                               CoordinateAxisType attachingAxis) : base(appController, target, attaching)
         {
             targetAxisType = targetAxis;
             attachingAxisType = attachingAxis;
@@ -33,7 +33,7 @@ namespace CadEditor.Models.Commands
                 throw new NotImplementedException();
             }
 
-            complexStructure = scene.GetComplexStructureByCube(targetCube);
+            complexStructure = _applicationController.SceneController.Scene.GetComplexStructureByCube(targetCube);
             if (complexStructure != null)
             {
                 complexStructure.AttachCubes(targetCube, targetAxisType, attachingCube, attachingAxisType);

@@ -1,4 +1,5 @@
-﻿using CadEditor.Models.Scene.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.Models.Scene.MeshObjects;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -12,7 +13,7 @@ namespace CadEditor.Models.Commands
         private ISceneObject prevObject;
         private Vector divisionDimensions;
 
-        public DivisionCommand(CadEditor.Scene _scene, ISceneObject obj, Vector _divDimensions) : base(_scene)
+        public DivisionCommand(ApplicationController appController, ISceneObject obj, Vector _divDimensions) : base(appController)
         {
             divisionDimensions = _divDimensions;
             divideableObject = obj;
@@ -25,7 +26,7 @@ namespace CadEditor.Models.Commands
                 (divideableObject as IDivideable).Divide(divisionDimensions);
                 if (divideableObject is ComplexCube)
                 {
-                    ComplexStructure structure = scene.GetComplexStructureByCube(divideableObject as ComplexCube);
+                    ComplexStructure structure = _applicationController.SceneController.Scene.GetComplexStructureByCube(divideableObject as ComplexCube);
                     if (structure != null)
                     {
                         structure.Divide(divideableObject as ComplexCube, divisionDimensions);

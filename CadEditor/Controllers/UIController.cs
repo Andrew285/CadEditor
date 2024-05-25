@@ -56,7 +56,7 @@ namespace CadEditor.Controllers
 
         public void InitContextMenu(int x, int y)
         {
-            Scene scene = _applicationController.Scene;
+            Scene scene = _applicationController.SceneController.Scene;
             ComplexCube attachingCube = _applicationController.AttachingController.GetAttachingCube();
             ComplexCube targetCube = _applicationController.AttachingController.GetTargetCube();
 
