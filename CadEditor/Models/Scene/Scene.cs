@@ -13,7 +13,6 @@ namespace CadEditor
         public List<ISceneObject> ObjectCollection { get; private set; }
 		public ISceneObject SelectedObject { get; set; }
 		public ISceneObject PreviousSelectedObject { get; set; }
-		public bool DrawFacets { get; set; }
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 		public bool IsObjectRotate { get; set; } = false;
 
@@ -40,30 +39,30 @@ namespace CadEditor
 
         #region --- Drawing ---
 
-        public void Draw()
-        {
+        //public void Draw(bool drawFacets)
+        //{
 
-            //Draw all objects
-            foreach (var obj in ObjectCollection)
-            {
-                if (obj is ComplexCube)
-                {
-                    ((ComplexCube)obj).DrawFacets = this.DrawFacets;
-                }
-                else if (obj is ComplexStructure)
-                {
-                    ((ComplexStructure)obj).DrawFacets = this.DrawFacets;
-                }
+        //    //Draw all objects
+        //    foreach (var obj in ObjectCollection)
+        //    {
+        //        if (obj is ComplexCube)
+        //        {
+        //            ((ComplexCube)obj).DrawFacets = drawFacets;
+        //        }
+        //        else if (obj is ComplexStructure)
+        //        {
+        //            ((ComplexStructure)obj).DrawFacets = drawFacets;
+        //        }
 
-                if (obj is IRotateable)
-                {
-                    RotateObject(obj);
-                    continue;
-                }
+        //        if (obj is IRotateable)
+        //        {
+        //            RotateObject(obj);
+        //            continue;
+        //        }
 
-                obj.Draw();
-            }
-        }
+        //        obj.Draw();
+        //    }
+        //}
 
         #endregion
 
@@ -218,21 +217,21 @@ namespace CadEditor
 			ObjectCollection.Add(obj);
 		}
 
-		public void RotateObject(ISceneObject obj)
-		{
-			if (obj is IRotateable)
-			{
-                GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
-                GraphicsGL.GL.PushMatrix();
-                Point3D p = obj.GetCenterPoint();
-                GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
-                GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
-                GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
-                GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
-                (obj).Draw();
-                GraphicsGL.GL.PopMatrix();
-            }
-        }
+		//public void RotateObject(ISceneObject obj)
+		//{
+		//	if (obj is IRotateable)
+		//	{
+  //              GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+  //              GraphicsGL.GL.PushMatrix();
+  //              Point3D p = obj.GetCenterPoint();
+  //              GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
+  //              GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
+  //              GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
+  //              GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
+  //              (obj).Draw();
+  //              GraphicsGL.GL.PopMatrix();
+  //          }
+  //      }
 
 		public bool Remove(ISceneObject obj)
 		{

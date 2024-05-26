@@ -1,13 +1,7 @@
-﻿using SharpGL.Enumerations;
-using SharpGL.SceneGraph;
-using SharpGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using CadEditor.Properties;
+using CadEditor.Settings;
+using CadEditor.View.Forms;
 
 namespace CadEditor.Controllers
 {
@@ -25,10 +19,13 @@ namespace CadEditor.Controllers
         private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
         private static ToolStripMenuItem uniteItem = new ToolStripMenuItem("Unite");
         private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Set Camera Target");
+        public Form1 MainForm { get; set; }
 
-        public UIController(ApplicationController appController)
+        public UIController(ApplicationController appController, Form1 mainForm)
         {
             _applicationController = appController;
+            Scene scene = _applicationController.SceneController.Scene;
+            MainForm = mainForm;
             contextMenuStrip = GraphicsGL.Control.ContextMenuStrip;
             contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.AddRange(new ToolStripMenuItem[]
@@ -51,7 +48,14 @@ namespace CadEditor.Controllers
             notSetTargetItem.Click += (sender, e) => _applicationController.MakeNonAttachableElement();
             divideItem.Click += (sender, e) => _applicationController.DivideElement();
             uniteItem.Click += (sender, e) => _applicationController.UniteElement();
-            setTarget.Click += (sender, e) => _applicationController.SetCameraTarget();
+            setTarget.Click += (sender, e) => _applicationController.RenderController.SetCameraTarget(scene.SelectedObject);
+        }
+
+        public void Initialize()
+        {
+            //Load Settings
+            MainForm.BackColor = ThemeSettings.MainThemeColor;
+            MainForm.GetMenuStrip().BackColor = ThemeSettings.MenuStripBackColor;
         }
 
         public void InitContextMenu(int x, int y)
@@ -118,5 +122,22 @@ namespace CadEditor.Controllers
             contextMenuStrip.Show(GraphicsGL.Control, new System.Drawing.Point(x, y));
         }
 
+        public void CreateSettingsForm()
+        {
+            SettingsForm settingsForm = new SettingsForm(_applicationController);
+            settingsForm.ShowDialog();
+        }
+
+        public DividingCubeForm CreateDividingForm()
+        {
+            DividingCubeForm form = new DividingCubeForm();
+            form.TopMost = true;
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+
+            return form;
+        }
     }
 }

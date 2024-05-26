@@ -1,5 +1,4 @@
 ﻿using CadEditor.Models.Scene;
-using SharpGL.SceneGraph.Cameras;
 using System;
 using System.Numerics;
 

@@ -1,9 +1,4 @@
 ﻿using SharpGL;
-using SharpGL.SceneGraph.Cameras;
-using System.Threading;
-using System;
-using System.Numerics;
-using System.Diagnostics;
 
 namespace CadEditor
 {
@@ -25,7 +20,8 @@ namespace CadEditor
         {
             if (GraphicsGL.GL == null)
             {
-                new GraphicsGL(openGL);
+                Control = openGL;
+                GL = Control.OpenGL;
             }
 
         }

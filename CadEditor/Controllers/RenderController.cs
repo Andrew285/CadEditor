@@ -1,15 +1,7 @@
-﻿using SharpGL.SceneGraph.Cameras;
-using SharpGL.SceneGraph;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpGL;
-using System.Windows.Forms;
+﻿using SharpGL;
 using CadEditor.Models.Scene;
-using SharpGL.SceneGraph.Primitives;
 using System.Numerics;
+using System.Collections.Generic;
 
 namespace CadEditor.Controllers
 {
@@ -17,6 +9,7 @@ namespace CadEditor.Controllers
     {
         private ApplicationController _controller;
         public Camera Camera;
+        public GraphicsGL Graphics;
         private SceneGrid grid;
         private const int sceneGridSize = 20;
         private const int sceneGridDensity = sceneGridSize * 4;
@@ -31,12 +24,13 @@ namespace CadEditor.Controllers
             Camera = camera;
         }
 
-        public RenderController(ApplicationController appController) 
+        public RenderController(ApplicationController appController, OpenGLControl control) 
         {
             _controller = appController;
-            //_scene = _controller.Scene;
-            Camera = new Camera();
+            GraphicsGL.CreateInstance(control);
+            GraphicsGL.GL.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
             grid = new SceneGrid(sceneGridDensity, sceneGridSize, sceneGridLineWidth);
+            Camera = new Camera();
         }
 
         public void Initialize()
@@ -45,7 +39,7 @@ namespace CadEditor.Controllers
             Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
         }
 
-        public void Render()
+        public void Render(List<ISceneObject> objectsToDraw)
         {
             _scene = _controller.SceneController.Scene;
             GraphicsGL.GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
@@ -60,11 +54,46 @@ namespace CadEditor.Controllers
             Camera.Rotate();
             DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, sceneGridSize);
             grid.Draw();
-            _scene.Draw();
+
+            //Draw all objects
+            foreach (var obj in objectsToDraw)
+            {
+                if (obj is ComplexCube)
+                {
+                    ((ComplexCube)obj).DrawFacets = DrawFacets;
+                }
+                else if (obj is ComplexStructure)
+                {
+                    ((ComplexStructure)obj).DrawFacets = DrawFacets;
+                }
+
+                if (obj is IRotateable)
+                {
+                    RotateObject(obj);
+                    continue;
+                }
+
+                obj.Draw();
+            }
+
             DrawSelectingRay(Camera.Position);
         }
 
-
+        public void RotateObject(ISceneObject obj)
+        {
+            if (obj is IRotateable)
+            {
+                GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+                GraphicsGL.GL.PushMatrix();
+                Point3D p = obj.GetCenterPoint();
+                GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
+                GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
+                GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
+                (obj).Draw();
+                GraphicsGL.GL.PopMatrix();
+            }
+        }
 
         public void DrawSelectingRay(Vector3 cameraPosition)
         {

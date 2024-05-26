@@ -2,6 +2,7 @@
 using CadEditor.Models.Commands;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
+using CadEditor.Settings;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -10,29 +11,32 @@ namespace CadEditor.Controllers
 {
     public class ApplicationController
     {
-        public CubeController CubeController;
-        public SceneCollection SceneCollection;
-        public CommandsHistory CommandsHistory;
-        public Library Library;
-        public AttachingController AttachingController;
-        public MovingController MovingController;
-        public UIController UIController;
-        public RenderController RenderController;
-        public SceneController SceneController;
-        public MouseController MouseController;
+        public CubeController CubeController { get; private set; }
+        public SceneCollection SceneCollection { get; private set; }
+        public CommandsHistory CommandsHistory { get; private set; }
+        public AttachingController AttachingController { get; private set; }
+        public MovingController MovingController { get; private set; }
+        public UIController UIController { get; private set; }
+        public RenderController RenderController { get; private set; }
+        public SceneController SceneController { get; private set; }
+        public MouseController MouseController { get; private set; }
+        public SettingsController SettingsController { get; private set; }
+        public Library Library { get; private set; }
         private Scene _scene;
 
-        public ApplicationController()
+        public ApplicationController(Form1 mainForm)
         {
             INameProvider nameProvider = new ModelNameProvider();
+            RenderController = new RenderController(this, mainForm.GetOpenGLControl());
             SceneController = new SceneController();
             CubeController = new CubeController(this, nameProvider);
             AttachingController = new AttachingController();
             MovingController = new MovingController();
-            UIController = new UIController(this);
-            RenderController = new RenderController(this);
+            UIController = new UIController(this, mainForm);
             MouseController = new MouseController();
             CommandsHistory = new CommandsHistory();
+            SceneCollection = new SceneCollection(mainForm.GetTreeView(), "Collection");
+            SettingsController = new SettingsController();
             Library = new Library();
             _scene = SceneController.Scene;
         }
@@ -40,6 +44,8 @@ namespace CadEditor.Controllers
         public void Initialize()
         {
             RenderController.Initialize();
+            SettingsController.LoadData(MainSettings.FilePath);
+            UIController.Initialize();
             InitializeScene();
         }
 
@@ -185,9 +191,38 @@ namespace CadEditor.Controllers
             }
         }
 
-        public void HandleProcessCmdKey()
+        public int HandlePressTab(int index)
         {
+            if (index == 1)
+            {
+                SceneController.Scene.SceneMode = SceneMode.EDIT;
+                return 0;
+            }
+            else if (index == 0)
+            {
+                SceneController.Scene.SceneMode = SceneMode.VIEW;
+                return 1;
+            }
+            SceneController.UpdateScene();
+            return 0;
+        }
 
+        public void HandlePressCtrlZ()
+        {
+            if (!CommandsHistory.IsEmpty())
+            {
+                CommandsHistory.Peek()?.Undo();
+                CommandsHistory.StepBackward();
+            }
+        }
+
+        public void HandlePressCtrlShiftZ()
+        {
+            if (!CommandsHistory.IsEmpty())
+            {
+                CommandsHistory.StepForward();
+                CommandsHistory.Peek()?.Redo();
+            }
         }
 
         public int SetObjectToAxis(CoordinateAxis axis, int clicks)
@@ -246,7 +281,7 @@ namespace CadEditor.Controllers
         {
             if (_scene.SelectedObject != null && _scene.SelectedObject is IDivideable)
             {
-                DividingCubeForm form = InitializeDividingForm();
+                DividingCubeForm form = UIController.CreateDividingForm();
                 DialogResult result = form.ShowDialog();
 
                 if (result == DialogResult.OK)
@@ -388,11 +423,6 @@ namespace CadEditor.Controllers
             _scene.ObjectCollection.Remove(AttachingController.AttachingAxisSystem);
         }
 
-        public void SetCameraTarget()
-        {
-            RenderController.SetCameraTarget(_scene.SelectedObject);
-        }
-
         public void UpdateRotation(IRotateable rotateable, int x, int y)
         {
             float xDelta = (float)MouseController.GetHorizontalAngle(x);
@@ -422,18 +452,6 @@ namespace CadEditor.Controllers
                     meshObject.EdgeNonSelectedColor = color;
                 }
             }
-        }
-
-        private DividingCubeForm InitializeDividingForm()
-        {
-            DividingCubeForm form = new DividingCubeForm();
-            form.TopMost = true;
-            form.FormBorderStyle = FormBorderStyle.FixedDialog;
-            form.StartPosition = FormStartPosition.CenterScreen;
-            form.MinimizeBox = false;
-            form.MaximizeBox = false;
-
-            return form;
         }
 
         public void SelectElement()

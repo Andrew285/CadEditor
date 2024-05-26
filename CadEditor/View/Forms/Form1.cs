@@ -1,94 +1,57 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
-using CadEditor.Models.Commands;
-using CadEditor.Models.Scene;
-using CadEditor.Models.Scene.MeshObjects;
-using CadEditor.Properties;
-using CadEditor.Settings;
-using CadEditor.View.Forms;
 using SharpGL;
-using SharpGL.SceneGraph.Primitives;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Web.WebSockets;
 using System.Windows.Forms;
 
 namespace CadEditor
 {
-
     public partial class Form1 : Form
     {
         private ApplicationController _applicationController;
-        private static Form1 instance;
-        //private Library library;
-        private static Scene scene;
-        //private ContextMenuStrip contextMenuStrip;
-        private SceneCollection sceneCollection;
-        //public AxisSystem AttachingAxisSystem { get; private set; }
-        //private Camera camera;
-        //private CommandsHistory commandsHistory;
-
-        //private ComplexCube targetCube;
-        //private ComplexCube attachingCube;
-        //private CoordinateAxisType targetFacetAxis;
-        //private CoordinateAxisType attachingFacetAxis;
-
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
 
-        public static Form1 GetInstance()
-        {
-            if (instance == null)
-            {
-                instance = new Form1();
-            }
-
-            return instance;
-        }
-
         public Form1()
         {
             InitializeComponent();
-            instance = this;
             KeyPreview = true;
-
-            //Load Settings
-            SettingsController.GetInstance().LoadData(MainSettings.FilePath);
-            this.BackColor = ThemeSettings.MainThemeColor;
-            this.menuStrip1.BackColor = ThemeSettings.MenuStripBackColor;
-
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
             checkBox_DrawFacets.Checked = true;
+        }
 
-            //Set Events
-            GraphicsGL.Control.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
+        public OpenGLControl GetOpenGLControl()
+        {
+            return openGLControl1;
+        }
+
+        public TreeView GetTreeView()
+        {
+            return treeView1;
+        }
+
+        public MenuStrip GetMenuStrip()
+        {
+            return menuStrip1;
         }
 
 		#region ---- OpenGLControl Events ----
 
 		private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
         {
-
-            GraphicsGL.CreateInstance(openGLControl1);
-            GraphicsGL.GL.ClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-
-            //Initializing fundemental objects of scene
-            sceneCollection = new SceneCollection(treeView1, "Collection");
-            _applicationController = new ApplicationController();
-            _applicationController.SetSceneCollection(sceneCollection);
+            _applicationController = new ApplicationController(this);
             _applicationController.Initialize();
-
-            scene = _applicationController.SceneController.Scene;
         }
 
         private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
         {
-            _applicationController.RenderController.Render();
+            Scene scene = _applicationController.SceneController.Scene;
+            _applicationController.RenderController.Render(scene.ObjectCollection);
         }
 
 		#endregion
@@ -118,67 +81,41 @@ namespace CadEditor
 
 
                 case Keys.ControlKey:
-                    scene.IsObjectRotate = true;
+                    _applicationController.SceneController.Scene.IsObjectRotate = true;
                     break;
             }
         }
-
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.ControlKey:
-                    scene.IsObjectRotate = false;
+                    _applicationController.SceneController.Scene.IsObjectRotate = false;
                     break;
             }
         }
 
-
-
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool baseResult = base.ProcessCmdKey(ref msg, keyData);
-            Scene scene = _applicationController.SceneController.Scene;
-            CommandsHistory commandsHistory = _applicationController.CommandsHistory;
-
             if (keyData == Keys.Tab)
             {
-				if (mode_comboBox.SelectedIndex == 1)
-				{
-					scene.SceneMode = SceneMode.VIEW;
-                    mode_comboBox.SelectedItem = mode_comboBox.Items[0];
-				}
-				else if (mode_comboBox.SelectedIndex == 0)
-				{
-					scene.SceneMode = SceneMode.EDIT;
-					mode_comboBox.SelectedItem = mode_comboBox.Items[1];
-				}
-				//scene.Update();
-                _applicationController.SceneController.UpdateScene();
-
-				return true;
+                int oppositeViewIndex = _applicationController.HandlePressTab(mode_comboBox.SelectedIndex);
+                mode_comboBox.SelectedItem = mode_comboBox.Items[oppositeViewIndex];
+                return true;
             }
             else if (keyData == (Keys.Control | Keys.Z))
             {
-                if (!commandsHistory.IsEmpty())
-                {
-                    commandsHistory.Peek()?.Undo();
-                    commandsHistory.StepBackward();
-                }
+                _applicationController.HandlePressCtrlZ();
             }
             else if (keyData == (Keys.Control | Keys.Shift | Keys.Z))
             {
-                if (!commandsHistory.IsEmpty())
-                {
-                    commandsHistory.StepForward();
-                    commandsHistory.Peek()?.Redo();
-                }
+                _applicationController.HandlePressCtrlShiftZ();
             }
 
             return baseResult;
         }
-
 		#endregion
 
 		#region ---- Mouse Events ----
@@ -187,20 +124,6 @@ namespace CadEditor
         {
             _applicationController.MouseController.UpdateMousePosition(e.X, e.Y);
             _applicationController.HandleMouseDown(e.Button);
-        }
-
-        public void DeselectAndSaveCommand(Scene scene, ISceneObject obj)
-        {
-            DeselectionCommand deselectionCommand = new DeselectionCommand(_applicationController, obj);
-            deselectionCommand.Execute();
-            _applicationController.CommandsHistory.Push(deselectionCommand);
-        }
-
-        public void SelectAndSaveCommand(Scene scene, ISceneObject obj)
-        {
-            SelectionCommand selectionCommand = new SelectionCommand(_applicationController, obj);
-            selectionCommand.Execute();
-            _applicationController.CommandsHistory.Push(selectionCommand);
         }
 
         private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
@@ -220,55 +143,6 @@ namespace CadEditor
 
 		#endregion
 
-		#region ---- RightClick ----
-
-		private void Select_Object_click(object sender, EventArgs e)
-		{
-            _applicationController.SelectElement();
-		}
-
-		private void Deselect_Object_click(object sender, EventArgs e)
-		{
-            _applicationController.DeselectElement();
-		}
-
-		private void Divide_Object_click(object sender, EventArgs e)
-		{
-            _applicationController.DivideElement();
-		}
-
-        private void Unite_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.UniteElement();
-        }
-
-        private void Delete_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.DeleteElement();
-        }
-
-        private void Attach_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.MakeAttachableElement();
-        }
-
-        private void Detach_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.MakeNonAttachableElement();
-        }
-
-        private void SetTarget_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.MakeTargetableElement();
-        }
-
-        private void NotSetTarget_Object_click(object sender, EventArgs e)
-        {
-            _applicationController.MakeNonTargetableElement();
-        }
-
-        #endregion
-
         private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
             _applicationController.AddNewCubeElement(new Point3D(0, 0, 0));
@@ -276,40 +150,45 @@ namespace CadEditor
 
 		private void mode_comboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
-            if(mode_comboBox.SelectedIndex == 0)
-            {
-                scene.SceneMode = SceneMode.VIEW;
-            }
-            else if (mode_comboBox.SelectedIndex == 1)
-            {
-                scene.SceneMode = SceneMode.EDIT;
-			}
-			_applicationController.SceneController.UpdateScene();
+            _applicationController.HandlePressTab(mode_comboBox.SelectedIndex);
 		}
 
         private void checkBox_DrawFacets_CheckedChanged(object sender, EventArgs e)
         {
-            scene.DrawFacets = checkBox_DrawFacets.Checked;
-            //_applicationController.RenderController.DrawFacets = checkBox_DrawFacets.Checked;
+            _applicationController.RenderController.DrawFacets = checkBox_DrawFacets.Checked;
         }
 
-		private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-		{
-            scene.DeselectAll();
+        //public void DeselectAndSaveCommand(Scene scene, ISceneObject obj)
+        //{
+        //    DeselectionCommand deselectionCommand = new DeselectionCommand(_applicationController, obj);
+        //    deselectionCommand.Execute();
+        //    _applicationController.CommandsHistory.Push(deselectionCommand);
+        //}
 
-            TreeNode selectedTreeNode = sceneCollection.GetSelectedNode();
-            if(selectedTreeNode != null)
-            {
-                ISceneObject obj = sceneCollection.GetObjectByNode(selectedTreeNode, scene.ObjectCollection);
-                if(obj != null)
-                {
-                    scene.SelectedObject = obj;
-                    obj.Select();
-                    //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
-                    AxisSystem axisSystem = new AxisSystem(obj.GetCenterPoint(), RenderController.selectingRay);
-                    scene.ObjectCollection.Insert(0, axisSystem);
-				}
-            }
+        //public void SelectAndSaveCommand(Scene scene, ISceneObject obj)
+        //{
+        //    SelectionCommand selectionCommand = new SelectionCommand(_applicationController, obj);
+        //    selectionCommand.Execute();
+        //    _applicationController.CommandsHistory.Push(selectionCommand);
+        //}
+
+        private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+    //        scene.DeselectAll();
+
+    //        TreeNode selectedTreeNode = sceneCollection.GetSelectedNode();
+    //        if(selectedTreeNode != null)
+    //        {
+    //            ISceneObject obj = sceneCollection.GetObjectByNode(selectedTreeNode, scene.ObjectCollection);
+    //            if(obj != null)
+    //            {
+    //                scene.SelectedObject = obj;
+    //                obj.Select();
+    //                //scene.InitSelectingCoordAxes(nodeObjects[0], 2.8f, 1.0);
+    //                AxisSystem axisSystem = new AxisSystem(obj.GetCenterPoint(), RenderController.selectingRay);
+    //                scene.ObjectCollection.Insert(0, axisSystem);
+				//}
+    //        }
 		}
 
 		private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -323,7 +202,7 @@ namespace CadEditor
 			if (result == DialogResult.OK)
 			{
 				string filePath = saveFileDialog.FileName;
-				string exportString = scene.Export();
+				string exportString = _applicationController.SceneController.Scene.Export();
 
 				try
 				{
@@ -356,7 +235,7 @@ namespace CadEditor
 				try
 				{
 					string[] lines = File.ReadAllLines(filePath);
-                    scene.Import(lines);
+                    _applicationController.SceneController.Scene.Import(lines);
 				}
 				catch (Exception ex)
 				{
@@ -393,8 +272,7 @@ namespace CadEditor
         //Settings Tab
         private void generalSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SettingsForm settingsForm = new SettingsForm();
-            DialogResult result = settingsForm.ShowDialog();
+            _applicationController.UIController.CreateSettingsForm();
         }
 
         private Bitmap CaptureScreen()
@@ -414,7 +292,7 @@ namespace CadEditor
             {
                 SaveData saveData = libraryForm.SelectedSave;
                 string[] lines = File.ReadAllLines(saveData.GetFilePath());
-                scene.Import(lines);
+                _applicationController.SceneController.Scene.Import(lines);
             }
         }
 
@@ -428,7 +306,7 @@ namespace CadEditor
             if (result == DialogResult.OK)
             {
                 string nameOfSave = form.SaveData.GetTitle();
-                string exportString = scene.Export();
+                string exportString = _applicationController.SceneController.Scene.Export();
 
                 bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\" + nameOfSave + ".jpeg", ImageFormat.Jpeg);
                 string filePath = @"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Scene\" + nameOfSave + ".txt";
