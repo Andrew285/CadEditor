@@ -164,6 +164,7 @@
     <Compile Include="View\Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\OpenGLController.cs" />
     <EmbeddedResource Include="View\Forms\DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -141,15 +141,19 @@ namespace CadEditor.Controllers
             Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
         }
 
-        public void UpdateRotation(int x, int y)
+        public void UpdateRotation(double horizontalAngle, double verticalAngle, bool isMiddleBtnPressed)
         {
-            if (_controller.MouseController.IsMiddleButtonPressed && _scene.IsObjectRotate && _scene.SelectedObject != null && _scene.SelectedObject.IsSelected && _scene.SelectedObject is IRotateable)
+            if (isMiddleBtnPressed)
             {
-                _controller.UpdateRotation((IRotateable)_scene.SelectedObject, x, y);
-            }
-            else if (_controller.MouseController.IsMiddleButtonPressed)
-            {
-                _controller.UpdateRotation(Camera, x, y);
+                if (_scene.IsObjectRotate && _scene.SelectedObject != null && _scene.SelectedObject.IsSelected && _scene.SelectedObject is IRotateable)
+                {
+                    _controller.UpdateRotation((IRotateable)_scene.SelectedObject, horizontalAngle, verticalAngle);
+                }
+                else
+                {
+                    //_controller.UpdateRotation(Camera, x, y);
+                    Camera.UpdateRotation(horizontalAngle, verticalAngle);
+                }
             }
         }
     }

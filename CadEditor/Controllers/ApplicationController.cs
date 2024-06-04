@@ -5,6 +5,7 @@ using CadEditor.Models.Scene.MeshObjects;
 using CadEditor.Settings;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace CadEditor.Controllers
@@ -19,7 +20,7 @@ namespace CadEditor.Controllers
         public UIController UIController { get; private set; }
         public RenderController RenderController { get; private set; }
         public SceneController SceneController { get; private set; }
-        public MouseController MouseController { get; private set; }
+        //public MouseController MouseController { get; private set; }
         public SettingsController SettingsController { get; private set; }
         public Library Library { get; private set; }
         private Scene _scene;
@@ -33,7 +34,7 @@ namespace CadEditor.Controllers
             AttachingController = new AttachingController();
             MovingController = new MovingController();
             UIController = new UIController(this, mainForm);
-            MouseController = new MouseController();
+            //MouseController = new MouseController();
             CommandsHistory = new CommandsHistory();
             SceneCollection = new SceneCollection(mainForm.GetTreeView(), "Collection");
             SettingsController = new SettingsController();
@@ -60,7 +61,110 @@ namespace CadEditor.Controllers
             SceneCollection = sceneCollection;
         }
 
-        public void HandleMouseDown(MouseButtons mouseButton)
+        public void HandleLeftMouseButtonDown()
+        {
+            GraphicsGL.DisableContexMenu();
+
+            CommandList selectionCommandList = new CommandList();
+            ISceneObject selectedObject = SceneController.GetSelectedObject();
+            ISceneObject prevObject = SceneController.GetPreviousSelectedObject();
+            AxisCube axisCube;
+            Point3D startMovePoint;
+
+            if (selectedObject != null)
+            {
+                if (selectedObject is AxisCube)
+                {
+                    SelectionCommand selectionCommand = new SelectionCommand(this, selectedObject);
+                    DeselectionCommand deselectionCommand = new DeselectionCommand(this, prevObject);
+                    DeleteAxesCommand deleteAxesCommand = new DeleteAxesCommand(this, prevObject);
+                    selectionCommand.Execute();
+                    deselectionCommand.Execute();
+                    CommandsHistory.Push(new CommandList(new List<ICommand> { deselectionCommand, deleteAxesCommand }));
+
+                    axisCube = selectedObject as AxisCube;
+                    SceneController.SetAxisCube(axisCube);
+                    startMovePoint = (Point3D)prevObject.GetCenterPoint().Clone();
+                    MovingController.SetStartMovingPoint(startMovePoint);
+                }
+                else
+                {
+                    SceneController.DeleteSelectingCoordAxes();
+
+                    if (prevObject != null && selectedObject != prevObject)
+                    {
+                        CommandList commandList = new CommandList(
+                            new List<ICommand> {
+                                new DeselectionCommand(this, prevObject),
+                                new DeleteAxesCommand(this, prevObject)
+                            });
+                        commandList.Execute();
+                        CommandsHistory.Push(commandList);
+                    }
+
+                    selectionCommandList.AddRange(new List<ICommand>
+                        {
+                            new SelectionCommand(this, selectedObject),
+                            new InitAxesCommand(this, selectedObject)
+                        });
+                }
+            }
+            else
+            {
+                if (prevObject != null)
+                {
+                    selectionCommandList.AddRange(new List<ICommand>
+                        {
+                            new DeselectionCommand(this, prevObject),
+                            new DeleteAxesCommand(this, prevObject)
+                        });
+                }
+                else
+                {
+                    _scene.DeselectAll();
+                }
+            }
+
+            if (!selectionCommandList.IsEmpty())
+            {
+                ISceneObject obj = ((UnaryCommand)selectionCommandList[0]).GetSceneObject();
+                selectionCommandList.Execute();
+
+                if (obj is ComplexCube || obj is ComplexStructure)
+                {
+                    CommandsHistory.Push(selectionCommandList);
+                }
+            }
+        }
+
+        public bool HandleRightMouseButtonDown()
+        {
+            GraphicsGL.DisableContexMenu();
+            //scene.Select();
+            ISceneObject selectedObject = SceneController.GetSelectedObject();
+
+            if (selectedObject != null)
+            {
+                SelectionCommand selectionCommand = new SelectionCommand(this, selectedObject);
+                selectionCommand.Execute();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void InitializeContextMenu(int x, int y)
+        {
+            UIController.InitContextMenu(x, y);
+
+        }
+
+        public void HandleMiddleButtonDown()
+        {
+        }
+
+
+        public void HandleMouseDown(int mouseX, int mouseY)
         {
             ISceneObject selectedObject = SceneController.GetSelectedObject();
             ISceneObject prevObject;
@@ -69,102 +173,14 @@ namespace CadEditor.Controllers
 
             prevObject = selectedObject;
             SceneController.SetPreviousSelectedObject(prevObject);
-            selectedObject = _scene.Select(MouseController.X, MouseController.Y);
+            selectedObject = _scene.Select(mouseX, mouseY);
             SceneController.SetSelectedObject(selectedObject);
-            if (mouseButton == MouseButtons.Left)
-            {
-                GraphicsGL.DisableContexMenu();
-
-                CommandList selectionCommandList = new CommandList();
-
-                if (selectedObject != null)
-                {
-                    if (selectedObject is AxisCube)
-                    {
-                        SelectionCommand selectionCommand = new SelectionCommand(this, selectedObject);
-                        DeselectionCommand deselectionCommand = new DeselectionCommand(this, prevObject);
-                        DeleteAxesCommand deleteAxesCommand = new DeleteAxesCommand(this, prevObject);
-                        selectionCommand.Execute();
-                        deselectionCommand.Execute();
-                        CommandsHistory.Push(new CommandList(new List<ICommand> { deselectionCommand, deleteAxesCommand }));
-
-                        axisCube = selectedObject as AxisCube;
-                        SceneController.SetAxisCube(axisCube);
-                        startMovePoint = (Point3D)prevObject.GetCenterPoint().Clone();
-                        MovingController.SetStartMovingPoint(startMovePoint);
-                    }
-                    else
-                    {
-                        SceneController.DeleteSelectingCoordAxes();
-
-                        if (prevObject != null && selectedObject != prevObject)
-                        {
-                            CommandList commandList = new CommandList(
-                                new List<ICommand> {
-                                new DeselectionCommand(this, prevObject),
-                                new DeleteAxesCommand(this, prevObject)
-                                });
-                            commandList.Execute();
-                            CommandsHistory.Push(commandList);
-                        }
-
-                        selectionCommandList.AddRange(new List<ICommand>
-                        {
-                            new SelectionCommand(this, selectedObject),
-                            new InitAxesCommand(this, selectedObject)
-                        });
-                    }
-                }
-                else
-                {
-                    if (prevObject != null)
-                    {
-                        selectionCommandList.AddRange(new List<ICommand>
-                        {
-                            new DeselectionCommand(this, prevObject),
-                            new DeleteAxesCommand(this, prevObject)
-                        });
-                    }
-                    else
-                    {
-                        _scene.DeselectAll();
-                    }
-                }
-
-                if (!selectionCommandList.IsEmpty())
-                {
-                    ISceneObject obj = ((UnaryCommand)selectionCommandList[0]).GetSceneObject();
-                    selectionCommandList.Execute();
-
-                    if (obj is ComplexCube || obj is ComplexStructure)
-                    {
-                        CommandsHistory.Push(selectionCommandList);
-                    }
-                }
-            }
-            else if (mouseButton == MouseButtons.Right)
-            {
-                GraphicsGL.DisableContexMenu();
-                //scene.Select();
-
-                if (selectedObject != null)
-                {
-                    SelectionCommand selectionCommand = new SelectionCommand(this, selectedObject);
-                    selectionCommand.Execute();
-                    UIController.InitContextMenu(MouseController.X, MouseController.Y);
-                }
-            }
-            else if (mouseButton == MouseButtons.Middle)
-            {
-                MouseController.IsMiddleButtonPressed = true;
-            }
         }
 
-        public void HandleMouseMove(int x, int y)
+        public void HandleMouseMove(double horizontalAngle, double verticalAngle, bool isMiddleBtnPressed)
         {
-            RenderController.UpdateRotation(x, y);
-            MoveBy(x, y);
-            MouseController.UpdateMousePosition(x, y);
+            RenderController.UpdateRotation(horizontalAngle, verticalAngle, isMiddleBtnPressed);
+            MoveBy(horizontalAngle, verticalAngle);
         }
 
         public void HandleMouseUp()
@@ -173,8 +189,6 @@ namespace CadEditor.Controllers
             ISceneObject prevObject = SceneController.GetPreviousSelectedObject();
             Point3D startMovingPoint = MovingController.GetStartMovingPoint();
             Point3D endMovingPoint;
-
-            MouseController.IsMiddleButtonPressed = false;
 
             if (axisCube != null)
             {
@@ -242,7 +256,7 @@ namespace CadEditor.Controllers
             return cube;
         }
 
-        public void MoveBy(int x, int y)
+        public void MoveBy(double horizontalAngle, double verticalAngle)
         {
             AxisCube axisCube = SceneController.GetAxisCube();
             ISceneObject prevObject = SceneController.GetPreviousSelectedObject();
@@ -250,8 +264,8 @@ namespace CadEditor.Controllers
             if (axisCube != null)
             {
                 double sensitivityLevel = 0.01;
-                double value = MouseController.GetHorizontalAngle(x) * sensitivityLevel;
-                double valueY = MouseController.GetVerticalAngle(y) * sensitivityLevel;
+                double value = horizontalAngle * sensitivityLevel;
+                double valueY = verticalAngle * sensitivityLevel;
                 Vector coords = new Vector(3);
 
                 if (axisCube.Axis == CoordinateAxis.X)
@@ -423,10 +437,10 @@ namespace CadEditor.Controllers
             _scene.ObjectCollection.Remove(AttachingController.AttachingAxisSystem);
         }
 
-        public void UpdateRotation(IRotateable rotateable, int x, int y)
+        public void UpdateRotation(IRotateable rotateable, double horizontalAngle, double verticalAngle)
         {
-            float xDelta = (float)MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)MouseController.GetVerticalAngle(y);
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
 
             rotateable.xRotation += xDelta * 1f;
             rotateable.yRotation += yDelta * 1f;

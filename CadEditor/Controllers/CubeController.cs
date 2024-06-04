@@ -35,10 +35,10 @@ namespace CadEditor.Controllers
             return new ComplexCube(cubePosition, cubeSize, cubeName);
         }
 
-        public void UpdateRotation(ComplexCube cube, int x, int y)
+        public void UpdateRotation(ComplexCube cube, double horizontalAngle, double verticalAngle)
         {
-            float xDelta = (float)_applicationControler.MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)_applicationControler.MouseController.GetVerticalAngle(y);
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
 
             cube.xRotation += xDelta * 1f;
             cube.yRotation += yDelta * 1f;

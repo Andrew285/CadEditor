@@ -47,17 +47,17 @@ namespace CadEditor
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
         }
 
-        //public void UpdateRotation(int x, int y, MouseController controller)
-        //{
-        //    float xDelta = (float)controller.GetHorizontalAngle(x);
-        //    float yDelta = (float)controller.GetVerticalAngle(y);
+        public void UpdateRotation(double horizontalAngle, double verticalAngle)
+        {
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
 
-        //    xRotation += xDelta * RotationSpeed;
-        //    yRotation += yDelta * RotationSpeed;
+            xRotation += xDelta * RotationSpeed;
+            yRotation += yDelta * RotationSpeed;
 
-        //    UpdateCameraPosition();
-        //    GraphicsGL.Control.Invalidate();
-        //}
+            UpdateCameraPosition();
+            GraphicsGL.Control.Invalidate();
+        }
 
 
         public void SetTarget(double x, double y, double z)
@@ -68,21 +68,6 @@ namespace CadEditor
 
             Target = new Vector3((float)x, (float)y, (float)z);
         }
-
-        public void LimitDistance()
-        {
-            float zValue = distance;
-            zValue = (float)Math.Max(zValue, MinZoom);
-            zValue = (float)Math.Min(zValue, MaxZoom);
-
-            Position = new Vector3(Position.X, Position.Y, zValue);
-        }
-
-        public void Zoom(double value)
-        {
-            distance += (float)(-value * ZoomSensitivity);
-        }
-
 
         private void UpdateCameraPosition()
         {
@@ -102,6 +87,20 @@ namespace CadEditor
             Zoom(value);
             LimitDistance();
             GraphicsGL.Invalidate();
+        }
+
+        public void Zoom(double value)
+        {
+            distance += (float)(-value * ZoomSensitivity);
+        }
+
+        public void LimitDistance()
+        {
+            float zValue = distance;
+            zValue = (float)Math.Max(zValue, MinZoom);
+            zValue = (float)Math.Min(zValue, MaxZoom);
+
+            Position = new Vector3(Position.X, Position.Y, zValue);
         }
     }
 }

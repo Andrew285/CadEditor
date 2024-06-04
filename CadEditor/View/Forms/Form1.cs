@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.View;
 using SharpGL;
 using System;
 using System.Drawing;
@@ -16,9 +17,16 @@ namespace CadEditor
         private static int KeyY_Clicks = 0;
         private static int KeyZ_Clicks = 0;
 
+        private OpenGLController _openGLController;
+
         public Form1()
         {
             InitializeComponent();
+
+            _applicationController = new ApplicationController(this);
+            _applicationController.Initialize();
+            _openGLController = new OpenGLController(GetOpenGLControl(), _applicationController);
+
             KeyPreview = true;
             mode_comboBox.Items.AddRange(new string[] { "View Mode", "Edit Mode" });
             mode_comboBox.SelectedItem = mode_comboBox.Items[0];
@@ -39,22 +47,6 @@ namespace CadEditor
         {
             return menuStrip1;
         }
-
-		#region ---- OpenGLControl Events ----
-
-		private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
-        {
-            _applicationController = new ApplicationController(this);
-            _applicationController.Initialize();
-        }
-
-        private void openGLControl1_OpenGLDraw_1(object sender, RenderEventArgs args)
-        {
-            Scene scene = _applicationController.SceneController.Scene;
-            _applicationController.RenderController.Render(scene.ObjectCollection);
-        }
-
-		#endregion
 
 		#region ---- Key Events ----
 
@@ -118,40 +110,15 @@ namespace CadEditor
         }
 		#endregion
 
-		#region ---- Mouse Events ----
-
-		private void openGLControl1_MouseDown(object sender, MouseEventArgs e)
-        {
-            _applicationController.MouseController.UpdateMousePosition(e.X, e.Y);
-            _applicationController.HandleMouseDown(e.Button);
-        }
-
-        private void openGLControl1_MouseMove(object sender, MouseEventArgs e)
-        {
-            _applicationController.HandleMouseMove(e.X, e.Y);
-		}
-
-        private void openGLControl1_MouseUp(object sender, MouseEventArgs e)
-        {
-            _applicationController.HandleMouseUp();
-		}
-
-		private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
-		{
-            _applicationController.RenderController.Camera.ZoomBy(e.Delta);
-		}
-
-		#endregion
-
         private void cubeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-            _applicationController.AddNewCubeElement(new Point3D(0, 0, 0));
+            //_applicationController.AddNewCubeElement(new Point3D(0, 0, 0));
 		}
 
 		private void mode_comboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
             _applicationController.HandlePressTab(mode_comboBox.SelectedIndex);
-		}
+        }
 
         private void checkBox_DrawFacets_CheckedChanged(object sender, EventArgs e)
         {
