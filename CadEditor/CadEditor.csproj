@@ -109,6 +109,8 @@
     <Compile Include="Settings\ThemeSettings.cs" />
     <Compile Include="Settings\SceneSettings.cs" />
     <Compile Include="Tools\TypeStringConverter.cs" />
+    <Compile Include="Tools\UITools.cs" />
+    <Compile Include="View\BaseControl.cs" />
     <Compile Include="View\Forms\LibraryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -164,7 +166,10 @@
     <Compile Include="View\Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="View\OpenGLController.cs" />
+    <Compile Include="View\GLControl.cs" />
+    <Compile Include="View\PropertiesControl.cs" />
+    <Compile Include="View\SceneCollectionControl.cs" />
+    <Compile Include="View\ToolsMenuControl.cs" />
     <EmbeddedResource Include="View\Forms\DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
     </EmbeddedResource>

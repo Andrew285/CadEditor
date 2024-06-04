@@ -55,7 +55,7 @@ namespace CadEditor.Controllers
         {
             //Load Settings
             MainForm.BackColor = ThemeSettings.MainThemeColor;
-            MainForm.GetMenuStrip().BackColor = ThemeSettings.MenuStripBackColor;
+            //MainForm.GetMenuStrip().BackColor = ThemeSettings.MenuStripBackColor;
         }
 
         public void InitContextMenu(int x, int y)

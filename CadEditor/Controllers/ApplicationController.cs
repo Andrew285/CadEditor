@@ -3,9 +3,9 @@ using CadEditor.Models.Commands;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
 using CadEditor.Settings;
+using SharpGL;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace CadEditor.Controllers
@@ -20,23 +20,20 @@ namespace CadEditor.Controllers
         public UIController UIController { get; private set; }
         public RenderController RenderController { get; private set; }
         public SceneController SceneController { get; private set; }
-        //public MouseController MouseController { get; private set; }
         public SettingsController SettingsController { get; private set; }
         public Library Library { get; private set; }
         private Scene _scene;
 
-        public ApplicationController(Form1 mainForm)
+        public ApplicationController(Form1 mainForm, OpenGLControl glControl)
         {
             INameProvider nameProvider = new ModelNameProvider();
-            RenderController = new RenderController(this, mainForm.GetOpenGLControl());
+            RenderController = new RenderController(this, glControl);
             SceneController = new SceneController();
             CubeController = new CubeController(this, nameProvider);
             AttachingController = new AttachingController();
             MovingController = new MovingController();
             UIController = new UIController(this, mainForm);
-            //MouseController = new MouseController();
             CommandsHistory = new CommandsHistory();
-            SceneCollection = new SceneCollection(mainForm.GetTreeView(), "Collection");
             SettingsController = new SettingsController();
             Library = new Library();
             _scene = SceneController.Scene;
@@ -140,7 +137,6 @@ namespace CadEditor.Controllers
         public bool HandleRightMouseButtonDown()
         {
             GraphicsGL.DisableContexMenu();
-            //scene.Select();
             ISceneObject selectedObject = SceneController.GetSelectedObject();
 
             if (selectedObject != null)
@@ -156,20 +152,12 @@ namespace CadEditor.Controllers
         public void InitializeContextMenu(int x, int y)
         {
             UIController.InitContextMenu(x, y);
-
         }
-
-        public void HandleMiddleButtonDown()
-        {
-        }
-
 
         public void HandleMouseDown(int mouseX, int mouseY)
         {
             ISceneObject selectedObject = SceneController.GetSelectedObject();
             ISceneObject prevObject;
-            AxisCube axisCube;
-            Point3D startMovePoint;
 
             prevObject = selectedObject;
             SceneController.SetPreviousSelectedObject(prevObject);
@@ -203,6 +191,11 @@ namespace CadEditor.Controllers
                 MoveCommand moveCommand = new MoveCommand(this, prevObject, moveResult);
                 CommandsHistory.Push(moveCommand);
             }
+        }
+
+        public void HandleMouseWheel(int value)
+        {
+            RenderController.Camera.ZoomBy(value);
         }
 
         public int HandlePressTab(int index)
