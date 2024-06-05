@@ -376,7 +376,7 @@ namespace CadEditor.Controllers
             {
                 if (facet.GetCenterPoint() == targetAxis.P1)
                 {
-                    facet.IsAttached = true;
+                    //facet.IsAttached = true;
                     AttachingController.SetTargetAxisType(facet.AxisType);
                     break;
                 }
@@ -387,14 +387,22 @@ namespace CadEditor.Controllers
             {
                 if (facet.AxisType == oppositeType)
                 {
-                    facet.IsAttached = true;
+                    //facet.IsAttached = true;
                     AttachingController.SetAttachingAxisType(facet.AxisType);
                     break;
                 }
             }
 
             Vector distanceVector = attachingCube.GetCenterPoint() - pointToMove;
-            attachingCube.Move(distanceVector * (-1));
+            ComplexStructure structure = SceneController.Scene.GetComplexStructureByCube(attachingCube);
+            if (structure != null)
+            {
+                structure.Move(distanceVector * (-1));
+            }
+            else
+            {
+                attachingCube.Move(distanceVector * (-1));
+            }
         }
 
         public void MakeAttachableElement()

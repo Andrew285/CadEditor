@@ -5,6 +5,7 @@ using CadEditor.Models.Scene.MeshObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 
 
@@ -83,6 +84,68 @@ namespace CadEditor
             return cells.Values.ToList();
         }
 
+        public void AttachStructure(ComplexCube target, CoordinateAxisType targetAxis,
+                                ComplexCube attaching, CoordinateAxisType attachingAxis, ComplexStructure attachingStructure)
+        {
+            CellPosition? targetPosition = GetCellPositionByCube(target);
+            if (targetPosition == null)
+            {
+                targetPosition = new CellPosition(0, 0, 0);
+                cells[(CellPosition)targetPosition] = target;
+            }
+
+            CellPosition attachingPosition = new CellPosition((CellPosition)targetPosition);
+            switch (targetAxis)
+            {
+                case CoordinateAxisType.PlusZ: attachingPosition.Z += 1; break;
+                case CoordinateAxisType.MinusZ: attachingPosition.Z -= 1; break;
+                case CoordinateAxisType.PlusY: attachingPosition.Y += 1; break;
+                case CoordinateAxisType.MinusY: attachingPosition.Y -= 1; break;
+                case CoordinateAxisType.PlusX: attachingPosition.X += 1; break;
+                case CoordinateAxisType.MinusX: attachingPosition.X -= 1; break;
+            }
+
+            CellPosition? realAttachPos = attachingStructure.GetCellPositionByCube(attaching);
+            if (realAttachPos != null)
+            {
+                int newX = attachingPosition.X - ((CellPosition)realAttachPos).X;
+                int newY = attachingPosition.Y - ((CellPosition)realAttachPos).Y;
+                int newZ = attachingPosition.Z - ((CellPosition)realAttachPos).Z;
+                CellPosition difference = new CellPosition(newX, newY, newZ);
+
+                foreach (var attachingCell in attachingStructure.GetCells())
+                {
+                    int X = attachingCell.Key.X + difference.X;
+                    int Y = attachingCell.Key.Y + difference.Y;
+                    int Z = attachingCell.Key.Z + difference.Z;
+                    CellPosition realPos = new CellPosition(X, Y, Z);
+
+                    //Get all neighbours of attachingPosition to find all connections
+                    Dictionary<CellPosition, ComplexCube> neighbourCells = GetClosestCubesToPosition(realPos);
+
+                    foreach (var cell in neighbourCells)
+                    {
+                        (CoordinateAxisType, CoordinateAxisType) axisTypes = GetAxesFromCellPositions(cell.Key, realPos);
+                        Plane targetFacet = cell.Value.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item1);
+                        Plane attachingFacet = attachingCell.Value.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item2);
+
+                        if (targetFacet.IsAttached && attachingFacet.IsAttached)
+                        {
+                            cells[realPos] = attachingCell.Value;
+                            connections[(cell.Value, attachingCell.Value)] = (targetFacet, attachingFacet);
+                            continue;
+                        }
+                        else
+                        {
+                            Attach(cell.Value, targetFacet, attachingCell.Value, attachingFacet, attachingStructure);
+                            cells[realPos] = attachingCell.Value;
+                            connections[(cell.Value, attachingCell.Value)] = (targetFacet, attachingFacet);
+                        }
+                    }
+                }
+            }
+        }
+
         public void AttachCubes(ComplexCube target, CoordinateAxisType targetAxis,
                                 ComplexCube attaching, CoordinateAxisType attachingAxis)
         {
@@ -104,6 +167,7 @@ namespace CadEditor
                 case CoordinateAxisType.MinusX: attachingPosition.X -= 1; break;
             }
 
+
             //Get all neighbours of attachingPosition to find all connections
             Dictionary<CellPosition, ComplexCube> neighbourCells = GetClosestCubesToPosition(attachingPosition);
 
@@ -112,7 +176,7 @@ namespace CadEditor
                 (CoordinateAxisType, CoordinateAxisType) axisTypes = GetAxesFromCellPositions(cell.Key, attachingPosition);
                 Plane targetFacet = cell.Value.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item1);
                 Plane attachingFacet = attaching.Mesh.GetFacetByCoordinateAxisType(axisTypes.Item2);
-                Attach(cell.Value, targetFacet, attaching, attachingFacet);
+                Attach(cell.Value, targetFacet, attaching, attachingFacet, null);
                 cells[attachingPosition] = attaching;
                 connections[(cell.Value, attaching)] = (targetFacet, attachingFacet);
             }
@@ -164,7 +228,7 @@ namespace CadEditor
             else return (CoordinateAxisType.MinusX, CoordinateAxisType.MinusX);
         }
 
-        private void Attach(ComplexCube targetCube, Plane targetFacet, ComplexCube attachingCube, Plane attachingFacet)
+        private void Attach(ComplexCube targetCube, Plane targetFacet, ComplexCube attachingCube, Plane attachingFacet, ComplexStructure attachingStructure)
         {
             //find closest point to attaching cube
             (int, Vector) closestDistance = GetClosestDistanceToAttach(targetFacet, attachingFacet);
@@ -176,7 +240,14 @@ namespace CadEditor
             Vector centerToPoint = minVector - pointToPoint;
             Point3D resultCenterPoint = new Point3D(targetFacet.Points[indexOfMinPoint] + new Point3D(centerToPoint));
             Vector resultVector = attachingFacet.GetCenterPoint() - resultCenterPoint;
-            attachingCube.Move(resultVector * (-1));
+            if (attachingStructure != null)
+            {
+                attachingStructure.Move(resultVector * (-1));
+            }
+            else
+            {
+                attachingCube.Move(resultVector * (-1));
+            }
 
             //attach facet
             AttachFacets(targetCube, targetFacet, attachingCube, attachingFacet);
@@ -222,16 +293,11 @@ namespace CadEditor
                 Vector v = attachingPoint - targetPoint;
                 attachingPoint.Move(v * (-1));
                 int coef = targetMesh.Vertices[index1].Coefficient;
-                //targetMesh.Vertices[index1] = attachingPoint;
-                //targetMesh.Vertices[index1].Coefficient += coef;
-
                 attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
-                //if (attachingMesh.Vertices[index2].Coefficient < 4)
-                //{
                 attachingMesh.Vertices[index2].Coefficient += 1;
-                //}
 
-                //TODO: Moving is not working
+                targetFacet.IsAttached = true;
+                attachingFacet.IsAttached = true;
             }
         }
 
@@ -255,6 +321,11 @@ namespace CadEditor
             }
 
             return (indexOfMinPoint, minVector);
+        }
+
+        public Dictionary<CellPosition, ComplexCube> GetCells()
+        {
+            return cells;
         }
 
         private CellPosition? GetCellPositionByCube(ComplexCube cube)

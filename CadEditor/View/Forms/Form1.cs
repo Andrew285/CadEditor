@@ -11,6 +11,7 @@ namespace CadEditor
     public partial class Form1 : Form
     {
         private ApplicationController _applicationController;
+        private ToolsMenuControl _toolsMenuControl;
         private BaseControl[] mainControls;
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
@@ -23,7 +24,7 @@ namespace CadEditor
 
             _applicationController = new ApplicationController(this, GetOpenGLControl());
             GLControl _openGLController = new GLControl(this, GetOpenGLControl(), _applicationController);
-            ToolsMenuControl _toolsMenuController = new ToolsMenuControl(this, _applicationController, GetOpenGLControl());
+            _toolsMenuControl = new ToolsMenuControl(this, _applicationController, GetOpenGLControl());
             SceneCollectionControl _sceneCollectionController = new SceneCollectionControl(this, _applicationController);
             PropertiesControl _propertiesController = new PropertiesControl(this, _applicationController);
 
@@ -33,7 +34,7 @@ namespace CadEditor
             mainControls = new BaseControl[] 
             {
                 _openGLController,
-                _toolsMenuController,
+                _toolsMenuControl,
                 _sceneCollectionController,
                 _propertiesController,
             };
@@ -92,9 +93,10 @@ namespace CadEditor
             bool baseResult = base.ProcessCmdKey(ref msg, keyData);
             if (keyData == Keys.Tab)
             {
-                //int oppositeViewIndex = _applicationController.HandlePressTab(mode_comboBox.SelectedIndex);
-                //mode_comboBox.SelectedItem = mode_comboBox.Items[oppositeViewIndex];
-                //return true;
+                ComboBox sceneModeComboBox = _toolsMenuControl.GetSceneModeComboBox();
+                int oppositeViewIndex = _applicationController.HandlePressTab(sceneModeComboBox.SelectedIndex);
+                sceneModeComboBox.SelectedItem = sceneModeComboBox.Items[oppositeViewIndex];
+                return true;
             }
             else if (keyData == (Keys.Control | Keys.Z))
             {

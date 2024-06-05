@@ -249,6 +249,11 @@ namespace CadEditor.View
             sceneMode.SelectedIndex = 0;
         }
 
+        public ComboBox GetSceneModeComboBox()
+        {
+            return sceneMode;
+        }
+
         private void addCubeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _applicationController.AddNewCubeElement(new Point3D(0, 0, 0));
