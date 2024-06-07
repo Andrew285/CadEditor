@@ -2,6 +2,11 @@
 using CadEditor.Models.Scene;
 using System.Numerics;
 using System.Collections.Generic;
+using System;
+using CadEditor.MeshObjects;
+using System.Runtime.InteropServices;
+using CadEditor.Maths;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CadEditor.Controllers
 {
@@ -147,12 +152,92 @@ namespace CadEditor.Controllers
             {
                 if (_scene.IsObjectRotate && _scene.SelectedObject != null && _scene.SelectedObject.IsSelected && _scene.SelectedObject is IRotateable)
                 {
-                    _controller.UpdateRotation((IRotateable)_scene.SelectedObject, horizontalAngle, verticalAngle);
+                    UpdateRotation((IRotateable)_scene.SelectedObject, horizontalAngle, verticalAngle);
                 }
                 else
                 {
                     //_controller.UpdateRotation(Camera, x, y);
                     Camera.UpdateRotation(horizontalAngle, verticalAngle);
+                }
+            }
+        }
+        public void UpdateRotation(IRotateable rotateable, double horizontalAngle, double verticalAngle)
+        {
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
+
+            rotateable.xRotation += xDelta * 1f;
+            rotateable.yRotation += yDelta * 1f;
+
+            float rotationAngleX = TransformMesh.DegreesToRadians(rotateable.xRotation);
+            float rotationAngleY = TransformMesh.DegreesToRadians(rotateable.yRotation);
+            float rotationAngleZ = TransformMesh.DegreesToRadians(0);
+            RotateVertices(rotationAngleX, rotationAngleY, rotationAngleZ, rotateable);
+
+            GraphicsGL.Control.Invalidate();
+        }
+
+        void RotateVertices(float angleX, float angleY, float angleZ, IRotateable obj)
+        {
+            float cosX = (float)Math.Cos(angleX);
+            float sinX = (float)Math.Sin(angleX);
+            Matrix4x4 rotationMatrixX = new Matrix4x4(
+                 1, 0, 0, 0,
+                 0, cosX, -sinX, 0,
+                 0, sinX, cosX, 0,
+                 0, 0, 0, 1
+            );
+
+            float cosY = (float)Math.Cos(angleY);
+            float sinY = (float)Math.Sin(angleY);
+            Matrix4x4 rotationMatrixY = new Matrix4x4(
+                 cosY, 0, sinY, 0,
+                 0, 1, 0, 0,
+                 -sinY, 0, cosY, 0,
+                 0, 0, 0, 1
+            );
+
+            float cosZ = (float)Math.Cos(angleZ);
+            float sinZ = (float)Math.Sin(angleZ);
+            Matrix4x4 rotationMatrixZ = new Matrix4x4(
+                cosZ, -sinZ, 0, 0,
+                sinZ, cosZ, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            );
+
+
+            Matrix4x4 combinedRotation = rotationMatrixZ * rotationMatrixY * rotationMatrixX;
+
+            if (obj is ComplexStructure)
+            {
+                ComplexStructure complexStructure = (ComplexStructure)obj;
+                for (int i = 0; i < complexStructure.GetCubes().Count; i++)
+                {
+                    for (int j = 0; j < complexStructure.GetCubes()[i].Mesh.Vertices.Count; j++)
+                    {
+                        Vector3 vertex = new Vector3((float)complexStructure.GetCubes()[i].Mesh.Vertices[j].X,
+                                                     (float)complexStructure.GetCubes()[i].Mesh.Vertices[j].Y,
+                                                     (float)complexStructure.GetCubes()[i].Mesh.Vertices[j].Z);
+                        Vector3 result3 = Vector3.Transform(vertex, combinedRotation);
+                        complexStructure.GetCubes()[i].Mesh.Vertices[j].X = result3.X;
+                        complexStructure.GetCubes()[i].Mesh.Vertices[j].Y = result3.Y;
+                        complexStructure.GetCubes()[i].Mesh.Vertices[j].Z = result3.Z;
+                    }
+                }
+            }
+            else if (obj is MeshObject3D)
+            {
+                MeshObject3D meshObj = (MeshObject3D)obj;
+                for (int j = 0; j < meshObj.Mesh.Vertices.Count; j++)
+                {
+                    Vector3 vertex = new Vector3((float)meshObj.Mesh.Vertices[j].X,
+                                                    (float)meshObj.Mesh.Vertices[j].Y,
+                                                    (float)meshObj.Mesh.Vertices[j].Z);
+                    Vector3 result = Vector3.Transform(vertex, rotationMatrixZ);
+                    meshObj.Mesh.Vertices[j].X = result.X;
+                    meshObj.Mesh.Vertices[j].Y = result.Y;
+                    meshObj.Mesh.Vertices[j].Z = result.Z;
                 }
             }
         }

@@ -438,15 +438,14 @@ namespace CadEditor.Controllers
             _scene.ObjectCollection.Remove(AttachingController.AttachingAxisSystem);
         }
 
-        public void UpdateRotation(IRotateable rotateable, double horizontalAngle, double verticalAngle)
+        public void RotateSelectedObject()
         {
-            float xDelta = (float)horizontalAngle;
-            float yDelta = (float)verticalAngle;
+            ISceneObject selectedObject = SceneController.GetSelectedObject();
+            if (selectedObject is IRotateable)
+            {
 
-            rotateable.xRotation += xDelta * 1f;
-            rotateable.yRotation += yDelta * 1f;
-
-            GraphicsGL.Control.Invalidate();
+                RenderController.UpdateRotation(selectedObject as IRotateable, 90, 0);
+            }
         }
 
         public void ColorPartOf(MeshObject3D meshObject, ModelPartTypes partType, Color color, ModelColorMode? mode = null)

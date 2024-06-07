@@ -55,6 +55,10 @@ namespace CadEditor
 
             switch (e.KeyCode)
             {
+                case Keys.R:
+                    _applicationController.RotateSelectedObject();
+                    break;
+
                 case Keys.X:
                     KeyX_Clicks = _applicationController.SetObjectToAxis(CoordinateAxis.X, KeyX_Clicks);
                     break;

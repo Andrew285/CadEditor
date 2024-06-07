@@ -291,10 +291,17 @@ namespace CadEditor
                 Point3D attachingPoint = attachingMesh.Vertices[index2];
 
                 Vector v = attachingPoint - targetPoint;
+
+
                 attachingPoint.Move(v * (-1));
                 int coef = targetMesh.Vertices[index1].Coefficient;
                 attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
                 attachingMesh.Vertices[index2].Coefficient += 1;
+
+                if (attachingMesh.Vertices[index2].Coefficient > 4)
+                {
+                    throw new Exception("");
+                }
 
                 targetFacet.IsAttached = true;
                 attachingFacet.IsAttached = true;
