@@ -42,6 +42,9 @@
     <Reference Include="MathNet.Spatial, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Spatial.0.6.0\lib\net461\MathNet.Spatial.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Nito.Collections.Deque, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nito.Collections.Deque.1.2.1\lib\net461\Nito.Collections.Deque.dll</HintPath>
     </Reference>
@@ -83,6 +86,7 @@
     <Compile Include="Controllers\IObjectController.cs" />
     <Compile Include="Controllers\ModelNameProvider.cs" />
     <Compile Include="Controllers\MovingController.cs" />
+    <Compile Include="Controllers\ProjectController.cs" />
     <Compile Include="Controllers\RenderController.cs" />
     <Compile Include="Controllers\SceneController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
@@ -108,14 +112,16 @@
     <Compile Include="Settings\MainSettings.cs" />
     <Compile Include="Settings\ThemeSettings.cs" />
     <Compile Include="Settings\SceneSettings.cs" />
+    <Compile Include="Tools\Localization\Localization.cs" />
+    <Compile Include="Tools\Localization\Strings.cs" />
     <Compile Include="Tools\TypeStringConverter.cs" />
     <Compile Include="Tools\UITools.cs" />
     <Compile Include="View\BaseControl.cs" />
-    <Compile Include="View\Forms\LibraryForm.cs">
+    <Compile Include="View\Forms\ProjectLibraryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="View\Forms\LibraryForm.Designer.cs">
-      <DependentUpon>LibraryForm.cs</DependentUpon>
+    <Compile Include="View\Forms\ProjectLibraryForm.Designer.cs">
+      <DependentUpon>ProjectLibraryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\Forms\SaveForm.cs">
       <SubType>Form</SubType>
@@ -176,9 +182,6 @@
     <EmbeddedResource Include="View\Forms\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="View\Forms\LibraryForm.resx">
-      <DependentUpon>LibraryForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -189,6 +192,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="View\Forms\ProjectLibraryForm.resx">
+      <DependentUpon>ProjectLibraryForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="View\Forms\SaveForm.resx">
       <DependentUpon>SaveForm.cs</DependentUpon>
     </EmbeddedResource>

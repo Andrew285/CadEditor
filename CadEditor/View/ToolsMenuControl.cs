@@ -315,7 +315,7 @@ namespace CadEditor.View
         //Scene Tab
         private void captureSceneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Bitmap bmp = CaptureScreen();
+            Bitmap bmp = _applicationController.RenderController.CaptureScreen();
             bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\", ImageFormat.Jpeg);
         }
 
@@ -343,49 +343,16 @@ namespace CadEditor.View
             _applicationController.UIController.CreateSettingsForm();
         }
 
-        private Bitmap CaptureScreen()
-        {
-            Control c = _openGLControl;
-            Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
-            c.DrawToBitmap(bmp, c.ClientRectangle);
-            return bmp;
-        }
+
 
         private void openLibraryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LibraryForm libraryForm = new LibraryForm(_applicationController.Library.GetAllSaves());
-            DialogResult result = libraryForm.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-                SaveData saveData = libraryForm.SelectedSave;
-                string[] lines = File.ReadAllLines(saveData.GetFilePath());
-                _applicationController.SceneController.Scene.Import(lines);
-            }
+            _applicationController.OpenLibrary();
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Bitmap bmp = CaptureScreen();
-
-            SaveForm form = new SaveForm(bmp);
-            DialogResult result = form.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-                string nameOfSave = form.SaveData.GetTitle();
-                string exportString = _applicationController.SceneController.Scene.Export();
-
-                bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\" + nameOfSave + ".jpeg", ImageFormat.Jpeg);
-                string filePath = @"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Scene\" + nameOfSave + ".txt";
-
-                using (StreamWriter writer = new StreamWriter(filePath))
-                {
-                    writer.WriteLine(exportString);
-                    writer.Close(); // Close the writer to flush and release resources
-                }
-                _applicationController.Library.AddSave(bmp, filePath, nameOfSave);
-            }
+            _applicationController.SaveProject();
         }
 
         private void mode_comboBox_SelectedIndexChanged(object sender, EventArgs e)

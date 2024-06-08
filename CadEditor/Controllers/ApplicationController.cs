@@ -3,9 +3,14 @@ using CadEditor.Models.Commands;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
 using CadEditor.Settings;
+using CadEditor.Tools.Localization;
+using CadEditor.View.Forms;
 using SharpGL;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows.Forms;
 
 namespace CadEditor.Controllers
@@ -21,6 +26,8 @@ namespace CadEditor.Controllers
         public RenderController RenderController { get; private set; }
         public SceneController SceneController { get; private set; }
         public SettingsController SettingsController { get; private set; }
+        public ProjectController ProjectController { get; private set; }
+        public Localization Localization { get; private set; }
         public Library Library { get; private set; }
         private Scene _scene;
 
@@ -35,6 +42,8 @@ namespace CadEditor.Controllers
             UIController = new UIController(this, mainForm);
             CommandsHistory = new CommandsHistory();
             SettingsController = new SettingsController();
+            ProjectController = new ProjectController();
+            Localization = new Localization();
             Library = new Library();
             _scene = SceneController.Scene;
         }
@@ -44,6 +53,7 @@ namespace CadEditor.Controllers
             RenderController.Initialize();
             SettingsController.LoadData(MainSettings.FilePath);
             UIController.Initialize();
+            Localization.LoadTranslations();
             InitializeScene();
         }
 
@@ -244,9 +254,21 @@ namespace CadEditor.Controllers
         public ComplexCube AddNewCubeElement(Point3D position, Vector size = null, string name = null)
         {
             ComplexCube cube = CubeController.Create(position, size, name);
-            SceneController.Scene.AddObject(cube);
-            SceneCollection.AddCube(cube);
+            RegisterObject(cube);
             return cube;
+        }
+
+        public void RegisterObject(ISceneObject obj)
+        {
+            SceneController.Scene.AddObject(obj);
+            if (obj is ComplexCube)
+            {
+                SceneCollection.AddCube(obj as ComplexCube);
+            }
+            else if (obj is ComplexStructure)
+            {
+                SceneCollection.AddComplexStructure(obj as ComplexStructure);
+            }
         }
 
         public void MoveBy(double horizontalAngle, double verticalAngle)
@@ -351,6 +373,30 @@ namespace CadEditor.Controllers
                 scene.Remove(attachingCubeCopy);
             }
             AttachingController.AttachingAxisSystem = null;
+        }
+
+        public void CopySelectedElement()
+        {
+            ProjectController.Clipboard = SceneController.GetSelectedObject().Clone();
+        }
+
+        public void PasteElement()
+        {
+            ISceneObject pastedObject = ProjectController.Clipboard as ISceneObject;
+            if (pastedObject != null)
+            {
+
+                pastedObject.Move(new Vector(2, 2, 2));
+                if (pastedObject is ComplexCube)
+                {
+                    ComplexCube cube = CubeController.Create(pastedObject as ComplexCube);
+                    RegisterObject(cube);
+                }
+                else if (pastedObject is ComplexStructure) 
+                {
+                    // TODO: implement copying of ComplexStructure
+                }
+            }
         }
 
         private int ClickKeyAxes(CoordinateAxis axis, int clicks)
@@ -480,6 +526,45 @@ namespace CadEditor.Controllers
             DeselectionCommand deselectionCommand = new DeselectionCommand(this, _scene.SelectedObject);
             deselectionCommand.Execute();
             CommandsHistory.Push(deselectionCommand);
+        }
+
+        public void OpenLibrary()
+        {
+            ProjectLibraryForm libraryForm = new ProjectLibraryForm(Library.GetAllSaves());
+            DialogResult result = libraryForm.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                SaveData saveData = libraryForm.GetSelectedProject();
+                string[] lines = File.ReadAllLines(saveData.GetFilePath());
+                SceneController.Scene.Import(lines);
+            }
+        }
+
+        public void SaveProject()
+        {
+            Bitmap bmp = RenderController.CaptureScreen();
+            SaveForm form = new SaveForm(bmp);
+            form.StartPosition = FormStartPosition.CenterScreen;
+            DialogResult result = form.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                string date = form.SaveData.GetDate().ToString();
+                string convertedDate = date.Replace('.', 'd').Replace(":", "td").Replace(" ", "sp");
+                string nameOfSave = form.SaveData.GetTitle() + " " + convertedDate;
+                string exportString = SceneController.Scene.Export();
+
+                bmp.Save(@"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Screenshots\" + nameOfSave + ".jpeg", ImageFormat.Jpeg);
+                string filePath = @"D:\Projects\VisualStudio\CadEditor\CadEditor\LibrarySaves\Scene\" + nameOfSave + ".txt";
+
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    writer.WriteLine(exportString);
+                    writer.Close(); // Close the writer to flush and release resources
+                }
+                Library.AddSave(bmp, filePath, nameOfSave, DateTime.Now);
+            }
         }
     }
 }

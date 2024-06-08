@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CadEditor
@@ -18,6 +12,7 @@ namespace CadEditor
         {
             InitializeComponent();
             panel1.BackgroundImage = bmp;
+            this.TopMost = true;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -26,7 +21,7 @@ namespace CadEditor
 
             if (name != "")
             {
-                SaveData = new SaveData(new Bitmap(panel1.BackgroundImage), "", name);
+                SaveData = new SaveData(new Bitmap(panel1.BackgroundImage), "", name, DateTime.Now);
                 DialogResult = DialogResult.OK;
             }
         }

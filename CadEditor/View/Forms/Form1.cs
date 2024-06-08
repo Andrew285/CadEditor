@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.MeshObjects;
+using CadEditor.Tools.Localization;
 using CadEditor.View;
 using SharpGL;
 using System;
@@ -43,6 +44,21 @@ namespace CadEditor
             {
                 control.Initialize();
             }
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            foreach (var control in mainControls)
+            {
+                control.Resize(sender, e);
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //this.TopMost = true;
+            this.WindowState = FormWindowState.Maximized;
+            this.Text = _applicationController.Localization.GetTranslationOf(Strings.form_name);
         }
 
         public OpenGLControl GetOpenGLControl()
@@ -110,6 +126,14 @@ namespace CadEditor
             {
                 _applicationController.HandlePressCtrlShiftZ();
             }
+            else if (keyData == (Keys.Control | Keys.C))
+            {
+                _applicationController.CopySelectedElement();
+            }
+            else if (keyData == (Keys.Control | Keys.V))
+            {
+                _applicationController.PasteElement();
+            }
 
             return baseResult;
         }
@@ -139,14 +163,6 @@ namespace CadEditor
         public void UpdateMenuBackColor(Color color)
         {
             //this.menuStrip1.BackColor = color;
-        }
-
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-            foreach (var control in mainControls)
-            {
-                control.Resize(sender, e);
-            }
         }
     }
 }

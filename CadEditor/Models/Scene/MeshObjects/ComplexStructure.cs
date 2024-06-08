@@ -5,7 +5,6 @@ using CadEditor.Models.Scene.MeshObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Text;
 
 
@@ -298,10 +297,10 @@ namespace CadEditor
                 attachingMesh.Vertices[index2] = targetMesh.Vertices[index1];
                 attachingMesh.Vertices[index2].Coefficient += 1;
 
-                if (attachingMesh.Vertices[index2].Coefficient > 4)
-                {
-                    throw new Exception("");
-                }
+                //if (attachingMesh.Vertices[index2].Coefficient > 4)
+                //{
+                //    throw new Exception("");
+                //}
 
                 targetFacet.IsAttached = true;
                 attachingFacet.IsAttached = true;

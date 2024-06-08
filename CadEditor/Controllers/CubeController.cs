@@ -1,11 +1,4 @@
 ﻿using CadEditor.Models.Scene;
-using GeometRi;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadEditor.Controllers
 {
@@ -33,6 +26,14 @@ namespace CadEditor.Controllers
             if (name == null) cubeName = _nameProvider.GetNextName(_modelType);
 
             return new ComplexCube(cubePosition, cubeSize, cubeName);
+        }
+
+        public ComplexCube Create(ComplexCube cube)
+        {
+            string cubeName = _nameProvider.GetNextName(_modelType);
+            ComplexCube cloneCube = (ComplexCube)cube.Clone();
+            cloneCube.Name = cubeName;
+            return cloneCube;
         }
 
         public void UpdateRotation(ComplexCube cube, double horizontalAngle, double verticalAngle)

@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadEditor
 {
@@ -30,7 +27,18 @@ namespace CadEditor
                 for (int i = 0; i < saveFiles.Length; i++)
                 {
                     Bitmap bm = new Bitmap(screensFiles[i]);
-                    SaveData saveData = new SaveData(bm, saveFiles[i], Path.GetFileName(saveFiles[i]));
+                    string fileName = Path.GetFileName(saveFiles[i]);
+                    string projectName = "No Title";
+                    DateTime projectDate = new DateTime();
+                    if (fileName.Contains(' '))
+                    {
+                        string[] fileNameParts = fileName.Split(' ');
+                        projectName = fileNameParts[0];
+                        string stringDate = fileNameParts[1].Replace("td", ":").Replace("d", ".").Replace("sp", " ");
+                        string substringDate = stringDate.Substring(0, stringDate.Length - 4);
+                        projectDate = DateTime.Parse(substringDate, System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    SaveData saveData = new SaveData(bm, saveFiles[i], projectName, projectDate);
                     saves.Add(saveData);
                 }
             }
@@ -38,17 +46,15 @@ namespace CadEditor
             return saves;
         }
 
-        public void AddSave(Bitmap picture, string path, string name)
+        public void AddSave(Bitmap picture, string path, string name, DateTime date)
         {
-            saves.Add(new SaveData(picture, path, name));
+            saves.Add(new SaveData(picture, path, name, date));
         }
 
         public void Remove(SaveData data)
         {
             saves.Remove(data);
         }
-
-        
     }
 
     public class SaveData
@@ -56,12 +62,14 @@ namespace CadEditor
         private Bitmap picture;
         private string filePath;
         private string title;
+        private DateTime creationDate;
 
-        public SaveData(Bitmap pic, string path, string name)
+        public SaveData(Bitmap pic, string path, string name, DateTime date)
         {
             picture = pic;
             filePath = path;
             title = name;
+            creationDate = date;
         }
 
         public Bitmap GetPicture()
@@ -77,6 +85,11 @@ namespace CadEditor
         public string GetTitle()
         {
             return title;
+        }
+
+        public DateTime GetDate()
+        {
+            return creationDate;
         }
     }
 }

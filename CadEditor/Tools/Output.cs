@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace CadEditor
 {
@@ -14,5 +9,9 @@ namespace CadEditor
             MessageBox.Show(body, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        public static DialogResult ShowError(string title, string body)
+        {
+            return MessageBox.Show(body, title, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }
     }
 }

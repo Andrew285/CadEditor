@@ -284,20 +284,27 @@ namespace CadEditor
 
         public ComplexCube(ComplexCube cubeToClone): base(cubeToClone)
         {
+            InitFacets(Mesh);
+            InitEdges(Mesh);
+
             xRotation = cubeToClone.xRotation;
             yRotation = cubeToClone.yRotation;
-            IsSelected = cubeToClone.IsSelected;
             IsDivided = cubeToClone.IsDivided;
-            //localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
-            //localSystem = new LocalSystem();
-            localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
-            OuterVertices = new Point3D[20];
-            //localSystem.InitOuterVertices(OuterVertices, cubeToClone.Mesh);
 
-            for (int i = 0; i < cubeToClone.OuterVertices.Length; i++)
-            {
-                OuterVertices[i] = (Point3D)cubeToClone.OuterVertices[i].Clone();
-            }
+            localSystem = new LocalSystem();
+            OuterVertices = new Point3D[20];
+            localSystem.InitOuterVertices(OuterVertices, Mesh);
+
+            ////localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            ////localSystem = new LocalSystem();
+            //localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            //OuterVertices = new Point3D[20];
+            ////localSystem.InitOuterVertices(OuterVertices, cubeToClone.Mesh);
+
+            //for (int i = 0; i < cubeToClone.OuterVertices.Length; i++)
+            //{
+            //    OuterVertices[i] = (Point3D)cubeToClone.OuterVertices[i].Clone();
+            //}
         }
 
 

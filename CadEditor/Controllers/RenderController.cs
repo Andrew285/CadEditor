@@ -4,9 +4,9 @@ using System.Numerics;
 using System.Collections.Generic;
 using System;
 using CadEditor.MeshObjects;
-using System.Runtime.InteropServices;
 using CadEditor.Maths;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace CadEditor.Controllers
 {
@@ -240,6 +240,14 @@ namespace CadEditor.Controllers
                     meshObj.Mesh.Vertices[j].Z = result.Z;
                 }
             }
+        }
+
+        public Bitmap CaptureScreen()
+        {
+            Control c = GraphicsGL.Control;
+            Bitmap bmp = new System.Drawing.Bitmap(c.Width, c.Height);
+            c.DrawToBitmap(bmp, c.ClientRectangle);
+            return bmp;
         }
     }
 }

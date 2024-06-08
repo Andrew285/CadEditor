@@ -33,7 +33,6 @@ namespace CadEditor
             this.components = new System.ComponentModel.Container();
             this.openGLControl1 = new SharpGL.OpenGLControl();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl1)).BeginInit();
             this.SuspendLayout();
@@ -63,7 +62,7 @@ namespace CadEditor
             this.Controls.Add(this.openGLControl1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
-            this.Text = "CadEditor";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.Resize += new System.EventHandler(this.Form1_Resize);
