@@ -1,4 +1,5 @@
-﻿using CadEditor.Models.Scene.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.Models.Scene.MeshObjects;
 using GeometRi;
 using SharpGL;
 using System;
@@ -176,13 +177,13 @@ namespace CadEditor.MeshObjects
 
 		}
 
-        public (ISceneObject, double) CheckSelected()
+        public (ISceneObject, double) CheckSelected(int x, int y)
         {
             //deselect all facets, edges and vertices before another selecting
             //Deselect();
 
-            Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
-            Scene.selectingRay = ray;
+            Ray ray = GraphicsGL.InitializeRay(x, GraphicsGL.GetHeight() - y);
+            RenderController.selectingRay = ray;
             (ISceneObject, double) selectedVertex = CheckSelectedVertex(ray);
             (ISceneObject, double) selectedEdge = CheckSelectedEdge(ray);
             (ISceneObject, double) selectedFacet = CheckSelectedFacet(ray);
@@ -325,9 +326,9 @@ namespace CadEditor.MeshObjects
             //Vector3 cameraPos = Scene.GetInstance().Camera.Position;
             //double distance = GetDistance(result.Item2, new Point3D(cameraPos.X, cameraPos.Y, cameraPos.Z));
 
-            double distance = GetDistance(result.Item2, new Point3D(Scene.selectingRay.Origin[0],
-                                                                    Scene.selectingRay.Origin[1],
-                                                                    Scene.selectingRay.Origin[2]));
+            double distance = GetDistance(result.Item2, new Point3D(RenderController.selectingRay.Origin[0],
+                                                                    RenderController.selectingRay.Origin[1],
+                                                                    RenderController.selectingRay.Origin[2]));
 
 
             return (result.Item1, distance);

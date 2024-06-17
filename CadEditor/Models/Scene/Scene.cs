@@ -2,131 +2,73 @@
 using CadEditor.MeshObjects;
 using CadEditor.Models.Scene;
 using CadEditor.Models.Scene.MeshObjects;
-using SharpGL;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using static CadEditor.ComplexStructure;
 
 namespace CadEditor
 {
     public class Scene
     {
-		private const int sceneGridSize = 20;
-		private const int sceneGridDensity = sceneGridSize * 4;
-		private const float sceneGridLineWidth = 0.1f;
+
         public List<ISceneObject> ObjectCollection { get; private set; }
-		public bool IsRayDrawable { get; set; } = false;
-		public static Ray selectingRay;
-		private AxisSystem axisSystem;
-		private SceneGrid grid;
-		public static Vector MovingVector;
-		public static CoordinateAxis ActiveMovingAxis;
 		public ISceneObject SelectedObject { get; set; }
 		public ISceneObject PreviousSelectedObject { get; set; }
-		public bool DrawFacets { get; set; }
 		public SceneMode SceneMode { get; set; } = SceneMode.VIEW;
 		public bool IsObjectRotate { get; set; } = false;
-		private SceneCollection SceneCollection;
 
-		public Scene(SceneCollection sceneCollection)
+		public Scene()
 		{
             ObjectCollection = new List<ISceneObject>();
-            grid = new SceneGrid(sceneGridDensity, sceneGridSize, sceneGridLineWidth);
-			this.SceneCollection = sceneCollection;
         }
 
         #region --- Initializing ---
 
-  //      public ISceneObject GetPreviousSelectedObject()
-		//{
-		//	foreach (ISceneObject obj in ObjectCollection)
-		//	{
-		//		if ((obj).IsEqual(previousSelectedObject))
-		//		{
-		//			return obj;
-		//		}
-		//	}
+        //      public ISceneObject GetPreviousSelectedObject()
+        //{
+        //	foreach (ISceneObject obj in ObjectCollection)
+        //	{
+        //		if ((obj).IsEqual(previousSelectedObject))
+        //		{
+        //			return obj;
+        //		}
+        //	}
 
-		//	return null;
-		//}
-		#endregion
+        //	return null;
+        //}
+        #endregion
 
-		#region --- Drawing ---
+        #region --- Drawing ---
 
-		public void Draw()
-        {
-            //Draw Scene Grid
-            DrawCordinateAxes(new Point3D(0, 0, 0), 3.0, sceneGridSize);
-			grid.Draw();
+        //public void Draw(bool drawFacets)
+        //{
 
-			//Draw all objects
-			foreach (var obj in ObjectCollection)
-			{
-				if (obj is ComplexCube)
-                {
-                    ((ComplexCube)obj).DrawFacets = this.DrawFacets;
-                }
-				else if (obj is ComplexStructure)
-				{
-                    ((ComplexStructure)obj).DrawFacets = this.DrawFacets;
-                }
+        //    //Draw all objects
+        //    foreach (var obj in ObjectCollection)
+        //    {
+        //        if (obj is ComplexCube)
+        //        {
+        //            ((ComplexCube)obj).DrawFacets = drawFacets;
+        //        }
+        //        else if (obj is ComplexStructure)
+        //        {
+        //            ((ComplexStructure)obj).DrawFacets = drawFacets;
+        //        }
 
-                if (obj is IRotateable)
-				{
-                    RotateObject(obj);
-					continue;
-				}
+        //        if (obj is IRotateable)
+        //        {
+        //            RotateObject(obj);
+        //            continue;
+        //        }
 
-                obj.Draw();
-			}
-        }
+        //        obj.Draw();
+        //    }
+        //}
 
-        public void DrawSelectingRay(Vector3 cameraPosition)
-        {
-			if (selectingRay != null && IsRayDrawable)
-			{
-                GraphicsGL.GL.LineWidth(2f);
-                GraphicsGL.GL.Begin(OpenGL.GL_LINES);
+        #endregion
 
-                GraphicsGL.GL.Color(1f, 0f, 0f, 0f);
-                GraphicsGL.GL.Vertex(selectingRay.Origin[0], selectingRay.Origin[1], selectingRay.Origin[2]);
-                GraphicsGL.GL.Vertex(selectingRay.Origin[0] + selectingRay.Direction[0] * cameraPosition.Z,
-                selectingRay.Origin[1] + selectingRay.Direction[1] * cameraPosition.Z,
-                selectingRay.Origin[2] + selectingRay.Direction[2] * cameraPosition.Z);
+        #region --- Selection ---
 
-                GraphicsGL.GL.End();
-                GraphicsGL.GL.Flush();
-            }
-        }
-
-        public void DrawCordinateAxes(Point3D v, double lineWidth, double axisLength)
-        {
-            GraphicsGL.GL.LineWidth((float)lineWidth);
-            GraphicsGL.GL.Begin(OpenGL.GL_LINES);
-
-            GraphicsGL.GL.Color(1f, 0, 0, 0);
-            GraphicsGL.GL.Vertex(-axisLength + v.X, v.Y, v.Z);
-            GraphicsGL.GL.Vertex(axisLength + v.X, v.Y, v.Z);
-
-
-            GraphicsGL.GL.Color(0, 1f, 0, 0);
-            GraphicsGL.GL.Vertex(v.X, -axisLength + v.Y, v.Z);
-            GraphicsGL.GL.Vertex(v.X, axisLength + v.Y, v.Z);
-
-            GraphicsGL.GL.Color(0, 0, 1f, 0);
-            GraphicsGL.GL.Vertex(v.X, v.Y, -axisLength + v.Z);
-            GraphicsGL.GL.Vertex(v.X, v.Y, axisLength + v.Z);
-
-            GraphicsGL.GL.End();
-            GraphicsGL.GL.Flush();
-        }
-
-		#endregion
-
-		#region --- Selection ---
-
-		public ISceneObject Select()
+        public ISceneObject Select(int x, int y)
 		{
 			PreviousSelectedObject = SelectedObject;
             ISceneObject realSelectedObject = null;
@@ -134,7 +76,7 @@ namespace CadEditor
 			double minDistance = 0;
             foreach (ISceneObject obj in ObjectCollection)
 			{
-                (ISceneObject, double) result = obj.CheckSelected();
+                (ISceneObject, double) result = obj.CheckSelected(x, y);
 				if(result.Item1 != null)
 				{
 					if (minDistance == 0 || realSelectedObject == null)
@@ -157,7 +99,7 @@ namespace CadEditor
 			{
 				if(!(realSelectedObject is AxisCube))
 				{
-                    DeleteSelectingCoordAxes();
+                    //DeleteSelectingCoordAxes();
 
                     SelectedObject = realSelectedObject;
                     if (SceneMode == SceneMode.VIEW)
@@ -181,22 +123,22 @@ namespace CadEditor
 			else
 			{
 				SelectedObject = null;
-                DeleteSelectingCoordAxes();
+                //DeleteSelectingCoordAxes();
             }
 			return SelectedObject;
         }
 
-		public ISceneObject GetObjectByName(string name)
-		{
-			foreach (ISceneObject obj in ObjectCollection)
-			{
-				if (obj is IUniqueable && ((IUniqueable)obj).Name == name)
-				{
-					return obj;
-				}
-			}
-			return null;
-		}
+		//public ISceneObject GetObjectByName(string name)
+		//{
+		//	foreach (ISceneObject obj in ObjectCollection)
+		//	{
+		//		if (obj is IUniqueable && ((IUniqueable)obj).Name == name)
+		//		{
+		//			return obj;
+		//		}
+		//	}
+		//	return null;
+		//}
 
         public ISceneObject GetObjectByName(string name, List<ISceneObject> objects)
         {
@@ -210,15 +152,15 @@ namespace CadEditor
             return null;
         }
 
-        public void SetObjectByName(string name, ISceneObject objToSet)
-		{
-			ISceneObject obj = GetObjectByName(name);
-            int index = ObjectCollection.IndexOf(obj);
-			if (index != -1)
-			{
-				ObjectCollection[index] = objToSet;
-			}
-        }
+  //      public void SetObjectByName(string name, ISceneObject objToSet)
+		//{
+		//	ISceneObject obj = GetObjectByName(name);
+  //          int index = ObjectCollection.IndexOf(obj);
+		//	if (index != -1)
+		//	{
+		//		ObjectCollection[index] = objToSet;
+		//	}
+  //      }
 
 		public List<ComplexStructure> GetAllComplexStructures()
 		{
@@ -266,87 +208,34 @@ namespace CadEditor
 			}
 		}
 		
-		public bool CreateAxes(ISceneObject obj)
-		{
-			if (axisSystem != null)
-			{
-				ObjectCollection.Remove(axisSystem);
-            }
-
-            axisSystem = new AxisSystem(obj.GetCenterPoint(), selectingRay);
-            ObjectCollection.Insert(0, axisSystem);
-            return true;
-        }
-
-        public bool DeleteSelectingCoordAxes()
-        {
-            ObjectCollection.Remove(axisSystem);
-			return true;
-        }
-
         #endregion
 
         #region --- Manipulation ---
-
-        public void DeleteCompletely(ISceneObject obj)
-		{
-			ObjectCollection.Remove(obj);
-			DeleteSelectingCoordAxes();
-        }
 
         public void AddObject(ISceneObject obj)
 		{
 			ObjectCollection.Add(obj);
 		}
 
-		public void MoveCoordinateAxes(Vector vector)
+		//public void RotateObject(ISceneObject obj)
+		//{
+		//	if (obj is IRotateable)
+		//	{
+  //              GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
+  //              GraphicsGL.GL.PushMatrix();
+  //              Point3D p = obj.GetCenterPoint();
+  //              GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
+  //              GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
+  //              GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
+  //              GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
+  //              (obj).Draw();
+  //              GraphicsGL.GL.PopMatrix();
+  //          }
+  //      }
+
+		public bool Remove(ISceneObject obj)
 		{
-			axisSystem.Move(vector);
-		}
-
-		public void Update()
-		{
-			foreach(ISceneObject cube in ObjectCollection)
-			{
-				cube.Deselect();
-			}
-
-			if(axisSystem != null)
-			{
-				DeleteSelectingCoordAxes();
-			}
-		}
-
-		public void UpdateObjectRotation(IRotateable rotateable, int x, int y)
-		{
-            float xDelta = (float)MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)MouseController.GetVerticalAngle(y);
-
-            rotateable.xRotation += xDelta * 1f;
-            rotateable.yRotation += yDelta * 1f;
-
-            GraphicsGL.Control.Invalidate();
-        }
-
-		public void RotateObject(ISceneObject obj)
-		{
-			if (obj is IRotateable)
-			{
-                GraphicsGL.GL.MatrixMode(SharpGL.Enumerations.MatrixMode.Modelview);
-                GraphicsGL.GL.PushMatrix();
-                Point3D p = obj.GetCenterPoint();
-                GraphicsGL.GL.Translate(p.X, p.Y, p.Z);
-                GraphicsGL.GL.Rotate(((IRotateable)obj).yRotation, 1.0f, 0.0f, 0.0f);
-                GraphicsGL.GL.Rotate(((IRotateable)obj).xRotation, 0.0f, 1.0f, 0.0f);
-                GraphicsGL.GL.Translate(-p.X, -p.Y, -p.Z);
-                (obj).Draw();
-                GraphicsGL.GL.PopMatrix();
-            }
-        }
-
-		public void Remove(ISceneObject obj)
-		{
-			ObjectCollection.Remove(obj);
+			return ObjectCollection.Remove(obj);
 		}
         
 		public bool Contains(ISceneObject obj)
@@ -357,6 +246,11 @@ namespace CadEditor
 		public void Add(ISceneObject obj)
 		{
 			ObjectCollection.Add(obj);
+		}
+
+		public void Insert(int index, ISceneObject obj)
+		{
+			ObjectCollection.Insert(index, obj);
 		}
 
 		#endregion
@@ -482,18 +376,7 @@ namespace CadEditor
 			//add new object to SceneCollection
 			//SceneCollection.ClearAll();
 			ObjectCollection = sceneObjects;
-			foreach (ISceneObject obj in ObjectCollection)
-			{
-				if (obj is ComplexCube)
-				{
-					SceneCollection.AddCube((ComplexCube)obj);
-				}
-				else if (obj is ComplexStructure)
-				{
-					SceneCollection.AddComplexStructure((ComplexStructure)obj);
-				}
-            }
-			NameController.GetValuesOf(ObjectCollection);
+			ModelNameProvider.GetInstance().GetValuesOf(ObjectCollection);
 		}
 
 		#endregion

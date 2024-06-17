@@ -5,7 +5,7 @@ using CadEditor.MeshObjects;
 using System.Text;
 using CadEditor.Models.Scene.MeshObjects;
 using CadEditor.Models.Scene;
-using System.Reflection.Emit;
+using CadEditor.Controllers;
 
 namespace CadEditor
 {
@@ -284,31 +284,27 @@ namespace CadEditor
 
         public ComplexCube(ComplexCube cubeToClone): base(cubeToClone)
         {
+            InitFacets(Mesh);
+            InitEdges(Mesh);
+
             xRotation = cubeToClone.xRotation;
             yRotation = cubeToClone.yRotation;
-            IsSelected = cubeToClone.IsSelected;
             IsDivided = cubeToClone.IsDivided;
-            //localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
-            //localSystem = new LocalSystem();
-            localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+
+            localSystem = new LocalSystem();
             OuterVertices = new Point3D[20];
-            //localSystem.InitOuterVertices(OuterVertices, cubeToClone.Mesh);
+            localSystem.InitOuterVertices(OuterVertices, Mesh);
 
-            for (int i = 0; i < cubeToClone.OuterVertices.Length; i++)
-            {
-                OuterVertices[i] = (Point3D)cubeToClone.OuterVertices[i].Clone();
-            }
-        }
+            ////localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            ////localSystem = new LocalSystem();
+            //localSystem = (LocalSystem)cubeToClone.localSystem.Clone();
+            //OuterVertices = new Point3D[20];
+            ////localSystem.InitOuterVertices(OuterVertices, cubeToClone.Mesh);
 
-        public void UpdateRotation(int x, int y)
-        {
-            float xDelta = (float)MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)MouseController.GetVerticalAngle(y);
-
-            xRotation += xDelta * 1f;
-            yRotation += yDelta * 1f;
-
-            GraphicsGL.Control.Invalidate();
+            //for (int i = 0; i < cubeToClone.OuterVertices.Length; i++)
+            //{
+            //    OuterVertices[i] = (Point3D)cubeToClone.OuterVertices[i].Clone();
+            //}
         }
 
 
@@ -505,13 +501,13 @@ namespace CadEditor
             localSystem.InitTransformMesh();
 
             //Transform cube in all axes
-            Scene.ActiveMovingAxis = CoordinateAxis.X;
+            MovingController.ActiveMovingAxis = CoordinateAxis.X;
             Transform();
 
-            Scene.ActiveMovingAxis = CoordinateAxis.Y;
+            MovingController.ActiveMovingAxis = CoordinateAxis.Y;
             Transform();
 
-            Scene.ActiveMovingAxis = CoordinateAxis.Z;
+            MovingController.ActiveMovingAxis = CoordinateAxis.Z;
             Transform();
 
             IsDivided = true;
@@ -522,9 +518,9 @@ namespace CadEditor
         public void Update(Point3D p)
         {
             int index = p.PositionInCube;
-            OuterVertices[index][0] += Scene.MovingVector[0];
-            OuterVertices[index][1] += Scene.MovingVector[1];
-            OuterVertices[index][2] += Scene.MovingVector[2];
+            OuterVertices[index][0] += MovingController.MovingVector[0];
+            OuterVertices[index][1] += MovingController.MovingVector[1];
+            OuterVertices[index][2] += MovingController.MovingVector[2];
         }
 
         public void UpdateObject()
@@ -569,7 +565,7 @@ namespace CadEditor
             Mesh currentMesh = this.Mesh;
             int index = -1;
 
-            switch(Scene.ActiveMovingAxis)
+            switch(MovingController.ActiveMovingAxis)
             {
                 case CoordinateAxis.X: index = 0; break;
                 case CoordinateAxis.Y: index = 1; break;

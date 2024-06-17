@@ -1,10 +1,12 @@
 ﻿
 
+using CadEditor.Controllers;
+
 namespace CadEditor.Models.Commands
 {
     public class DeselectionCommand : UnaryCommand, ICommand
     {
-        public DeselectionCommand(CadEditor.Scene _scene, ISceneObject obj) : base(_scene, obj)
+        public DeselectionCommand(ApplicationController appController, ISceneObject obj) : base(appController, obj)
         {
         }
 
@@ -12,7 +14,7 @@ namespace CadEditor.Models.Commands
         {
             if (sceneObject != null)
             {
-                return scene.Deselect(sceneObject);
+                return _applicationController.SceneController.Scene.Deselect(sceneObject);
             }
             else
             {
@@ -22,7 +24,7 @@ namespace CadEditor.Models.Commands
 
         public void Undo()
         {
-            scene.Select(sceneObject);
+            _applicationController.SceneController.Scene.Select(sceneObject);
         }
 
         public void SetSelectedObject(ISceneObject obj)

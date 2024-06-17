@@ -8,23 +8,29 @@ namespace CadEditor
 {
     public class MouseController
     {
-        public static int X { get; set; } = 0;
-        public static int Y { get; set; } = 0;
+        public int X { get; set; } = 0;
+        public int Y { get; set; } = 0;
 
-        public static bool IsMiddleButtonPressed { get; set; } = false;
+        public bool IsMiddleButtonPressed { get; set; } = false;
 
-        public static float Sensitivity = 0.9f;
+        public float Sensitivity = 0.9f;
 
-        public static double GetHorizontalAngle(int x)
+        public double GetHorizontalAngle(int x)
         {
-            return (x - MouseController.X) * MouseController.Sensitivity;
+            return (x - X) * Sensitivity;
 
         }
 
-        public static double GetVerticalAngle(int y)
+        public double GetVerticalAngle(int y)
         {
-            return (y - MouseController.Y) * MouseController.Sensitivity;
+            return (y - Y) * Sensitivity;
 
+        }
+
+        public void UpdateMousePosition(int x, int y)
+        {
+            X = x;
+            Y = y;
         }
     }
 }

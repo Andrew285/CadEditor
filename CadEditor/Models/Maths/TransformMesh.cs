@@ -19,5 +19,10 @@ namespace CadEditor.Maths
 			return (double)1 / 4 * (1 + v1[0] * v2[0]) * (1 + v1[1] * v2[1]) * (1 + v1[2] * v2[2]) *
 				(1 - Math.Pow((v1[0] * v2[1] * v2[2]), 2) - Math.Pow((v1[1] * v2[0] * v2[2]), 2) - Math.Pow((v1[2] * v2[0] * v2[1]), 2));
 		}
-	}
+
+        public static float DegreesToRadians(float degrees)
+        {
+            return (float)(degrees * Math.PI / 180.0);
+        }
+    }
 }

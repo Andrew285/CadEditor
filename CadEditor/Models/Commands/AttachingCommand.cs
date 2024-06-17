@@ -1,6 +1,6 @@
-﻿using CadEditor.MeshObjects;
+﻿using CadEditor.Controllers;
+using CadEditor.MeshObjects;
 using System;
-using System.Collections.Generic;
 
 namespace CadEditor.Models.Commands
 {
@@ -8,13 +8,14 @@ namespace CadEditor.Models.Commands
     {
         CoordinateAxisType targetAxisType;
         CoordinateAxisType attachingAxisType;
-        ComplexStructure complexStructure;
+        ComplexStructure targetComplexStructure;
+        ComplexStructure attachingComplexStructure;
 
-        public AttachingCommand(CadEditor.Scene _scene,
+        public AttachingCommand(ApplicationController appController,
                                ISceneObject target,
                                ISceneObject attaching,
                                CoordinateAxisType targetAxis,
-                               CoordinateAxisType attachingAxis) : base(_scene, target, attaching)
+                               CoordinateAxisType attachingAxis) : base(appController, target, attaching)
         {
             targetAxisType = targetAxis;
             attachingAxisType = attachingAxis;
@@ -33,14 +34,19 @@ namespace CadEditor.Models.Commands
                 throw new NotImplementedException();
             }
 
-            complexStructure = scene.GetComplexStructureByCube(targetCube);
-            if (complexStructure != null)
+            targetComplexStructure = _applicationController.SceneController.Scene.GetComplexStructureByCube(targetCube);
+            attachingComplexStructure = _applicationController.SceneController.Scene.GetComplexStructureByCube(attachingCube);
+            if (targetComplexStructure != null && attachingComplexStructure != null)
             {
-                complexStructure.AttachCubes(targetCube, targetAxisType, attachingCube, attachingAxisType);
+                targetComplexStructure.AttachStructure(targetCube, targetAxisType, attachingCube, attachingAxisType, attachingComplexStructure);
+            }
+            if (targetComplexStructure != null)
+            {
+                targetComplexStructure.AttachCubes(targetCube, targetAxisType, attachingCube, attachingAxisType);
             }
             else
             {
-                complexStructure = new ComplexStructure(targetCube, targetAxisType, attachingCube, attachingAxisType);
+                targetComplexStructure = new ComplexStructure(targetCube, targetAxisType, attachingCube, attachingAxisType);
             }
             return true;
         }
@@ -57,7 +63,7 @@ namespace CadEditor.Models.Commands
 
         public ComplexStructure GetComplexStructure()
         {
-            return complexStructure;
+            return targetComplexStructure;
         }
     }
 }

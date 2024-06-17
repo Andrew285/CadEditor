@@ -1,10 +1,12 @@
 ﻿
 
+using CadEditor.Controllers;
+
 namespace CadEditor.Models.Commands
 {
     public class SelectionCommand : UnaryCommand, ICommand
     {
-        public SelectionCommand(CadEditor.Scene _scene, ISceneObject obj) : base(_scene, obj)
+        public SelectionCommand(ApplicationController appController, ISceneObject obj) : base(appController, obj)
         {
         }
 
@@ -12,7 +14,7 @@ namespace CadEditor.Models.Commands
         {
             if (sceneObject != null)
             {
-                return scene.Select(sceneObject);
+                return _applicationController.SceneController.Scene.Select(sceneObject);
             }
             else
             {
@@ -22,7 +24,7 @@ namespace CadEditor.Models.Commands
 
         public void Undo()
         {
-            scene.Deselect(sceneObject);
+            _applicationController.SceneController.Scene.Deselect(sceneObject);
         }
 
         public ISceneObject GetSelectedObject()

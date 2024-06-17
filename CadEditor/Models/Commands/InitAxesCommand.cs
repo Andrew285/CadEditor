@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CadEditor.Controllers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace CadEditor.Models.Commands
 {
     public class InitAxesCommand : UnaryCommand, ICommand
     {
-        public InitAxesCommand(CadEditor.Scene _scene, ISceneObject obj) : base(_scene, obj)
+        public InitAxesCommand(ApplicationController appController, ISceneObject obj) : base(appController, obj)
         {
         }
 
@@ -16,7 +17,7 @@ namespace CadEditor.Models.Commands
         {
             if (sceneObject != null)
             {
-                return scene.CreateAxes(sceneObject);
+                return _applicationController.SceneController.CreateAxesAround(sceneObject);
             }
             else
             {
@@ -31,7 +32,7 @@ namespace CadEditor.Models.Commands
 
         public void Undo()
         {
-            scene.DeleteSelectingCoordAxes();
+            _applicationController.SceneController.DeleteSelectingCoordAxes();
         }
     }
 }

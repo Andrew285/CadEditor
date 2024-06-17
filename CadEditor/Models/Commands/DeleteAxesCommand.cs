@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CadEditor.Controllers;
+using System;
 
 namespace CadEditor.Models.Commands
 {
     public class DeleteAxesCommand : UnaryCommand, ICommand
     {
-        public DeleteAxesCommand(CadEditor.Scene _scene, ISceneObject obj) : base(_scene, obj)
+        public DeleteAxesCommand(ApplicationController appController, ISceneObject obj) : base(appController, obj)
         {
         }
 
@@ -12,7 +13,7 @@ namespace CadEditor.Models.Commands
         {
             if (sceneObject != null)
             {
-                return scene.DeleteSelectingCoordAxes();
+                return _applicationController.SceneController.DeleteSelectingCoordAxes();
             }
             else
             {
@@ -27,7 +28,7 @@ namespace CadEditor.Models.Commands
 
         public void Undo()
         {
-            scene.CreateAxes(sceneObject);
+            _applicationController.SceneController.CreateAxesAround(sceneObject);
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿namespace CadEditor.Models.Commands
+﻿using CadEditor.Controllers;
+
+namespace CadEditor.Models.Commands
 {
     public abstract class UnaryCommand : SceneCommand
     {
         protected ISceneObject sceneObject;
 
-        protected UnaryCommand(CadEditor.Scene _scene, ISceneObject sceneObject) : base(_scene)
+        protected UnaryCommand(ApplicationController appController, ISceneObject sceneObject) : base(appController)
         {
             this.sceneObject = sceneObject;
         }

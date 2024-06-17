@@ -1,24 +1,18 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.Settings;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CadEditor.View.Forms
 {
     public partial class SettingsForm : Form
     {
+        private ApplicationController _applicationController;
 
-        public SettingsForm()
+        public SettingsForm(ApplicationController appController)
         {
             InitializeComponent();
+            _applicationController = appController;
 
             //SceneTab
             checkBoxAxisCubeDrawFacets.Checked = SceneSettings.AxisCubeDrawFacets;
@@ -36,7 +30,7 @@ namespace CadEditor.View.Forms
 
         private void SettingsForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            SettingsController.GetInstance().SaveData(MainSettings.FilePath);
+            //SettingsController.GetInstance().SaveData(MainSettings.FilePath);
         }
 
 
@@ -67,7 +61,7 @@ namespace CadEditor.View.Forms
                 return;
 
             ThemeSettings.MainThemeColor = colorDialog1.Color;
-            Form1.GetInstance().UpdateFormColor(ThemeSettings.MainThemeColor);
+            _applicationController.UIController.MainForm.UpdateFormColor(ThemeSettings.MainThemeColor);
             panel1.BackColor = ThemeSettings.MainThemeColor;
         }
 
@@ -79,7 +73,7 @@ namespace CadEditor.View.Forms
                 return;
 
             ThemeSettings.MenuStripBackColor = colorDialog1.Color;
-            Form1.GetInstance().UpdateMenuBackColor(ThemeSettings.MenuStripBackColor);
+            _applicationController.UIController.MainForm.UpdateMenuBackColor(ThemeSettings.MenuStripBackColor);
             panelMenuBackColor.BackColor = ThemeSettings.MenuStripBackColor;
         }
     }

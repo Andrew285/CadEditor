@@ -194,7 +194,7 @@ namespace CadEditor
             return resultEdge;
         }
 
-        public (ISceneObject, double) CheckSelected()
+        public (ISceneObject, double) CheckSelected(int x, int y)
         {
             throw new NotImplementedException();
         }

@@ -42,6 +42,9 @@
     <Reference Include="MathNet.Spatial, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Spatial.0.6.0\lib\net461\MathNet.Spatial.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Nito.Collections.Deque, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nito.Collections.Deque.1.2.1\lib\net461\Nito.Collections.Deque.dll</HintPath>
     </Reference>
@@ -76,8 +79,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ActionHistoryController.cs" />
-    <Compile Include="Controllers\NameController.cs" />
+    <Compile Include="Controllers\ApplicationController.cs" />
+    <Compile Include="Controllers\AttachingController.cs" />
+    <Compile Include="Controllers\CubeController.cs" />
+    <Compile Include="Controllers\INameProvider.cs" />
+    <Compile Include="Controllers\IObjectController.cs" />
+    <Compile Include="Controllers\ModelNameProvider.cs" />
+    <Compile Include="Controllers\MovingController.cs" />
+    <Compile Include="Controllers\ProjectController.cs" />
+    <Compile Include="Controllers\RenderController.cs" />
+    <Compile Include="Controllers\SceneController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="Controllers\UIController.cs" />
     <Compile Include="Models\Commands\AttachingCommand.cs" />
     <Compile Include="Models\Commands\BinaryCommand.cs" />
     <Compile Include="Models\Commands\SceneCommand.cs" />
@@ -91,19 +104,37 @@
     <Compile Include="Models\Commands\SelectionCommand.cs" />
     <Compile Include="Models\Commands\UnaryCommand.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
-    <Compile Include="Models\Scene\ComplexStructureList.cs" />
     <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />
+    <Compile Include="Models\Scene\ModelTypes.cs" />
+    <Compile Include="Settings\LanguageSettings.cs" />
+    <Compile Include="Settings\LanguageSettingsControl.cs" />
     <Compile Include="Settings\MainSettings.cs" />
     <Compile Include="Settings\ThemeSettings.cs" />
     <Compile Include="Settings\SceneSettings.cs" />
+    <Compile Include="Tools\Localization\Localization.cs" />
+    <Compile Include="Tools\Localization\Strings.cs" />
     <Compile Include="Tools\TypeStringConverter.cs" />
-    <Compile Include="View\Forms\LibraryForm.cs">
+    <Compile Include="Tools\UITools.cs" />
+    <Compile Include="View\BaseControl.cs" />
+    <Compile Include="View\Forms\DocumentationForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="View\Forms\LibraryForm.Designer.cs">
-      <DependentUpon>LibraryForm.cs</DependentUpon>
+    <Compile Include="View\Forms\DocumentationForm.Designer.cs">
+      <DependentUpon>DocumentationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Forms\ProjectLibraryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\Forms\ProjectLibraryForm.Designer.cs">
+      <DependentUpon>ProjectLibraryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Forms\ProjectSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\Forms\ProjectSettingsForm.Designer.cs">
+      <DependentUpon>ProjectSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\Forms\SaveForm.cs">
       <SubType>Form</SubType>
@@ -154,14 +185,15 @@
     <Compile Include="View\Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\GLControl.cs" />
+    <Compile Include="View\PropertiesControl.cs" />
+    <Compile Include="View\SceneCollectionControl.cs" />
+    <Compile Include="View\MenuToolsControl.cs" />
     <EmbeddedResource Include="View\Forms\DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\Forms\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\Forms\LibraryForm.resx">
-      <DependentUpon>LibraryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -173,6 +205,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="View\Forms\ProjectLibraryForm.resx">
+      <DependentUpon>ProjectLibraryForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="View\Forms\SaveForm.resx">
       <DependentUpon>SaveForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -212,6 +247,8 @@
     <Content Include="Resources\camera.png" />
     <Content Include="Resources\deselect_object.png" />
     <None Include="Resources\library.png" />
+    <None Include="Resources\icons8-documentation-64.png" />
+    <None Include="Resources\icons8-github-50.png" />
     <Content Include="Resources\merge_face.png" />
     <None Include="Resources\remove.png" />
     <Content Include="Resources\select_object %281%29.png" />

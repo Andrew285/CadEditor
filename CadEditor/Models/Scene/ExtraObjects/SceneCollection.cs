@@ -1,14 +1,8 @@
 ﻿using CadEditor.MeshObjects;
 using CadEditor.Models.Scene.MeshObjects;
-using SharpGL.SceneGraph.Primitives;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace CadEditor
 {
@@ -145,6 +139,22 @@ namespace CadEditor
             }
 
 			return null;
+        }
+
+		public void Import(List<ISceneObject> collection)
+		{
+
+            foreach (ISceneObject obj in collection)
+            {
+                if (obj is ComplexCube)
+                {
+					AddCube((ComplexCube)obj);
+                }
+                else if (obj is ComplexStructure)
+                {
+                    AddComplexStructure((ComplexStructure)obj);
+                }
+            }
         }
 
 		public TreeNode GetSelectedNode()

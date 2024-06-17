@@ -1,12 +1,15 @@
-﻿using System;
+﻿using CadEditor.Models.Scene;
+using GeometRi;
+using System;
 using System.Numerics;
 
 namespace CadEditor
 {
-    public class Camera
+    public class Camera: IRotateable
     {
-        private float xRotation = 0.0f;
-        private float yRotation = 0.0f;
+        public float xRotation { get; set; } = 0.0f;
+        public float yRotation { get; set; } = 0.0f;
+        public float zRotation { get; set; } = 0.0f;
 
         public Vector3 Position { get; set; }
         public float RotationSpeed { get; set; } = 1.0f;
@@ -43,16 +46,33 @@ namespace CadEditor
             GraphicsGL.GL.Translate(Target.X, Target.Y, Target.Z);
             GraphicsGL.GL.Rotate(yRotation, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(xRotation, 0.0f, 1.0f, 0.0f);
+            GraphicsGL.GL.Rotate(zRotation, 0.0f, 0.0f, 1.0f);
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
         }
 
-        public void UpdateRotation(int x, int y)
+        public void UpdateRotation(double horizontalAngle, double verticalAngle, double rollAngle)
         {
-            float xDelta = (float)MouseController.GetHorizontalAngle(x);
-            float yDelta = (float)MouseController.GetVerticalAngle(y);
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
+            float zDelta = (float)rollAngle;
 
             xRotation += xDelta * RotationSpeed;
             yRotation += yDelta * RotationSpeed;
+            zRotation += zDelta * RotationSpeed;
+
+            UpdateCameraPosition();
+            GraphicsGL.Control.Invalidate();
+        }
+
+        public void SetCameraAt(double horizontalAngle, double verticalAngle, double rollAngle)
+        {
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
+            float zDelta = (float)rollAngle;
+
+            xRotation = xDelta * RotationSpeed;
+            yRotation = yDelta * RotationSpeed;
+            zRotation = zDelta * RotationSpeed;
 
             UpdateCameraPosition();
             GraphicsGL.Control.Invalidate();
@@ -68,21 +88,6 @@ namespace CadEditor
             Target = new Vector3((float)x, (float)y, (float)z);
         }
 
-        public void LimitDistance()
-        {
-            float zValue = distance;
-            zValue = (float)Math.Max(zValue, MinZoom);
-            zValue = (float)Math.Min(zValue, MaxZoom);
-
-            Position = new Vector3(Position.X, Position.Y, zValue);
-        }
-
-        public void Zoom(double value)
-        {
-            distance += (float)(-value * ZoomSensitivity);
-        }
-
-
         private void UpdateCameraPosition()
         {
             // Calculate camera position based on azimuth, elevation, and distance.
@@ -94,6 +99,27 @@ namespace CadEditor
             float Z = (float)(Target.Z + distance * Math.Cos(elevationRad) * Math.Cos(azimuthRad));
 
             Position = new Vector3(X, Y, Z);
+        }
+
+        public void ZoomBy(int value)
+        {
+            Zoom(value);
+            LimitDistance();
+            GraphicsGL.Invalidate();
+        }
+
+        public void Zoom(double value)
+        {
+            distance += (float)(-value * ZoomSensitivity);
+        }
+
+        public void LimitDistance()
+        {
+            float zValue = distance;
+            zValue = (float)Math.Max(zValue, MinZoom);
+            zValue = (float)Math.Min(zValue, MaxZoom);
+
+            Position = new Vector3(Position.X, Position.Y, zValue);
         }
     }
 }

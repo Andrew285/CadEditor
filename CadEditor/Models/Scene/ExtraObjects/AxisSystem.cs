@@ -139,9 +139,9 @@ namespace CadEditor.MeshObjects
             }
         }
 
-        public (ISceneObject, double) CheckSelected()
+        public (ISceneObject, double) CheckSelected(int x, int y)
         {
-            Ray ray = GraphicsGL.InitializeRay(MouseController.X, GraphicsGL.GetHeight() - MouseController.Y);
+            Ray ray = GraphicsGL.InitializeRay(x, GraphicsGL.GetHeight() - y);
             foreach (AxisCube cube in axisCubes)
             {
                 cube.Deselect();
