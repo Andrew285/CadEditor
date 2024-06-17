@@ -376,17 +376,6 @@ namespace CadEditor
 			//add new object to SceneCollection
 			//SceneCollection.ClearAll();
 			ObjectCollection = sceneObjects;
-			foreach (ISceneObject obj in ObjectCollection)
-			{
-				if (obj is ComplexCube)
-				{
-					//SceneCollection.AddCube((ComplexCube)obj);
-				}
-				else if (obj is ComplexStructure)
-				{
-					//SceneCollection.AddComplexStructure((ComplexStructure)obj);
-				}
-            }
 			ModelNameProvider.GetInstance().GetValuesOf(ObjectCollection);
 		}
 

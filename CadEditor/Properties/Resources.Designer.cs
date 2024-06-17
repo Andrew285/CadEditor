@@ -163,6 +163,16 @@ namespace CadEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap documentation_icon {
+            get {
+                object obj = ResourceManager.GetObject("documentation_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap download2 {
             get {
                 object obj = ResourceManager.GetObject("download2", resourceCulture);
@@ -176,6 +186,16 @@ namespace CadEditor.Properties {
         internal static System.Drawing.Bitmap download21 {
             get {
                 object obj = ResourceManager.GetObject("download21", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap github_icon {
+            get {
+                object obj = ResourceManager.GetObject("github_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

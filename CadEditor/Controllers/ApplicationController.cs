@@ -41,7 +41,7 @@ namespace CadEditor.Controllers
             MovingController = new MovingController();
             UIController = new UIController(this, mainForm);
             CommandsHistory = new CommandsHistory();
-            SettingsController = new SettingsController();
+            SettingsController = new SettingsController(this);
             ProjectController = new ProjectController();
             Localization = new Localization();
             Library = new Library();
@@ -61,6 +61,15 @@ namespace CadEditor.Controllers
         {
             AddNewCubeElement(new Point3D(6, 0, 5));
             AddNewCubeElement(new Point3D(5, 5, 8));
+        }
+
+        public void OpenSettingsForm()
+        {
+            ProjectSettingsForm form = new ProjectSettingsForm(this);
+            Form1 mainForm = UIController.MainForm;
+            form.LanguageSettingsControl.LanguageChanged += mainForm.SettingsForm_LanguageChanged;
+            form.Show();
+            //SubscribeToEvents();
         }
 
         public void SetSceneCollection(SceneCollection sceneCollection)
@@ -175,9 +184,9 @@ namespace CadEditor.Controllers
             SceneController.SetSelectedObject(selectedObject);
         }
 
-        public void HandleMouseMove(double horizontalAngle, double verticalAngle, bool isMiddleBtnPressed)
+        public void HandleMouseMove(double horizontalAngle, double verticalAngle, double rollAngle, bool isMiddleBtnPressed)
         {
-            RenderController.UpdateRotation(horizontalAngle, verticalAngle, isMiddleBtnPressed);
+            RenderController.UpdateRotation(horizontalAngle, verticalAngle, rollAngle, isMiddleBtnPressed);
             MoveBy(horizontalAngle, verticalAngle);
         }
 
@@ -538,6 +547,7 @@ namespace CadEditor.Controllers
                 SaveData saveData = libraryForm.GetSelectedProject();
                 string[] lines = File.ReadAllLines(saveData.GetFilePath());
                 SceneController.Scene.Import(lines);
+                SceneCollection.Import(SceneController.Scene.ObjectCollection);
             }
         }
 
@@ -565,6 +575,18 @@ namespace CadEditor.Controllers
                 }
                 Library.AddSave(bmp, filePath, nameOfSave, DateTime.Now);
             }
+        }
+
+        public void OpenDocumentation()
+        {
+            DocumentationForm form = new DocumentationForm();
+            form.Show();
+        }
+
+        public void OpenGitHubRepo()
+        {
+            string githubUrl = "https://github.com/Andrew285/CadEditor";
+            System.Diagnostics.Process.Start(githubUrl);
         }
     }
 }

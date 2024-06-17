@@ -10,5 +10,6 @@ namespace CadEditor.View
     {
         void Initialize();
         void Resize(object sender, EventArgs e);
+        void SetTextToControls();
     }
 }

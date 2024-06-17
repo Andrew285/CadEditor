@@ -104,11 +104,12 @@
     <Compile Include="Models\Commands\SelectionCommand.cs" />
     <Compile Include="Models\Commands\UnaryCommand.cs" />
     <Compile Include="Models\SceneLibrary\Library.cs" />
-    <Compile Include="Models\Scene\ComplexStructureList.cs" />
     <Compile Include="Models\Scene\IRotateable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IExportable.cs" />
     <Compile Include="Models\Scene\MeshObjects\IUniqueable.cs" />
     <Compile Include="Models\Scene\ModelTypes.cs" />
+    <Compile Include="Settings\LanguageSettings.cs" />
+    <Compile Include="Settings\LanguageSettingsControl.cs" />
     <Compile Include="Settings\MainSettings.cs" />
     <Compile Include="Settings\ThemeSettings.cs" />
     <Compile Include="Settings\SceneSettings.cs" />
@@ -117,11 +118,23 @@
     <Compile Include="Tools\TypeStringConverter.cs" />
     <Compile Include="Tools\UITools.cs" />
     <Compile Include="View\BaseControl.cs" />
+    <Compile Include="View\Forms\DocumentationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\Forms\DocumentationForm.Designer.cs">
+      <DependentUpon>DocumentationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\Forms\ProjectLibraryForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\Forms\ProjectLibraryForm.Designer.cs">
       <DependentUpon>ProjectLibraryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Forms\ProjectSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\Forms\ProjectSettingsForm.Designer.cs">
+      <DependentUpon>ProjectSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\Forms\SaveForm.cs">
       <SubType>Form</SubType>
@@ -175,7 +188,7 @@
     <Compile Include="View\GLControl.cs" />
     <Compile Include="View\PropertiesControl.cs" />
     <Compile Include="View\SceneCollectionControl.cs" />
-    <Compile Include="View\ToolsMenuControl.cs" />
+    <Compile Include="View\MenuToolsControl.cs" />
     <EmbeddedResource Include="View\Forms\DividingCubeForm.resx">
       <DependentUpon>DividingCubeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -234,6 +247,8 @@
     <Content Include="Resources\camera.png" />
     <Content Include="Resources\deselect_object.png" />
     <None Include="Resources\library.png" />
+    <None Include="Resources\icons8-documentation-64.png" />
+    <None Include="Resources\icons8-github-50.png" />
     <Content Include="Resources\merge_face.png" />
     <None Include="Resources\remove.png" />
     <Content Include="Resources\select_object %281%29.png" />

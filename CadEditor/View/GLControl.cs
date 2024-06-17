@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.Tools;
+using CadEditor.Tools.Localization;
 using SharpGL;
 using System;
 using System.Windows.Forms;
@@ -32,6 +33,7 @@ namespace CadEditor.View
             _glControl.MouseUp += new MouseEventHandler(openGLControl1_MouseUp);
             _glControl.MouseWheel += new MouseEventHandler(openGLControl_MouseWheel);
             _glControl.Resize += new EventHandler(Resize);
+
         }
 
         public void Initialize()
@@ -60,9 +62,9 @@ namespace CadEditor.View
             _glGroupBox.Size = new System.Drawing.Size(826, 834);
             _glGroupBox.TabIndex = 5;
             _glGroupBox.TabStop = false;
-            _glGroupBox.Text = "Scene";
-
             _mainForm.Controls.Add(this._glGroupBox);
+
+            SetTextToControls();
         }
 
         private void openGLControl1_OpenGLInitialized_1(object sender, EventArgs e)
@@ -111,7 +113,7 @@ namespace CadEditor.View
         {
             double horizontalAngle = _mouseController.GetHorizontalAngle(e.X);
             double verticalAngle = _mouseController.GetVerticalAngle(e.Y);
-            _applicationController.HandleMouseMove(horizontalAngle, verticalAngle, _mouseController.IsMiddleButtonPressed);
+            _applicationController.HandleMouseMove(horizontalAngle, verticalAngle, 0, _mouseController.IsMiddleButtonPressed);
             _mouseController.UpdateMousePosition(e.X, e.Y);
         }
 
@@ -124,6 +126,11 @@ namespace CadEditor.View
         private void openGLControl_MouseWheel(object sender, MouseEventArgs e)
         {
             _applicationController.HandleMouseWheel(e.Delta);
+        }
+
+        public void SetTextToControls()
+        {
+            _glGroupBox.Text = _applicationController.Localization.GetTranslationOf(Strings.scene_group_box_title);
         }
     }
 }

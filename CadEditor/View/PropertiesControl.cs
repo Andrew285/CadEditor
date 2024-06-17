@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.Tools;
+using CadEditor.Tools.Localization;
 using System;
 using System.Windows.Forms;
 
@@ -41,14 +42,13 @@ namespace CadEditor.View
             this.checkBox_DrawFacets.Name = "checkBox_DrawFacets";
             this.checkBox_DrawFacets.Size = new System.Drawing.Size(86, 17);
             this.checkBox_DrawFacets.TabIndex = 9;
-            this.checkBox_DrawFacets.Text = "Draw Facets";
             this.checkBox_DrawFacets.UseVisualStyleBackColor = true;
             this.checkBox_DrawFacets.CheckedChanged += new System.EventHandler(this.checkBox_DrawFacets_CheckedChanged);
             // 
             // tabControl1
             // 
             this.propertiesTabControl.Controls.Add(this.generalTab);
-            this.propertiesTabControl.Controls.Add(this.tabPage2);
+            //this.propertiesTabControl.Controls.Add(this.tabPage2);
             this.propertiesTabControl.Location = new System.Drawing.Point(propertiesTabControlStartX, propertiesTabControlStartY);
             this.propertiesTabControl.Name = "tabControl1";
             this.propertiesTabControl.SelectedIndex = 0;
@@ -64,7 +64,6 @@ namespace CadEditor.View
             this.generalTab.Padding = new System.Windows.Forms.Padding(3);
             this.generalTab.Size = new System.Drawing.Size(222, 231);
             this.generalTab.TabIndex = 0;
-            this.generalTab.Text = "General";
             this.generalTab.UseVisualStyleBackColor = true;
             // 
             // generalTab_checkBoxDrawRay
@@ -75,19 +74,18 @@ namespace CadEditor.View
             this.generalTab_checkBoxDrawRay.Name = "generalTab_checkBoxDrawRay";
             this.generalTab_checkBoxDrawRay.Size = new System.Drawing.Size(120, 17);
             this.generalTab_checkBoxDrawRay.TabIndex = 10;
-            this.generalTab_checkBoxDrawRay.Text = "Draw Selecting Ray";
             this.generalTab_checkBoxDrawRay.UseVisualStyleBackColor = true;
             this.generalTab_checkBoxDrawRay.CheckedChanged += new System.EventHandler(this.generalTab_checkBoxDrawRay_CheckedChanged);
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(222, 231);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            //// 
+            //// tabPage2
+            //// 
+            //this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            //this.tabPage2.Name = "tabPage2";
+            //this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            //this.tabPage2.Size = new System.Drawing.Size(222, 231);
+            //this.tabPage2.TabIndex = 1;
+            //this.tabPage2.Text = "tabPage2";
+            //this.tabPage2.UseVisualStyleBackColor = true;
 
             _mainForm.Controls.Add(this.propertiesTabControl);
 
@@ -99,6 +97,13 @@ namespace CadEditor.View
             int newX = _mainForm.Width - SceneCollectionControl.collectionGroupBoxWidth - UITools.GAP;
             int newY = SceneCollectionControl.collectionGroupBoxStartY + SceneCollectionControl.collectionGroupBoxHeight + UITools.GAP;
             propertiesTabControl.Location = new System.Drawing.Point(newX, newY);
+        }
+
+        public void SetTextToControls()
+        {
+            this.checkBox_DrawFacets.Text = _applicationController.Localization.GetTranslationOf(Strings.draw_facets);
+            this.generalTab.Text = _applicationController.Localization.GetTranslationOf(Strings.general_tab_title);
+            this.generalTab_checkBoxDrawRay.Text = _applicationController.Localization.GetTranslationOf(Strings.draw_selecting_ray);
         }
 
         private void checkBox_DrawFacets_CheckedChanged(object sender, EventArgs e)

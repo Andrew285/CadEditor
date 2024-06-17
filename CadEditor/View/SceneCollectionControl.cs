@@ -1,5 +1,6 @@
 ﻿using CadEditor.Controllers;
 using CadEditor.Tools;
+using CadEditor.Tools.Localization;
 using System;
 using System.Windows.Forms;
 
@@ -12,6 +13,7 @@ namespace CadEditor.View
         private TreeView treeView1;
         private GroupBox _collectionGroupBox;
         private SceneCollection _sceneCollection;
+        private string collectionRootNodeTitle = "Collection";
         public static int collectionGroupBoxWidth = 242;
         public static int collectionGroupBoxHeight = 313;
         public static int collectionGroupBoxStartX = 854;
@@ -23,7 +25,7 @@ namespace CadEditor.View
             _applicationController = applicationController;
             treeView1 = new TreeView();
             _collectionGroupBox = new GroupBox();
-            _sceneCollection = new SceneCollection(treeView1, "Collection");
+            _sceneCollection = new SceneCollection(treeView1, collectionRootNodeTitle);
         }
 
         public SceneCollection GetSceneCollection()
@@ -53,12 +55,13 @@ namespace CadEditor.View
             this._collectionGroupBox.Size = new System.Drawing.Size(collectionGroupBoxWidth, collectionGroupBoxHeight);
             this._collectionGroupBox.TabIndex = 8;
             this._collectionGroupBox.TabStop = false;
-            this._collectionGroupBox.Text = "Properties / Hiearchy";
             this._collectionGroupBox.Resize += new EventHandler(Resize);
 
             _collectionGroupBox.Dock = DockStyle.Bottom;
             _collectionGroupBox.Anchor = AnchorStyles.Bottom & AnchorStyles.Left;
             _mainForm.Controls.Add(_collectionGroupBox);
+
+            SetTextToControls();
         }
 
         public void Resize(object sender, EventArgs e)
@@ -85,6 +88,11 @@ namespace CadEditor.View
             //                scene.ObjectCollection.Insert(0, axisSystem);
             //}
             //        }
+        }
+
+        public void SetTextToControls()
+        {
+            _collectionGroupBox.Text = _applicationController.Localization.GetTranslationOf(Strings.scene_collection_group_box_title);
         }
     }
 }

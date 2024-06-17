@@ -12,7 +12,7 @@ namespace CadEditor
     public partial class Form1 : Form
     {
         private ApplicationController _applicationController;
-        private ToolsMenuControl _toolsMenuControl;
+        private MenuToolsControl _toolsMenuControl;
         private BaseControl[] mainControls;
         private static int KeyX_Clicks = 0;
         private static int KeyY_Clicks = 0;
@@ -25,7 +25,7 @@ namespace CadEditor
 
             _applicationController = new ApplicationController(this, GetOpenGLControl());
             GLControl _openGLController = new GLControl(this, GetOpenGLControl(), _applicationController);
-            _toolsMenuControl = new ToolsMenuControl(this, _applicationController, GetOpenGLControl());
+            _toolsMenuControl = new MenuToolsControl(this, _applicationController, GetOpenGLControl());
             SceneCollectionControl _sceneCollectionController = new SceneCollectionControl(this, _applicationController);
             PropertiesControl _propertiesController = new PropertiesControl(this, _applicationController);
 
@@ -59,6 +59,8 @@ namespace CadEditor
             //this.TopMost = true;
             this.WindowState = FormWindowState.Maximized;
             this.Text = _applicationController.Localization.GetTranslationOf(Strings.form_name);
+
+            UpdateForm();
         }
 
         public OpenGLControl GetOpenGLControl()
@@ -163,6 +165,24 @@ namespace CadEditor
         public void UpdateMenuBackColor(Color color)
         {
             //this.menuStrip1.BackColor = color;
+        }
+
+        public void SettingsForm_LanguageChanged(object sender, EventArgs e)
+        {
+            //Set lang to other controls   
+            foreach (var control in mainControls)
+            {
+                control.SetTextToControls();
+            }
+        }
+
+        public void UpdateForm()
+        {
+            //Set lang to other controls   
+            foreach (var control in mainControls)
+            {
+                control.SetTextToControls();
+            }
         }
     }
 }

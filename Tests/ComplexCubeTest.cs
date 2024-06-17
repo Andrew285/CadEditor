@@ -1,4 +1,5 @@
 ﻿using CadEditor;
+using CadEditor.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpGL.VertexBuffers;
 using System;
@@ -12,6 +13,14 @@ namespace Tests
     [TestClass]
     public class ComplexCubeTest
     {
+        ComplexCube cube1;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            cube1 = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "cube1");
+        }
+
         [TestMethod]
         public void VertexChangeTest()
         {
@@ -25,15 +34,13 @@ namespace Tests
         }
 
         [TestMethod]
-        public void IsDividedTest()
+        [DataRow(1, 1, 1, 100, 200, 300)]
+        public void DivideTest(int valueX, int valueY, int valueZ, int verticesAmount, int edgesAmount, int facetsAmount)
         {
-            ComplexCube c1 = new ComplexCube(new Point3D(0, 0, 0), new Vector(1, 1, 1), "cube1");
-            bool d1_1 = ((ComplexCube)c1.Mesh.Vertices[0].ParentCube).IsDivided;
-
-            c1.Divide(new Vector(4, 4, 4));
-            bool d2 = ((ComplexCube)c1.Mesh.Vertices[0].ParentCube).IsDivided;
-
-            Assert.IsTrue(d1_1 != d2);
+            cube1.Divide(new Vector(valueX, valueY, valueZ));
+            Assert.AreEqual(verticesAmount, cube1.Mesh.Vertices.Count);
+            Assert.AreEqual(edgesAmount, cube1.Mesh.Edges.Count);
+            Assert.AreEqual(facetsAmount, cube1.Mesh.Facets.Count);
         }
     }
 }

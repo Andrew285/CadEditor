@@ -9,16 +9,16 @@ namespace CadEditor.Controllers
     {
         private ApplicationController _applicationController;
         private ContextMenuStrip contextMenuStrip;
-        private static ToolStripMenuItem selectItem = new ToolStripMenuItem("Select Object");
-        private static ToolStripMenuItem deselectItem = new ToolStripMenuItem("Deselect Object");
-        private static ToolStripMenuItem deleteItem = new ToolStripMenuItem("Delete Object");
-        private static ToolStripMenuItem attachItem = new ToolStripMenuItem("Attach Object");
-        private static ToolStripMenuItem detachItem = new ToolStripMenuItem("Detach Object");
-        private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Set as Target");
-        private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Deselect Target");
-        private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Divide");
-        private static ToolStripMenuItem uniteItem = new ToolStripMenuItem("Unite");
-        private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Set Camera Target");
+        private static ToolStripMenuItem selectItem = new ToolStripMenuItem("Виділити об'єкт");
+        private static ToolStripMenuItem deselectItem = new ToolStripMenuItem("Скасувати виділення");
+        private static ToolStripMenuItem deleteItem = new ToolStripMenuItem("Видалити об'єкт");
+        private static ToolStripMenuItem attachItem = new ToolStripMenuItem("Приєднати");
+        private static ToolStripMenuItem detachItem = new ToolStripMenuItem("Скасувати приєднання");
+        private static ToolStripMenuItem setTargetItem = new ToolStripMenuItem("Встановити як ціль");
+        private static ToolStripMenuItem notSetTargetItem = new ToolStripMenuItem("Скасувати ціль");
+        private static ToolStripMenuItem divideItem = new ToolStripMenuItem("Поділити");
+        private static ToolStripMenuItem uniteItem = new ToolStripMenuItem("Об'єднати");
+        private static ToolStripMenuItem setTarget = new ToolStripMenuItem("Ціль камери");
         public Form1 MainForm { get; set; }
 
         public UIController(ApplicationController appController, Form1 mainForm)
@@ -124,8 +124,9 @@ namespace CadEditor.Controllers
 
         public void CreateSettingsForm()
         {
-            SettingsForm settingsForm = new SettingsForm(_applicationController);
-            settingsForm.ShowDialog();
+            //SettingsForm settingsForm = new SettingsForm(_applicationController);
+            //settingsForm.ShowDialog();
+            _applicationController.OpenSettingsForm();
         }
 
         public DividingCubeForm CreateDividingForm()

@@ -30,7 +30,7 @@ namespace CadEditor.View.Forms
 
         private void SettingsForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            SettingsController.GetInstance().SaveData(MainSettings.FilePath);
+            //SettingsController.GetInstance().SaveData(MainSettings.FilePath);
         }
 
 

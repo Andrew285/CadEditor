@@ -1,4 +1,5 @@
 ﻿using CadEditor.Models.Scene;
+using GeometRi;
 using System;
 using System.Numerics;
 
@@ -8,6 +9,7 @@ namespace CadEditor
     {
         public float xRotation { get; set; } = 0.0f;
         public float yRotation { get; set; } = 0.0f;
+        public float zRotation { get; set; } = 0.0f;
 
         public Vector3 Position { get; set; }
         public float RotationSpeed { get; set; } = 1.0f;
@@ -44,16 +46,33 @@ namespace CadEditor
             GraphicsGL.GL.Translate(Target.X, Target.Y, Target.Z);
             GraphicsGL.GL.Rotate(yRotation, 1.0f, 0.0f, 0.0f);
             GraphicsGL.GL.Rotate(xRotation, 0.0f, 1.0f, 0.0f);
+            GraphicsGL.GL.Rotate(zRotation, 0.0f, 0.0f, 1.0f);
             GraphicsGL.GL.Translate(-Target.X, -Target.Y, -Target.Z);
         }
 
-        public void UpdateRotation(double horizontalAngle, double verticalAngle)
+        public void UpdateRotation(double horizontalAngle, double verticalAngle, double rollAngle)
         {
             float xDelta = (float)horizontalAngle;
             float yDelta = (float)verticalAngle;
+            float zDelta = (float)rollAngle;
 
             xRotation += xDelta * RotationSpeed;
             yRotation += yDelta * RotationSpeed;
+            zRotation += zDelta * RotationSpeed;
+
+            UpdateCameraPosition();
+            GraphicsGL.Control.Invalidate();
+        }
+
+        public void SetCameraAt(double horizontalAngle, double verticalAngle, double rollAngle)
+        {
+            float xDelta = (float)horizontalAngle;
+            float yDelta = (float)verticalAngle;
+            float zDelta = (float)rollAngle;
+
+            xRotation = xDelta * RotationSpeed;
+            yRotation = yDelta * RotationSpeed;
+            zRotation = zDelta * RotationSpeed;
 
             UpdateCameraPosition();
             GraphicsGL.Control.Invalidate();

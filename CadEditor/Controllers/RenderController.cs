@@ -146,7 +146,7 @@ namespace CadEditor.Controllers
             Camera.SetTarget(centerPoint.X, centerPoint.Y, centerPoint.Z);
         }
 
-        public void UpdateRotation(double horizontalAngle, double verticalAngle, bool isMiddleBtnPressed)
+        public void UpdateRotation(double horizontalAngle, double verticalAngle, double rollAngle, bool isMiddleBtnPressed)
         {
             if (isMiddleBtnPressed)
             {
@@ -157,7 +157,7 @@ namespace CadEditor.Controllers
                 else
                 {
                     //_controller.UpdateRotation(Camera, x, y);
-                    Camera.UpdateRotation(horizontalAngle, verticalAngle);
+                    Camera.UpdateRotation(horizontalAngle, verticalAngle, rollAngle);
                 }
             }
         }
